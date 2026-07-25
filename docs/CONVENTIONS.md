@@ -583,6 +583,32 @@ the push. So the wiring is part of the supply, not an exercise for each app:
   external rule is the authority an implementing LLM cannot edit in the same code change; local hooks and prompts
   are only feedback.
 
+### The scar protocol travels with the scaffold
+
+AeroFortress projects also start with Not You Again as the repository-local
+memory of corrected failures:
+
+- `.nya/` stores the versioned skill, shared policy, and team scars. Personal
+  judge selection remains in the user config; an unversioned
+  `.nya/config.local.toml` may override it for one repository.
+- `dotnet tool run af nya <args...>` resolves the framework-pinned NYA release,
+  downloads one native binary on first use, verifies an embedded SHA-256, and
+  caches it outside the repository. No Rust toolchain or global NYA install is
+  part of project setup.
+- Root agent instructions require recall at task start and whenever scope or
+  context changes, remember only after a real reusable correction, and check
+  before completion.
+- Local pre-commit and pre-push hooks run the matching uncommitted or
+  base-relative recurrence check. CI does not select a model or credential on
+  behalf of the team; an organization may add its own ephemeral judge after
+  configuring that trust boundary.
+- `af doctor` validates the versioned NYA surface without reading personal
+  configuration or downloading a binary.
+
+The split is deliberate. AeroFortress deterministically proves code shape and
+executable behavior. NYA makes repository-specific corrected failures durable
+and supplies them to an isolated semantic judge. Neither replaces the other.
+
 ### Declaring criteria — born closed, not caught later
 
 The bridge is cheapest when the slice is born with it:

@@ -19,17 +19,23 @@ internal static class DoctorCommand
     /// </param>
     public static int Run(string[] rest, bool strictWarnings = false)
     {
+        var root = Directory.GetCurrentDirectory();
         // The manifest is the topology's source of truth — confirm the project has one and that the paths it
         // declares exist before trusting the rest. A missing manifest is a notice; a broken one fails the doctor.
-        var manifest = AeroFortressManifest.Validate(Directory.GetCurrentDirectory());
+        var manifest = AeroFortressManifest.Validate(root);
         Console.WriteLine("af doctor — manifest (AeroFortress.toml)...");
         foreach (var message in manifest.Messages)
+            Console.Error.WriteLine($"  {message}");
+
+        var nya = NyaProject.Check(root);
+        Console.WriteLine("af doctor — Not You Again project protocol...");
+        foreach (var message in nya.Messages)
             Console.Error.WriteLine($"  {message}");
 
         // The anti-desync leg (package-first law): a stale AeroFortress.Framework.* package version or a revived
         // vendored frontend copy fails the doctor. The expected version is baked into this CLI, so the gate fires on
         // CI and on any machine — no sibling framework checkout required.
-        var sync = FrameworkSync.Check(Directory.GetCurrentDirectory());
+        var sync = FrameworkSync.Check(root);
         Console.WriteLine("af doctor — framework sync...");
         foreach (var message in sync.Messages)
             Console.Error.WriteLine($"  {message}");
@@ -43,7 +49,7 @@ internal static class DoctorCommand
             },
         };
 
-        foreach (var client in FrontendTargets(Directory.GetCurrentDirectory()))
+        foreach (var client in FrontendTargets(root))
         {
             var captured = client;
             legs.Add(() =>
@@ -62,7 +68,7 @@ internal static class DoctorCommand
             }
         }
         if (strictWarnings)
-            legs.Add(() => FrontendWarningGate.RunEndpointCoverage(Directory.GetCurrentDirectory()));
+            legs.Add(() => FrontendWarningGate.RunEndpointCoverage(root));
 
         // Doctor legs are independent, read-only checks. A bounded fan-out avoids making a large monorepo pay their
         // sum serially while respecting the two-core hosted runner and keeping node/compiler memory predictable.
@@ -83,6 +89,8 @@ internal static class DoctorCommand
         Task.WaitAll(tasks);
         var code = tasks.Max(task => task.Result);
         if (manifest.Present && !manifest.Valid)
+            code = Math.Max(code, 1);
+        if (manifest.Present && !nya.Valid)
             code = Math.Max(code, 1);
         if (sync.Gating && !sync.InSync)
             code = Math.Max(code, 1);

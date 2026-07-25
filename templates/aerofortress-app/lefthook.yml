@@ -5,8 +5,12 @@ pre-commit:
   commands:
     affected-fast:
       run: dotnet tool run af gate --staged --fast
+    known-recurrences:
+      run: dotnet tool run af nya check --task "pre-commit recurrence review"
 
 pre-push:
   commands:
     affected-release:
       run: dotnet tool run af gate --affected --base origin/main --fast
+    known-recurrences:
+      run: dotnet tool run af nya check --base origin/main --task "pre-push recurrence review"

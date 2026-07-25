@@ -9,6 +9,8 @@ stranger-maintainable code, and a "doctor" of Roslyn analyzers that enforce the 
 - **The doctor** — the `AF####` analyzers catch structural drift (slice shape, co-located tests, `ctx.md`
   freshness, write-ownership, shape-derived write journeys, registry error codes…) at build time. Full catalog in
   [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
+- **Not You Again** — every scaffolded repository carries a versioned scar store and the `recall → remember →
+  check` agent protocol. The project-pinned `af nya` command downloads one verified native binary on first use.
 - **Generators** — `af new`, `af g module / slice / entity / vo / crud / auth` scaffold exactly the convention.
 
 Two laws hold it together: the output is always **stranger-maintainable** (plain, idiomatic C#), and the harness is
@@ -41,6 +43,22 @@ af g slice Billing CreateInvoice    # a slice + its co-located test
 af g auth                           # the auth module (register/login/refresh/logout/me)
 af doctor                           # run the conventions over back + front
 ```
+
+Every scaffold includes `.nya/`, managed agent instructions, and recurrence
+checks in the local pre-commit and pre-push hooks. No Rust toolchain or global
+NYA install is required:
+
+```bash
+dotnet tool run af nya setup --judge codex
+dotnet tool run af nya recall --task "Add invoice approval" --path "src/Billing/**"
+dotnet tool run af nya check --task "Add invoice approval"
+```
+
+`af` pins NYA `1.0.6`, selects the native release for Windows, Linux, or macOS,
+verifies its embedded SHA-256, and caches it outside the repository. Judge and
+credential selection remains personal in the user config, with
+`.nya/config.local.toml` available as an unversioned repository override.
+Scars, policy, and the skill remain versioned for the team.
 
 ## Packages (nuget.org)
 
