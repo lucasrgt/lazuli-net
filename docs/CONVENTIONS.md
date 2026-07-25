@@ -596,8 +596,12 @@ memory of corrected failures:
   caches it outside the repository. No Rust toolchain or global NYA install is
   part of project setup.
 - Root agent instructions require recall at task start and whenever scope or
-  context changes, remember only after a real reusable correction, and check
+  context changes, scar-driven review before accepting a versioned
+  specification, remember only after a real reusable correction, and check
   before completion.
+- `nya replay` is reserved for explicit corpus maintenance or evaluation. It
+  validates historical correction patches against their scars without
+  executing an agent or claiming a prevention rate.
 - Local pre-commit and pre-push hooks run the matching uncommitted or
   base-relative recurrence check. CI does not select a model or credential on
   behalf of the team; an organization may add its own ephemeral judge after

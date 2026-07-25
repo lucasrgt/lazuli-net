@@ -5,6 +5,7 @@ internal static class NyaProject
 {
     private const string Marker = "<!-- nya:instructions:start -->";
     private const string Command = "dotnet tool run af nya";
+    private static readonly string[] SkillCommands = ["recall", "spec", "check", "replay"];
 
     /// <summary>The immutable result of checking a repository's NYA integration.</summary>
     internal sealed record Outcome(bool Valid, IReadOnlyList<string> Messages);
@@ -19,8 +20,13 @@ internal static class NyaProject
             messages.Add("NYA: missing .nya/scars; run `dotnet tool run af nya init`.");
 
         var skill = Path.Combine(root, ".nya", "SKILL.md");
-        if (File.Exists(skill) && !File.ReadAllText(skill).Contains(Command, StringComparison.Ordinal))
-            messages.Add($"NYA: .nya/SKILL.md must invoke the framework-pinned `{Command}` command.");
+        if (File.Exists(skill))
+        {
+            var content = File.ReadAllText(skill);
+            foreach (var operation in SkillCommands.Where(operation =>
+                !content.Contains($"`{Command} {operation}", StringComparison.Ordinal)))
+                messages.Add($"NYA: .nya/SKILL.md must include `{Command} {operation}`.");
+        }
 
         var agentFiles = new[] { "AGENTS.md", "CLAUDE.md", "GEMINI.md" }
             .Select(name => Path.Combine(root, name))

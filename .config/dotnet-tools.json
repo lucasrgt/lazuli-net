@@ -3,7 +3,7 @@
   "isRoot": true,
   "tools": {
     "aerofortress-framework-cli": {
-      "version": "1.0.24",
+      "version": "1.0.25",
       "commands": [
         "af"
       ],

@@ -9,8 +9,9 @@ stranger-maintainable code, and a "doctor" of Roslyn analyzers that enforce the 
 - **The doctor** — the `AF####` analyzers catch structural drift (slice shape, co-located tests, `ctx.md`
   freshness, write-ownership, shape-derived write journeys, registry error codes…) at build time. Full catalog in
   [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
-- **Not You Again** — every scaffolded repository carries a versioned scar store and the `recall → remember →
-  check` agent protocol. The project-pinned `af nya` command downloads one verified native binary on first use.
+- **Not You Again** — every scaffolded repository carries a versioned scar store. Agents recall before work,
+  review versioned specifications, remember corrected failures, check final diffs, and can replay historical
+  correction pairs for explicit corpus evaluation.
 - **Generators** — `af new`, `af g module / slice / entity / vo / crud / auth` scaffold exactly the convention.
 
 Two laws hold it together: the output is always **stranger-maintainable** (plain, idiomatic C#), and the harness is
@@ -51,14 +52,17 @@ NYA install is required:
 ```bash
 dotnet tool run af nya setup --judge codex
 dotnet tool run af nya recall --task "Add invoice approval" --path "src/Billing/**"
+dotnet tool run af nya spec --file "specs/invoice-approval.md" --task "Design invoice approval" --path "src/Billing/**"
 dotnet tool run af nya check --task "Add invoice approval"
+dotnet tool run af nya replay --limit 20
 ```
 
-`af` pins NYA `1.0.6`, selects the native release for Windows, Linux, or macOS,
+`af` pins NYA `1.1.0`, selects the native release for Windows, Linux, or macOS,
 verifies its embedded SHA-256, and caches it outside the repository. Judge and
 credential selection remains personal in the user config, with
 `.nya/config.local.toml` available as an unversioned repository override.
-Scars, policy, and the skill remain versioned for the team.
+Scars, policy, and the skill remain versioned for the team. `replay` is a
+corpus-maintenance operation, not a daily gate or a prevention-rate claim.
 
 ## Packages (nuget.org)
 

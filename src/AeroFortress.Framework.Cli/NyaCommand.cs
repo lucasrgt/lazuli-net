@@ -12,18 +12,18 @@ namespace AeroFortress.Framework.Cli;
 /// </summary>
 internal static class NyaCommand
 {
-    internal const string Version = "1.0.6";
+    internal const string Version = "1.1.0";
     private const string Command = "dotnet tool run af nya";
     private const string ReleaseBase = "https://github.com/lucasrgt/not-you-again/releases/download";
 
     private static readonly IReadOnlyDictionary<string, string> Checksums =
         new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["aarch64-apple-darwin"] = "34f20dc9c99fec8c3ca9c3249a603ad60b83106b58c679368196d7497d836c78",
-            ["aarch64-unknown-linux-gnu"] = "011dc1417c06d56809b7177987caff77ec08cee4729706a721caaa4516d5c9fe",
-            ["x86_64-apple-darwin"] = "8adb3835881c34e96b4e02afc705d6d498b4b6be8951eb0d112a19ad2542b03c",
-            ["x86_64-pc-windows-msvc"] = "9478f2eb96967d129a178ab56f67d6c8ef38789eb11f013eb2a4a058d923f779",
-            ["x86_64-unknown-linux-gnu"] = "4e615b6fe5939ebf32b1e8b2614d9bd81977f8d931d77de79f0f74584f08a980",
+            ["aarch64-apple-darwin"] = "3eb7b26be3aac4c277d8aaff5e947e2886395f86eea2852a9f2ce809287c26ee",
+            ["aarch64-unknown-linux-gnu"] = "7c099ce21b8c25b5c4b5f58aad812e6cbace0567b87769984c2fe785c05ad37a",
+            ["x86_64-apple-darwin"] = "6a26ef0a3e8f37886b127ef7c3a267d1625afd4c6b5a680ed26d931db40761c5",
+            ["x86_64-pc-windows-msvc"] = "39f39718e4d31a7517cd66ee5865e395a4b280597138698fa64f4aefbe5bbfb2",
+            ["x86_64-unknown-linux-gnu"] = "5afefd80151c091977f2a4a11791c618098393c83c5081d2c664c2fcd4665b94",
         };
 
     /// <summary>Resolve, install, and execute NYA with every argument passed after <c>af nya</c>.</summary>

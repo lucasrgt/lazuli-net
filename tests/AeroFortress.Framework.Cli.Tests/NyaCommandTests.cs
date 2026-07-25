@@ -6,6 +6,12 @@ namespace AeroFortress.Framework.Cli.Tests;
 
 public class NyaCommandTests
 {
+    [Fact]
+    public void The_framework_pins_the_current_nya_release()
+    {
+        Assert.Equal("1.1.0", NyaCommand.Version);
+    }
+
     [Theory]
     [InlineData("windows", Architecture.X64, "x86_64-pc-windows-msvc")]
     [InlineData("linux", Architecture.X64, "x86_64-unknown-linux-gnu")]
@@ -40,13 +46,17 @@ public class NyaCommandTests
     {
         var root = NewDir();
         Directory.CreateDirectory(Path.Combine(root, ".nya"));
-        File.WriteAllText(Path.Combine(root, ".nya", "SKILL.md"), "Run `nya recall`, then `nya check`.");
+        File.WriteAllText(
+            Path.Combine(root, ".nya", "SKILL.md"),
+            "Run `nya recall`, `nya spec`, `nya check`, and `nya replay`.");
         File.WriteAllText(Path.Combine(root, "AGENTS.md"),
             "<!-- nya:instructions:start -->\nRun `nya check`.\n<!-- nya:instructions:end -->");
 
         NyaCommand.AdaptProjectInstructions(root);
 
         Assert.Contains("`dotnet tool run af nya recall`", File.ReadAllText(Path.Combine(root, ".nya", "SKILL.md")));
+        Assert.Contains("`dotnet tool run af nya spec`", File.ReadAllText(Path.Combine(root, ".nya", "SKILL.md")));
+        Assert.Contains("`dotnet tool run af nya replay`", File.ReadAllText(Path.Combine(root, ".nya", "SKILL.md")));
         Assert.Contains("`dotnet tool run af nya check`", File.ReadAllText(Path.Combine(root, "AGENTS.md")));
     }
 
@@ -63,7 +73,14 @@ public class NyaCommandTests
 
         Directory.CreateDirectory(Path.Combine(root, ".nya", "scars"));
         File.WriteAllText(Path.Combine(root, ".nya", "config.toml"), "schema = 1");
-        File.WriteAllText(Path.Combine(root, ".nya", "SKILL.md"), "Run `dotnet tool run af nya recall`.");
+        File.WriteAllText(
+            Path.Combine(root, ".nya", "SKILL.md"),
+            """
+            Run `dotnet tool run af nya recall`.
+            Run `dotnet tool run af nya spec`.
+            Run `dotnet tool run af nya check`.
+            Run `dotnet tool run af nya replay`.
+            """);
         File.WriteAllText(Path.Combine(root, "AGENTS.md"),
             "<!-- nya:instructions:start -->\nRun `dotnet tool run af nya check`.\n<!-- nya:instructions:end -->");
 
@@ -71,6 +88,24 @@ public class NyaCommandTests
 
         Assert.True(configured.Valid);
         Assert.Empty(configured.Messages);
+    }
+
+    [Fact]
+    public void Project_validation_rejects_an_outdated_skill_protocol()
+    {
+        var root = NewDir();
+        Directory.CreateDirectory(Path.Combine(root, ".nya", "scars"));
+        File.WriteAllText(Path.Combine(root, ".nya", "config.toml"), "schema = 1");
+        File.WriteAllText(Path.Combine(root, ".nya", "SKILL.md"), "Run `dotnet tool run af nya recall`.");
+        File.WriteAllText(
+            Path.Combine(root, "AGENTS.md"),
+            "<!-- nya:instructions:start -->\nRun `dotnet tool run af nya check`.\n<!-- nya:instructions:end -->");
+
+        var outdated = NyaProject.Check(root);
+
+        Assert.False(outdated.Valid);
+        Assert.Contains(outdated.Messages, message => message.Contains("nya spec"));
+        Assert.Contains(outdated.Messages, message => message.Contains("nya replay"));
     }
 
     private static string NewDir()
