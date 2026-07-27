@@ -20,9 +20,9 @@ from the same shell. Delegate `dotnet tool run af nya check` to the host, MCP se
 Never treat collector output as a code review. It may persist only a real failure
 paired with an actual correction and verbatim evidence.
 
-Use `dotnet tool run af nya replay` only for explicit corpus maintenance or
-evaluation. It tests historical correction patches against their scars and does
-not execute a coding agent or establish a prevention rate.
+Use `dotnet tool run af nya replay` only for explicit corpus maintenance or evaluation. It tests
+historical correction patches against their scars and does not execute a coding
+agent or establish a prevention rate.
 
 Do not report a task, review, commit, pull request, or push as ready until its
 applicable `dotnet tool run af nya check` exits with code 0.

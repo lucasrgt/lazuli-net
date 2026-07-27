@@ -7,18 +7,20 @@ description: End-to-end AeroFortress feature workflow — new slice from backend
 The full path from idea to doctor-clean, wired feature. Delegate each phase to the kit's
 specialist; keep the order.
 
-1. **Scaffold** (aerofortress-scaffolder): choose acceptance criteria with
+1. **Orient**: run `af wmw wake`, then `af rtw guide` and `af nya recall` with the feature goal
+   and expected paths. Treat due deferments, proven ways, and relevant scars as implementation constraints.
+2. **Scaffold** (aerofortress-scaffolder): choose acceptance criteria with
    `af criteria suggest <Name>`, then run `af g slice <Module> <Name> --verify <id,id>` (create
    the module first if needed: `af g module <Module>`). The CLI refuses a criterion-free slice.
-2. **Domain** (aerofortress-backend): model VOs/entity changes (always-valid, EnsureValid funnel),
+3. **Domain** (aerofortress-backend): model VOs/entity changes (always-valid, EnsureValid funnel),
    implement Handle (validation inline → domain method → SaveChanges → Result), declare error
    codes in the `*ErrorCodes` registry, decide authorization on Map, `.WithName("<Name>")`.
-3. **Backend proof** (aerofortress-backend): fill the co-located `<Name>.Tests.cs` and every
+4. **Backend proof** (aerofortress-backend): fill the co-located `<Name>.Tests.cs` and every
    generated `[AVP(typeof(Slice), "criterion")]` proof. For a shape-derived write, complete the
    isolated happy and sad `[Journey]` E2E cases; sad proves rejection and unchanged state. Declare
    the persistence concurrency posture. Never classify the slice by annotation or manifest mode.
-4. **Contract**: run the application's `npm run gen:client` — the new hook appears named after the slice.
-5. **Frontend** (aerofortress-frontend): create and own the plain triple — ViewModel composes the generated
+5. **Contract**: run the application's `npm run gen:client` — the new hook appears named after the slice.
+6. **Frontend** (aerofortress-frontend): create and own the plain triple — ViewModel composes the generated
    hook and exposes loading/error/empty; View renders through `<Resource>`; copy goes to the
    feature's i18n (every locale); error codes get entries in `api-errors`. Enumerate the semantic `@verify` set and
    satisfy every id with its own exact `@avp` + `defineVerification` in the co-located `*.assay.test.*`. Declare
@@ -30,8 +32,10 @@ specialist; keep the order.
    operations with `expectBackendSlices()` from `@aerofortress/frontend-sdk/playwright-backend`; global setup
    probes `PW_API_URL` with the same package. Put mocked smoke coverage in another spec and never call the API
    directly from a backend-bound case.
-6. **Gate**: run `af gate --affected` (and `af gate --full` for a release). Any AF*/AFFE* finding goes to aerofortress-doctor — fix the shape,
-   never suppress, skip, focus, or weaken the manifest.
+7. **Gate**: run `af gate --affected`, `af rtw check --task "<completed task>"`,
+   `af nya check --task "<completed task>"`, and `af wmw check`. Rerun the applicable checks after
+   every correction. Run `af gate --full` for a release. Any AF*/AFFE* finding goes to
+   aerofortress-doctor. Fix the shape; never suppress, skip, focus, or weaken the manifest.
 
 Report at the end: slice path, endpoints, error codes, AVP proofs, backend journeys, frontend
-happy/sad flows, and the `af gate` verdict.
+happy/sad flows, and all four foundation verdicts.

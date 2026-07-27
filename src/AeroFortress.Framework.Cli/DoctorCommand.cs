@@ -27,10 +27,18 @@ internal static class DoctorCommand
         foreach (var message in manifest.Messages)
             Console.Error.WriteLine($"  {message}");
 
-        var nya = NyaProject.Check(root);
-        Console.WriteLine("af doctor — Not You Again project protocol...");
-        foreach (var message in nya.Messages)
-            Console.Error.WriteLine($"  {message}");
+        var foundations = new[]
+        {
+            (Name: "Not You Again", Outcome: NyaProject.Check(root)),
+            (Name: "Right This Way", Outcome: RtwProject.Check(root)),
+            (Name: "Wake Me When", Outcome: WmwProject.Check(root)),
+        };
+        foreach (var foundation in foundations)
+        {
+            Console.WriteLine($"af doctor — {foundation.Name} project protocol...");
+            foreach (var message in foundation.Outcome.Messages)
+                Console.Error.WriteLine($"  {message}");
+        }
 
         // The anti-desync leg (package-first law): a stale AeroFortress.Framework.* package version or a revived
         // vendored frontend copy fails the doctor. The expected version is baked into this CLI, so the gate fires on
@@ -90,7 +98,7 @@ internal static class DoctorCommand
         var code = tasks.Max(task => task.Result);
         if (manifest.Present && !manifest.Valid)
             code = Math.Max(code, 1);
-        if (manifest.Present && !nya.Valid)
+        if (manifest.Present && foundations.Any(foundation => !foundation.Outcome.Valid))
             code = Math.Max(code, 1);
         if (sync.Gating && !sync.InSync)
             code = Math.Max(code, 1);

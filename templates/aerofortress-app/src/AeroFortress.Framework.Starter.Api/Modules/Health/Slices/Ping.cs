@@ -11,7 +11,7 @@ public static class Ping
         Task.FromResult<Result<Output>>(new Output(input.Message));
 
     public static void Map(IEndpointRouteBuilder app) =>
-        app.MapPost("/ping", async (Input input, CancellationToken ct) =>
-            (await Handle(input, ct)).ToHttp())
+        app.MapGet("/ping", async (string message, CancellationToken ct) =>
+            (await Handle(new Input(message), ct)).ToHttp())
             .WithName(nameof(Ping));
 }

@@ -44,3 +44,10 @@ Thumbs.db
 
 # vitest/vite dev cache (repo-root runs)
 .vite/
+# Right This Way disposable projection
+.rtw/config.local.toml
+.rtw/index.sqlite
+.rtw/index.sqlite-shm
+.rtw/index.sqlite-wal
+# Wake Me When local configuration and disposable state
+.wmw/config.local.toml

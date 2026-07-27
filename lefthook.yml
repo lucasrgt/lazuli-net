@@ -10,6 +10,10 @@ pre-commit:
       run: npm --prefix frontend-sdk run lint
     known-recurrences:
       run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- nya check --task "pre-commit recurrence review"
+    proven-patterns:
+      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- rtw check --task "pre-commit pattern review"
+    due-deferments:
+      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- wmw check
 
 pre-push:
   parallel: true
@@ -22,3 +26,7 @@ pre-push:
       run: npm --prefix frontend-sdk run typecheck
     known-recurrences:
       run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- nya check --base origin/main --task "pre-push recurrence review"
+    proven-patterns:
+      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- rtw check --base origin/main --task "pre-push pattern review"
+    due-deferments:
+      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- wmw check

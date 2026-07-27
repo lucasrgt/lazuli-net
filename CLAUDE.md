@@ -167,3 +167,43 @@ This repository uses Not You Again (`nya`) as a required recurrence-prevention g
 13. If the built-in evaluator reports a network-disabled agent sandbox, do not retry it from the same shell. Delegate the operation to the host, MCP server, or CI.
 14. Use `dotnet tool run af nya replay` only for explicit corpus maintenance or evaluation. It validates historical correction patches against their scars; it does not execute an agent or prove a prevention rate.
 <!-- nya:instructions:end -->
+<!-- rtw:instructions:start -->
+## Right This Way
+
+This repository uses Right This Way (`rtw`) to preserve proven implementation patterns across agents and sessions.
+
+1. At task start, run `dotnet tool run af rtw guide --task "<goal>" --path <expected-path>` before editing. Read every returned way and inspect its referenced files.
+2. Rerun `dotnet tool run af rtw guide` when scope changes, context is reset or compacted, or work moves into an unfamiliar area.
+3. Follow the invariants and structure of relevant ways. Adapt names and domain details instead of copying code blindly.
+4. Use `dotnet tool run af rtw add` only for a pattern already proven in tracked repository code and useful for future work. Every way requires reusable scopes, tags, guidance, and at least one tracked reference.
+5. Before committing an uncommitted diff, run `dotnet tool run af rtw check --task "<completed task>"`.
+6. For committed review, pull-request preparation, or pre-push review, run `dotnet tool run af rtw check --base <target-revision> --task "<review context>"`.
+7. Rerun the applicable check after changing the reviewed diff. Exit code 1 requires alignment and another check. Exit code 2 is an incomplete audit and must never be reported as a pass.
+
+Tests and linters do not replace `dotnet tool run af rtw check`. Do not report work ready until the applicable check exits with code 0.
+<!-- rtw:instructions:end -->
+<!-- wmw:instructions:start -->
+## Wake Me When
+
+This repository uses Wake Me When (`wmw`) to turn evidence-backed conditional
+deferments into obligations that reappear when their machine-checkable cue is
+observed.
+
+1. At task start and after context changes, run `dotnet tool run af wmw wake` with every event
+   supplied by the host. Treat returned deferments as due work, not suggestions.
+2. Resolve a completed deferment with `dotnet tool run af wmw resolve --id <id> --evidence
+   "<proof>"`.
+3. At task completion, the host must run `dotnet tool run af wmw collect` over the task, plan,
+   final response, and diff. Agents must not add deferments manually.
+4. Collection may preserve only a concrete action intentionally blocked by a
+   currently false prerequisite and bound to an event, path, or file-content
+   cue evidenced in the supplied task artifacts.
+5. Aspirations, optional improvements, unfinished current scope, permanent
+   behavior, vague future work, and invented cues are not deferments.
+6. Run `dotnet tool run af wmw check` before completion with the same observed events. Exit code
+   1 means a due deferment remains unresolved. Exit code 2 means the check did
+   not complete and must never be reported as a pass.
+
+Tests and roadmaps do not replace Wake Me When. The host owns collection and
+delivery; neither may depend on an agent voluntarily remembering the tool.
+<!-- wmw:instructions:end -->

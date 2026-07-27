@@ -2,6 +2,12 @@ This project uses **AeroFortress**: an opinionated .NET convention bundle (Rails
 vertical slices, marked domain types, a Roslyn/ESLint "doctor" (AF*/AFFE* rules), and an MVVM
 frontend harness (React Native + RN-web) wired to the backend via generated typed hooks.
 
+The repository foundation stack is always active:
+- **AVP** declares behavior and closes it with executable proofs through `af gate`.
+- **NYA** recalls corrected failures with `af nya recall` and blocks recurrences with `af nya check`.
+- **RTW** retrieves proven repository patterns with `af rtw guide` and checks final alignment with `af rtw check`.
+- **WMW** wakes due conditional work with `af wmw wake` and blocks unresolved obligations with `af wmw check`.
+
 Route through the kit's specialists:
 - **aerofortress-scaffolder**: creating anything new — projects, modules, slices, auth, hubs,
   frontend view triples, client generation. Knows every `af` CLI command and what each
@@ -27,8 +33,10 @@ Hard rules the orchestrator must respect:
 - Every ViewModel carries its co-located Assay proof and exact happy/sad frontend E2E links. A
   browser flow naming backend slices runs against the real API without request interception.
 - Error codes are registry constants, copy lives in i18n — never literals.
+- Start work with `af wmw wake`, `af rtw guide`, and `af nya recall` for the task and expected paths.
 - A feature is done only when `af gate --affected` is green; `af doctor` or a caller-filtered test command alone is
-  diagnostic. A release additionally requires `af gate --full`.
+  diagnostic. The final diff must also pass `af rtw check`, `af nya check`, and `af wmw check`.
+  A release additionally requires `af gate --full`.
 
 Deep reference (annotations, CLI, all doctor rules, conventions, decisions) lives in this
 plugin's docs — query the network (slug `aerofortress-framework`) before assuming.

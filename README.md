@@ -9,9 +9,9 @@ stranger-maintainable code, and a "doctor" of Roslyn analyzers that enforce the 
 - **The doctor** — the `AF####` analyzers catch structural drift (slice shape, co-located tests, `ctx.md`
   freshness, write-ownership, shape-derived write journeys, registry error codes…) at build time. Full catalog in
   [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
-- **Not You Again** — every scaffolded repository carries a versioned scar store. Agents recall before work,
-  review versioned specifications, remember corrected failures, check final diffs, and can replay historical
-  correction pairs for explicit corpus evaluation.
+- **Agent foundations** — every scaffold carries the four repository-local protocols: AVP proves declared
+  behavior, NYA prevents known failures, RTW preserves proven implementation patterns, and WMW makes
+  evidence-backed future obligations reappear when their cue becomes true.
 - **Generators** — `af new`, `af g module / slice / entity / vo / crud / auth` scaffold exactly the convention.
 
 Two laws hold it together: the output is always **stranger-maintainable** (plain, idiomatic C#), and the harness is
@@ -45,24 +45,56 @@ af g auth                           # the auth module (register/login/refresh/lo
 af doctor                           # run the conventions over back + front
 ```
 
-Every scaffold includes `.nya/`, managed agent instructions, and recurrence
-checks in the local pre-commit and pre-push hooks. No Rust toolchain or global
-NYA install is required:
+## Agent foundation stack
+
+The framework composes four independent tools instead of merging their data or
+responsibilities:
+
+| Foundation | Repository question | Versioned surface | Framework entrypoint |
+|---|---|---|---|
+| **AVP** | What behavior must this change prove? | `*.spec.toml` and co-located executable proofs | `af criteria`, `af gate` |
+| **Not You Again** | Which corrected failure must never recur? | `.nya/scars/`, policy, and skill | `af nya` |
+| **Right This Way** | How does this repository already implement this kind of work? | `.rtw/ways/` and skill | `af rtw` |
+| **Wake Me When** | Which blocked future action is due now? | `.wmw/deferments/` and skill | `af wmw` |
+
+Every scaffold includes the three versioned stores, portable skills, managed
+agent instructions, and pre-commit and pre-push checks. AVP ships as the native
+proof protocol. The other three commands resolve pinned release binaries,
+verify their embedded SHA-256 checksums, and cache them outside the repository.
+No Rust toolchain or global installation is required.
+
+Initialize every shared protocol and then select personal judge configuration
+after creating or cloning a project:
 
 ```bash
+dotnet tool run af foundations init
 dotnet tool run af nya setup --judge codex
+```
+
+`af foundations init` auto-detects existing `AGENTS.md`, `CLAUDE.md`, and
+`GEMINI.md` files. Pass repeated `--agent-file <path>` options to select other
+surfaces. Initialization is idempotent and preserves existing content. Each
+developer or harness can use a different judge without changing the versioned
+team protocol.
+
+Use the foundations throughout a task:
+
+```bash
+dotnet tool run af wmw wake
+dotnet tool run af rtw guide --task "Add invoice approval" --path "src/Billing/**"
 dotnet tool run af nya recall --task "Add invoice approval" --path "src/Billing/**"
 dotnet tool run af nya spec --file "specs/invoice-approval.md" --task "Design invoice approval" --path "src/Billing/**"
+dotnet tool run af rtw check --task "Add invoice approval"
 dotnet tool run af nya check --task "Add invoice approval"
+dotnet tool run af wmw check
 dotnet tool run af nya replay --limit 20
 ```
 
-`af` pins NYA `1.1.0`, selects the native release for Windows, Linux, or macOS,
-verifies its embedded SHA-256, and caches it outside the repository. Judge and
-credential selection remains personal in the user config, with
-`.nya/config.local.toml` available as an unversioned repository override.
-Scars, policy, and the skill remain versioned for the team. `replay` is a
-corpus-maintenance operation, not a daily gate or a prevention-rate claim.
+`af` pins NYA `1.1.0`, RTW `0.1.3`, and WMW `0.2.3` for Windows x64, Linux
+x64 and ARM64, and macOS x64 and ARM64. Judge commands, credentials,
+disposable SQLite indexes, and local configuration remain unversioned.
+`af doctor` validates that every shared store, skill, and managed instruction
+surface is present and still points through the pinned framework commands.
 
 ## Packages (nuget.org)
 
