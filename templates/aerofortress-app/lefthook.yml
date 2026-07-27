@@ -5,6 +5,8 @@ pre-commit:
   commands:
     affected-fast:
       run: dotnet tool run af gate --staged --fast
+    governing-context:
+      run: dotnet tool run af wtw guard --task "pre-commit governance review"
     known-recurrences:
       run: dotnet tool run af nya check --task "pre-commit recurrence review"
     proven-patterns:
@@ -16,6 +18,8 @@ pre-push:
   commands:
     affected-release:
       run: dotnet tool run af gate --affected --base origin/main --fast
+    governing-context:
+      run: dotnet tool run af wtw guard --base origin/main --task "pre-push governance review"
     known-recurrences:
       run: dotnet tool run af nya check --base origin/main --task "pre-push recurrence review"
     proven-patterns:

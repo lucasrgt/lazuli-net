@@ -26,7 +26,7 @@
 ## CLI
 
 - `af new [name]` — full project (AeroFortress.toml, src/<App>.Api, Program.cs index, sample module, Modules.cs).
-- `af foundations init [--agent-file <path>]...` — initialize the versioned NYA, RTW, and NWC
+- `af foundations init [--agent-file <path>]...` — initialize the versioned NYA, WTW, RTW, and NWC
   protocols through the framework-pinned binaries.
 - `af g module <Name>` — module + `<Name>.ctx.md` + entities placeholder.
 - `af g slice <Module> <Name> --verify <id,id>` — slice + co-located test + complete write
@@ -43,10 +43,12 @@
 - `af gate --full` — exhaustive release audit over every declared proof.
 - `af nya <args...>` — pinned Not You Again CLI for scar recall, collection, specification review,
   recurrence checks, and replay.
+- `af wtw <args...>` — pinned Why This Way CLI for governing decisions, invariants, collection,
+  explanation, graph health, and final guards.
 - `af rtw <args...>` — pinned Right This Way CLI for proven-pattern guidance, recording, and alignment checks.
 - `af nwc <args...>` — pinned Now We Can CLI for collecting, waking, resolving, and checking conditional deferments.
 - `af test [--unit|--integration|--e2e]` — the .NET test leg, optionally filtered by category.
 
 Typed client generation is an explicit application package script (`npm run gen:client`) over its own OpenAPI and
-orval configuration. The three agent-foundation wrappers download verified native releases on first use and
+orval configuration. The four agent-foundation wrappers download verified native releases on first use and
 do not turn the framework into a task orchestrator.

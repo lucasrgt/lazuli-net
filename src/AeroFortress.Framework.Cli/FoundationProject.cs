@@ -25,14 +25,14 @@ internal static class FoundationProject
             messages.Add(
                 $"{tool.DisplayName}: missing {directory}; run `{tool.FrameworkCommand} init`.");
 
-        var skill = ProjectPath(root, $".{tool.Id}/SKILL.md");
+        var skill = ProjectPath(root, $"{tool.ProjectDirectory}/SKILL.md");
         if (File.Exists(skill))
         {
             var content = File.ReadAllText(skill);
             foreach (var operation in skillCommands.Where(operation =>
                 !content.Contains($"`{tool.FrameworkCommand} {operation}", StringComparison.Ordinal)))
                 messages.Add(
-                    $"{tool.DisplayName}: .{tool.Id}/SKILL.md must include "
+                    $"{tool.DisplayName}: {tool.ProjectDirectory}/SKILL.md must include "
                     + $"`{tool.FrameworkCommand} {operation}`.");
         }
 

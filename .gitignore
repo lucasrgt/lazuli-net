@@ -51,3 +51,5 @@ Thumbs.db
 .rtw/index.sqlite-wal
 # Now We Can local configuration and disposable state
 .nwc/config.local.toml
+# Why This Way local judge configuration
+.agent-first/wtw/config.local.toml

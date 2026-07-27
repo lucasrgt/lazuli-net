@@ -3,7 +3,7 @@ namespace AeroFortress.Framework.Cli;
 /// <summary>Initializes every repository-local agent foundation through its pinned native CLI.</summary>
 internal static class FoundationStackCommand
 {
-    /// <summary>Initialize NYA, RTW, and NWC while preserving the selected agent instruction files.</summary>
+    /// <summary>Initialize NYA, WTW, RTW, and NWC while preserving selected agent instruction files.</summary>
     internal static int Run(string[] arguments)
     {
         if (arguments is ["--help"] or ["-h"])
@@ -34,11 +34,12 @@ internal static class FoundationStackCommand
         var results = new[]
         {
             NyaCommand.Run(["init"]),
+            WtwCommand.Run(["init", .. agentArguments]),
             RtwCommand.Run(["init", .. agentArguments]),
             NwcCommand.Run(["init", .. agentArguments]),
         };
         if (results.All(code => code == 0))
-            Console.WriteLine("af foundations: NYA, RTW, and NWC project protocols are initialized.");
+            Console.WriteLine("af foundations: NYA, WTW, RTW, and NWC project protocols are initialized.");
         return results.Max();
     }
 
@@ -75,7 +76,7 @@ internal static class FoundationStackCommand
             usage:
               af foundations init [--agent-file <path>]...
 
-            Initializes the versioned NYA, RTW, and NWC repository protocols through
+            Initializes the versioned NYA, WTW, RTW, and NWC repository protocols through
             framework-pinned verified binaries. If no agent file is supplied, existing
             AGENTS.md, CLAUDE.md, and GEMINI.md files are detected automatically.
             """);

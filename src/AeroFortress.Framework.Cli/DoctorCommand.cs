@@ -30,6 +30,7 @@ internal static class DoctorCommand
         var foundations = new[]
         {
             (Name: "Not You Again", Outcome: NyaProject.Check(root)),
+            (Name: "Why This Way", Outcome: WtwProject.Check(root)),
             (Name: "Right This Way", Outcome: RtwProject.Check(root)),
             (Name: "Now We Can", Outcome: NwcProject.Check(root)),
         };

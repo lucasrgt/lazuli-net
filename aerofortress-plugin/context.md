@@ -5,6 +5,7 @@ frontend harness (React Native + RN-web) wired to the backend via generated type
 The repository foundation stack is always active:
 - **AVP** declares behavior and closes it with executable proofs through `af gate`.
 - **NYA** recalls corrected failures with `af nya recall` and blocks recurrences with `af nya check`.
+- **WTW** retrieves governing decisions and invariants with `af wtw explain` and validates them with `af wtw guard`.
 - **RTW** retrieves proven repository patterns with `af rtw guide` and checks final alignment with `af rtw check`.
 - **NWC** wakes due conditional work with `af nwc wake` and blocks unresolved obligations with `af nwc check`.
 
@@ -33,9 +34,9 @@ Hard rules the orchestrator must respect:
 - Every ViewModel carries its co-located Assay proof and exact happy/sad frontend E2E links. A
   browser flow naming backend slices runs against the real API without request interception.
 - Error codes are registry constants, copy lives in i18n — never literals.
-- Start work with `af nwc wake`, `af rtw guide`, and `af nya recall` for the task and expected paths.
+- Start work with `af nwc wake`, `af wtw explain`, `af rtw guide`, and `af nya recall` for the task and expected paths.
 - A feature is done only when `af gate --affected` is green; `af doctor` or a caller-filtered test command alone is
-  diagnostic. The final diff must also pass `af rtw check`, `af nya check`, and `af nwc check`.
+  diagnostic. The final diff must also pass `af wtw guard`, `af rtw check`, `af nya check`, and `af nwc check`.
   A release additionally requires `af gate --full`.
 
 Deep reference (annotations, CLI, all doctor rules, conventions, decisions) lives in this

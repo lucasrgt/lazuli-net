@@ -16,6 +16,7 @@ return args switch
     ["criteria", .. var rest] => CriteriaCommand.Run(rest),
     ["foundations", .. var rest] => FoundationStackCommand.Run(rest),
     ["nya", .. var rest] => NyaCommand.Run(rest),
+    ["wtw", .. var rest] => WtwCommand.Run(rest),
     ["rtw", .. var rest] => RtwCommand.Run(rest),
     ["nwc", .. var rest] => NwcCommand.Run(rest),
     ["doctor", .. var rest] => DoctorCommand.Run(rest),
@@ -52,6 +53,7 @@ static int Usage()
           af foundations init [--agent-file <path>]...
                                         initialize every repository-local agent foundation
           af nya <args...>              run the pinned Not You Again CLI; downloads one verified binary on first use
+          af wtw <args...>              run the pinned Why This Way CLI; downloads one verified binary on first use
           af rtw <args...>              run the pinned Right This Way CLI; downloads one verified binary on first use
           af nwc <args...>              run the pinned Now We Can CLI; downloads one verified binary on first use
           af g entity <Module> <Name>   generate a rich [Entity] — encapsulated, with an EnsureValid invariant funnel

@@ -7,6 +7,8 @@ pre-commit:
     sdk-doctor: # the AFFE rule self-test — every rule must fire on its violation and pass on what it allows
       glob: "frontend-sdk/**/*.{cjs,mjs,ts,tsx}"
       run: npm --prefix frontend-sdk run lint
+    governing-context:
+      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- wtw guard --task "pre-commit governance review"
     known-recurrences:
       run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- nya check --task "pre-commit recurrence review"
     proven-patterns:
@@ -22,6 +24,8 @@ pre-push:
     sdk-typecheck:
       glob: "frontend-sdk/**/*.{ts,tsx}"
       run: npm --prefix frontend-sdk run typecheck
+    governing-context:
+      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- wtw guard --base origin/main --task "pre-push governance review"
     known-recurrences:
       run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- nya check --base origin/main --task "pre-push recurrence review"
     proven-patterns:

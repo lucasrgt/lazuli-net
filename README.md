@@ -9,9 +9,9 @@ stranger-maintainable code, and a "doctor" of Roslyn analyzers that enforce the 
 - **The doctor** — the `AF####` analyzers catch structural drift (slice shape, co-located tests, `ctx.md`
   freshness, write-ownership, shape-derived write journeys, registry error codes…) at build time. Full catalog in
   [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
-- **Agent foundations** — every scaffold carries the four repository-local protocols: AVP proves declared
-  behavior, NYA prevents known failures, RTW preserves proven implementation patterns, and NWC makes
-  evidence-backed future obligations reappear when their cue becomes true.
+- **Agent foundations** — every scaffold carries five repository-local protocols: AVP proves declared
+  behavior, NYA prevents known failures, WTW preserves governing decisions and invariants, RTW preserves
+  proven implementation patterns, and NWC reactivates obligations when their cue becomes true.
 - **Generators** — `af new`, `af g module / slice / entity / vo / crud / auth` scaffold exactly the convention.
 
 Two laws hold it together: the output is always **stranger-maintainable** (plain, idiomatic C#), and the harness is
@@ -47,19 +47,20 @@ af doctor                           # run the conventions over back + front
 
 ## Agent foundation stack
 
-The framework composes four independent tools instead of merging their data or
+The framework composes five independent tools instead of merging their data or
 responsibilities:
 
 | Foundation | Repository question | Versioned surface | Framework entrypoint |
 |---|---|---|---|
 | **AVP** | What behavior must this change prove? | `*.spec.toml` and co-located executable proofs | `af criteria`, `af gate` |
 | **Not You Again** | Which corrected failure must never recur? | `.nya/scars/`, policy, and skill | `af nya` |
+| **Why This Way** | Which decision or invariant governs this change, and why? | `.agent-first/wtw/records/` and skill | `af wtw` |
 | **Right This Way** | How does this repository already implement this kind of work? | `.rtw/ways/` and skill | `af rtw` |
 | **Now We Can** | Which previously blocked action can proceed now? | `.nwc/deferments/` and skill | `af nwc` |
 
-Every scaffold includes the three versioned stores, portable skills, managed
+Every scaffold includes the four versioned stores, portable skills, managed
 agent instructions, and pre-commit and pre-push checks. AVP ships as the native
-proof protocol. The other three commands resolve pinned release binaries,
+proof protocol. The other four commands resolve pinned release binaries,
 verify their embedded SHA-256 checksums, and cache them outside the repository.
 No Rust toolchain or global installation is required.
 
@@ -81,16 +82,18 @@ Use the foundations throughout a task:
 
 ```bash
 dotnet tool run af nwc wake
+dotnet tool run af wtw explain --task "Add invoice approval" --path "src/Billing/**"
 dotnet tool run af rtw guide --task "Add invoice approval" --path "src/Billing/**"
 dotnet tool run af nya recall --task "Add invoice approval" --path "src/Billing/**"
 dotnet tool run af nya spec --file "specs/invoice-approval.md" --task "Design invoice approval" --path "src/Billing/**"
+dotnet tool run af wtw guard --task "Add invoice approval"
 dotnet tool run af rtw check --task "Add invoice approval"
 dotnet tool run af nya check --task "Add invoice approval"
 dotnet tool run af nwc check
 dotnet tool run af nya replay --limit 20
 ```
 
-`af` pins NYA `1.1.0`, RTW `0.1.3`, and NWC `0.3.0` for Windows x64, Linux
+`af` pins NYA `1.1.0`, WTW `0.1.2`, RTW `0.1.3`, and NWC `0.3.0` for Windows x64, Linux
 x64 and ARM64, and macOS x64 and ARM64. Judge commands, credentials,
 disposable SQLite indexes, and local configuration remain unversioned.
 `af doctor` validates that every shared store, skill, and managed instruction

@@ -14,7 +14,7 @@ internal sealed class FoundationTool
 {
     private readonly IReadOnlyDictionary<string, string> checksums;
     private readonly bool versionInAssetName;
-    private readonly string durableDirectory;
+    private readonly IReadOnlyList<string> durableDirectories;
 
     internal FoundationTool(
         string id,
@@ -23,13 +23,18 @@ internal sealed class FoundationTool
         string repository,
         string durableDirectory,
         IReadOnlyDictionary<string, string> checksums,
-        bool versionInAssetName = false)
+        bool versionInAssetName = false,
+        string? projectDirectory = null,
+        IReadOnlyList<string>? additionalDurableDirectories = null)
     {
         Id = id;
         DisplayName = displayName;
         Version = version;
         Repository = repository;
-        this.durableDirectory = durableDirectory;
+        ProjectDirectory = projectDirectory ?? $".{id}";
+        durableDirectories = additionalDurableDirectories is null
+            ? [durableDirectory]
+            : [durableDirectory, .. additionalDurableDirectories];
         this.checksums = checksums;
         this.versionInAssetName = versionInAssetName;
     }
@@ -38,6 +43,7 @@ internal sealed class FoundationTool
     internal string DisplayName { get; }
     internal string Version { get; }
     internal string Repository { get; }
+    internal string ProjectDirectory { get; }
     internal string FrameworkCommand => $"dotnet tool run af {Id}";
 
     /// <summary>Resolve, install, and execute the tool with every forwarded argument.</summary>
@@ -95,7 +101,7 @@ internal sealed class FoundationTool
 
     internal void AdaptProjectInstructions(string root)
     {
-        foreach (var relative in new[] { $".{Id}/SKILL.md", "AGENTS.md", "CLAUDE.md", "GEMINI.md" })
+        foreach (var relative in new[] { $"{ProjectDirectory}/SKILL.md", "AGENTS.md", "CLAUDE.md", "GEMINI.md" })
         {
             var path = Path.Combine(root, relative.Replace('/', Path.DirectorySeparatorChar));
             if (!File.Exists(path))
@@ -106,9 +112,15 @@ internal sealed class FoundationTool
                 File.WriteAllText(path, adapted);
         }
 
-        var durable = Path.Combine(root, $".{Id}", durableDirectory);
-        if (Directory.Exists(durable) && !Directory.EnumerateFileSystemEntries(durable).Any())
-            File.WriteAllText(Path.Combine(durable, ".gitkeep"), "");
+        foreach (var relative in durableDirectories)
+        {
+            var durable = Path.Combine(
+                root,
+                ProjectDirectory.Replace('/', Path.DirectorySeparatorChar),
+                relative.Replace('/', Path.DirectorySeparatorChar));
+            if (Directory.Exists(durable) && !Directory.EnumerateFileSystemEntries(durable).Any())
+                File.WriteAllText(Path.Combine(durable, ".gitkeep"), "");
+        }
     }
 
     private string EnsureInstalled()

@@ -59,6 +59,36 @@ public class FoundationProjectTests
     }
 
     [Fact]
+    public void Why_this_way_requires_both_record_stores_skill_and_agent_protocol()
+    {
+        var root = NewDir();
+        var missing = WtwProject.Check(root);
+
+        Assert.False(missing.Valid);
+        Assert.Contains(missing.Messages, message => message.Contains(".agent-first/wtw/SKILL.md"));
+        Assert.Contains(missing.Messages, message => message.Contains("records/decisions"));
+        Assert.Contains(missing.Messages, message => message.Contains("records/invariants"));
+
+        Directory.CreateDirectory(Path.Combine(
+            root, ".agent-first", "wtw", "records", "decisions"));
+        Directory.CreateDirectory(Path.Combine(
+            root, ".agent-first", "wtw", "records", "invariants"));
+        File.WriteAllText(
+            Path.Combine(root, ".agent-first", "wtw", "SKILL.md"),
+            """
+            Run `dotnet tool run af wtw explain`.
+            Run `dotnet tool run af wtw collect`.
+            Run `dotnet tool run af wtw guard`.
+            """);
+        File.WriteAllText(
+            Path.Combine(root, "AGENTS.md"),
+            "<!-- wtw:instructions:start -->\nRun `dotnet tool run af wtw explain`.\n"
+            + "<!-- wtw:instructions:end -->");
+
+        Assert.True(WtwProject.Check(root).Valid);
+    }
+
+    [Fact]
     public void An_outdated_skill_fails_even_when_store_and_agent_marker_exist()
     {
         var root = NewDir();
@@ -84,6 +114,7 @@ public class FoundationProjectTests
         var template = Path.Combine(RepoRoot(), "templates", "aerofortress-app");
 
         Assert.True(NyaProject.Check(template).Valid);
+        Assert.True(WtwProject.Check(template).Valid);
         Assert.True(RtwProject.Check(template).Valid);
         Assert.True(NwcProject.Check(template).Valid);
     }

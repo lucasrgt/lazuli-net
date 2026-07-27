@@ -167,6 +167,24 @@ This repository uses Not You Again (`nya`) as a required recurrence-prevention g
 13. If the built-in evaluator reports a network-disabled agent sandbox, do not retry it from the same shell. Delegate the operation to the host, MCP server, or CI.
 14. Use `dotnet tool run af nya replay` only for explicit corpus maintenance or evaluation. It validates historical correction patches against their scars; it does not execute an agent or prove a prevention rate.
 <!-- nya:instructions:end -->
+<!-- wtw:instructions:start -->
+## Why This Way
+
+This repository uses Why This Way (`wtw`) to preserve the decisions and
+invariants that govern future changes.
+
+1. At task start, run `dotnet tool run af wtw explain --task "<goal>" --path <expected-path>`.
+2. Treat every returned active invariant as a constraint and every returned
+   decision as governing context.
+3. Rerun `dotnet tool run af wtw explain` when scope changes or context is compacted.
+4. The host runs `dotnet tool run af wtw collect` after accepted plans, ADRs, explicit decisions,
+   and completed work. Agents never add records manually.
+5. Before completion, run `dotnet tool run af wtw guard --task "<completed task>"`. Exit code 1
+   means the governing graph is unhealthy and exit code 2 is an incomplete
+   check.
+
+Tests and documentation do not replace `dotnet tool run af wtw guard`.
+<!-- wtw:instructions:end -->
 <!-- rtw:instructions:start -->
 ## Right This Way
 
