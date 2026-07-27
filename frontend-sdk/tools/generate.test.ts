@@ -12,7 +12,7 @@ const plugin = require("../packages/eslint-plugin/index.cjs");
 
 // The scaffolded unit must be conformant BY CONSTRUCTION — there is no point generating a feature the harness then
 // rejects. So we render one, write it to disk (so test-colocated can see the sibling test), and lint every file
-// with the real AFFE rules: zero messages is the contract. This is the generator's analogue of the plugin's own
+// with the real SKYFE rules: zero messages is the contract. This is the generator's analogue of the plugin's own
 // self-test — proving the emitter and the enforcer agree.
 const lintConfig = [
   {
@@ -23,24 +23,24 @@ const lintConfig = [
       sourceType: "module" as const,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    plugins: { aerofortress: plugin },
+    plugins: { skies: plugin },
     rules: {
-      "aerofortress/view-purity": "error",
-      "aerofortress/data-door": "error",
-      "aerofortress/viewmodel-platform-agnostic": "error",
-      "aerofortress/test-colocated": "error",
-      "aerofortress/view-integration-test": "error",
-      "aerofortress/no-mock": "error",
-      "aerofortress/state-completeness": "error",
-      "aerofortress/i18n-completeness": "error",
-      "aerofortress/design-tokens": "error",
-      // The design band (AFFE024–026): the emitted View composes @/ui only — no host elements, no
+      "skies/view-purity": "error",
+      "skies/data-door": "error",
+      "skies/viewmodel-platform-agnostic": "error",
+      "skies/test-colocated": "error",
+      "skies/view-integration-test": "error",
+      "skies/no-mock": "error",
+      "skies/state-completeness": "error",
+      "skies/i18n-completeness": "error",
+      "skies/design-tokens": "error",
+      // The design band (SKYFE024–026): the emitted View composes @/ui only — no host elements, no
       // free-form styling, no raw color. The emitter and the enforcer agree here too.
-      "aerofortress/ui-door": "error",
-      "aerofortress/scale-only": "error",
-      "aerofortress/semantic-colors": "error",
-      "aerofortress/verify-has-avp-proof": "error",
-      "aerofortress/feature-has-e2e-flow": "error",
+      "skies/ui-door": "error",
+      "skies/scale-only": "error",
+      "skies/semantic-colors": "error",
+      "skies/verify-has-avp-proof": "error",
+      "skies/feature-has-e2e-flow": "error",
     },
   },
 ];
@@ -79,7 +79,7 @@ describe("renderFeature", () => {
     for (const locale of ["ptBR", "esES", "enUS"]) expect(i18n).toContain(`export const ${locale}`);
   });
 
-  it("emits a unit that passes every AFFE rule (conformant by construction)", () => {
+  it("emits a unit that passes every SKYFE rule (conformant by construction)", () => {
     // Write under the repo (cwd) so the flat-config `files` globs match and test-colocated resolves the sibling.
     const dir = mkdtempSync(join(process.cwd(), "tools", ".scaffold-tmp-"));
     try {

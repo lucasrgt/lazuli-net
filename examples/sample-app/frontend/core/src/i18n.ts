@@ -4,7 +4,7 @@ import { enUS as depositEnUS, esES as depositEsES, ptBR as depositPtBR } from ".
 import { enUS, esES, ptBR } from "./items/items.i18n";
 
 // Harness i18n instance (`@/i18n`) wired with the sample features' catalogs, so the ViewModels'
-// `i18n.t("items:error")` / `i18n.t("deposit:errors.submit")` resolve. A real AeroFortress Framework app assembles this
+// `i18n.t("items:error")` / `i18n.t("deposit:errors.submit")` resolve. A real Skies Framework app assembles this
 // resource tree from every feature's `*.i18n.ts` (the generator the roadmap calls "i18n assembly"); here we wire
 // the two sample features by hand.
 void i18next.use(initReactI18next).init({

@@ -1,3 +1,3 @@
-global using AeroFortress.Framework.Abstractions;
-global using AeroFortress.Framework.AspNetCore;
+global using Skies.Framework.Abstractions;
+global using Skies.Framework.AspNetCore;
 global using Sample.Api.BuildingBlocks;

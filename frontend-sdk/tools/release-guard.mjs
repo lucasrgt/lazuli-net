@@ -15,22 +15,22 @@ import { FRONTEND_PACKAGE_VERSIONS } from "./package-versions.mjs";
 // package carries its own. SelfHarness is framework-dev-only and never shipped, so it is not a unit here.
 export const RELEASE_UNITS = Object.freeze([
   {
-    name: "AeroFortress.Framework.* (nuget)",
-    version: "build/AeroFortress.Framework.Library.props",
-    paths: ["src", ":(exclude)src/AeroFortress.Framework.Cli", "analyzers/AeroFortress.Framework.Doctor"],
+    name: "Skies.Framework.* (nuget)",
+    version: "build/Skies.Framework.Library.props",
+    paths: ["src", ":(exclude)src/Skies.Framework.Cli", "analyzers/Skies.Framework.Doctor"],
   },
   {
-    name: "aerofortress-framework-cli",
-    version: "src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj",
-    paths: ["src/AeroFortress.Framework.Cli"],
+    name: "skies-framework-cli",
+    version: "src/Skies.Framework.Cli/Skies.Framework.Cli.csproj",
+    paths: ["src/Skies.Framework.Cli"],
   },
   {
-    name: "@aerofortress/react",
-    version: "frontend-sdk/packages/aerofortress-react/package.json",
-    paths: ["frontend-sdk/packages/aerofortress-react/src", "frontend-sdk/packages/aerofortress-react/package.json"],
+    name: "skies-react",
+    version: "frontend-sdk/packages/skies-react/package.json",
+    paths: ["frontend-sdk/packages/skies-react/src", "frontend-sdk/packages/skies-react/package.json"],
   },
   {
-    name: "eslint-plugin-aerofortress",
+    name: "eslint-plugin-skies",
     version: "frontend-sdk/packages/eslint-plugin/package.json",
     paths: [
       "frontend-sdk/packages/eslint-plugin/index.cjs",
@@ -39,7 +39,7 @@ export const RELEASE_UNITS = Object.freeze([
     ],
   },
   {
-    name: "@aerofortress/frontend-sdk",
+    name: "skies-frontend-sdk",
     version: "frontend-sdk/package.json",
     paths: ["frontend-sdk/tools", "frontend-sdk/README.md", "frontend-sdk/package.json"],
   },
@@ -62,15 +62,15 @@ export function violations(units) {
 
 // Where each canonical entry's own package.json lives (repo-root relative, like RELEASE_UNITS).
 const CANONICAL_MANIFESTS = Object.freeze({
-  "@aerofortress/frontend-sdk": "frontend-sdk/package.json",
-  "@aerofortress/react": "frontend-sdk/packages/aerofortress-react/package.json",
-  "eslint-plugin-aerofortress": "frontend-sdk/packages/eslint-plugin/package.json",
+  "skies-frontend-sdk": "frontend-sdk/package.json",
+  "avp-assay": "frontend-sdk/node_modules/avp-assay/package.json",
+  "skies-react": "frontend-sdk/packages/skies-react/package.json",
+  "eslint-plugin-skies": "frontend-sdk/packages/eslint-plugin/package.json",
 });
-const EXTERNALLY_VERSIONED = new Set(["@aerofortress/assay"]);
 
 /**
  * The canonical table must agree with the packages it describes: FRONTEND_PACKAGE_VERSIONS ships INSIDE
- * @aerofortress/frontend-sdk and is what `affe-framework-sync` holds every pilot to — a release where the
+ * skies-frontend-sdk and is what the framework sync command holds every pilot to — a release where the
  * table lags its own package (0.1.2 shipped saying "canonical is 0.1.1") turns the sync gate red in every
  * pilot for the wrong reason. Caught here, at publish time, where the fix is one line.
  * @param {ReadonlyArray<{name: string, version: string}>} canonical
@@ -79,7 +79,6 @@ const EXTERNALLY_VERSIONED = new Set(["@aerofortress/assay"]);
  */
 export function canonicalDrift(canonical, readManifest) {
   return canonical.flatMap(({ name, version }) => {
-    if (EXTERNALLY_VERSIONED.has(name)) return [];
     const path = CANONICAL_MANIFESTS[name];
     if (!path) return [`release-guard: ${name} is in FRONTEND_PACKAGE_VERSIONS but has no known manifest path.`];
     const actual = JSON.parse(readManifest(path)).version;
@@ -105,7 +104,10 @@ function versionOf(content, versionPath) {
 /** The file's content at a git ref, or "" when it did not exist there. @param {string} ref @param {string} path */
 function fileAt(ref, path) {
   try {
-    return execFileSync("git", ["show", `${ref}:${path}`], { encoding: "utf8" });
+    return execFileSync("git", ["show", `${ref}:${path}`], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
   } catch {
     return "";
   }

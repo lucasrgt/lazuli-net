@@ -7,7 +7,7 @@ namespace Sample.Tests;
 // ({ items, totalCount, pageNumber, pageSize }), so the document must present the four members as
 // required, plainly typed numbers (no read-from-string union leaking in) — and each Page<T>
 // instantiation must get a collision-free schema id qualified by its item's slice. This test pins
-// all three; if the generator's defaults drift, the seam in AddAeroFortressOpenApi absorbs it, not the apps.
+// all three; if the generator's defaults drift, the seam in AddSkiesOpenApi absorbs it, not the apps.
 public class OpenApiPage
 {
     [Fact]

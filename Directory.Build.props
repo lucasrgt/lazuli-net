@@ -3,18 +3,18 @@
   <PropertyGroup>
     <!-- The .NET analyzers (IDE####, CA####) are the lint engine. EnforceCodeStyleInBuild
          makes them run at build time, not just in the IDE — so the native lint is part of
-         the doctor's gate alongside the AF rules. Configuration lives in .editorconfig. -->
+         the doctor's gate alongside the SKY rules. Configuration lives in .editorconfig. -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Shared package metadata for the publishable AeroFortress.Framework.* projects. Non-packable projects
+    <!-- Shared package metadata for the publishable Skies.Framework.* projects. Non-packable projects
          (the sample, tests, self-harness) ignore it. -->
     <Version>0.1.0</Version>
-    <Authors>AeroFortress</Authors>
-    <Company>AeroFortress</Company>
-    <Description>AeroFortress — the opinionated .NET convention framework (vertical slices + the doctor).</Description>
-    <PackageTags>aerofortress;vertical-slice;convention;doctor</PackageTags>
+    <Authors>Skies</Authors>
+    <Company>Skies</Company>
+    <Description>Skies — the opinionated .NET convention framework (vertical slices + the doctor).</Description>
+    <PackageTags>skies;vertical-slice;convention;doctor</PackageTags>
   </PropertyGroup>
 
 </Project>

@@ -28,7 +28,7 @@ section verbatim; do not re-decide names, values' structure, or signatures.
   mechanism stays the app's; vocabulary (token names, kit shape, ui-door) is now the convention,
   pointer to DESIGN-CONVENTIONS.md. Update the a11y section's last paragraph to note the design band
   promotes web a11y to error once canonical screens land (stage 0005).
-- `CLAUDE.md` — add layout line: `docs/DESIGN-CONVENTIONS.md  The design constitution + token taxonomy + AFFE design band catalog.`
+- `CLAUDE.md` — add layout line: `docs/DESIGN-CONVENTIONS.md  The design constitution + token taxonomy + SKYFE design band catalog.`
 - `AGENTS.md` — identical edit (verbatim mirror).
 
 ## Contracts
@@ -84,24 +84,24 @@ ErrorState({ title, retryLabel, onRetry })
 Every interactive primitive implements the five states internally: rest, hover, focus-visible
 (2px `color.focusRing` ring, never removed), active, disabled. No state is the consumer's job.
 
-### C3 — AFFE design band (IDs + intent; implementation lands in 0004)
-- **AFFE024 `ui-door`** — a `*.view.tsx` renders no host elements (lowercase JSX) and carries no
-  `style`/`className` JSX attribute; everything visual comes from `@/ui`. The AFFE002 one-door
+### C3 — SKYFE design band (IDs + intent; implementation lands in 0004)
+- **SKYFE024 `ui-door`** — a `*.view.tsx` renders no host elements (lowercase JSX) and carries no
+  `style`/`className` JSX attribute; everything visual comes from `@/ui`. The SKYFE002 one-door
   pattern applied to paint.
-- **AFFE025 `scale-only`** — outside `ui/`, token files, and tests: no numeric literals in
+- **SKYFE025 `scale-only`** — outside `ui/`, token files, and tests: no numeric literals in
   spacing-ish style keys (`padding*`, `margin*`, `gap`, `rowGap`, `columnGap`, `borderRadius`,
   `fontSize`, `lineHeight`) except 0; no Tailwind arbitrary values (`[13px]`) in `className` strings.
-- **AFFE026 `semantic-colors`** — outside token files: no `rgb()/rgba()/hsl()/hsla()/oklch()`
+- **SKYFE026 `semantic-colors`** — outside token files: no `rgb()/rgba()/hsl()/hsla()/oklch()`
   literals, no CSS named colors in color-ish style keys (`color`, `backgroundColor`, `borderColor`,
-  `*Color`), no value-import of a raw palette export outside `ui/`. Completes AFFE012 (hex).
-Catalog entries follow the AFFE012 format in FRONTEND-CONVENTIONS.md. Warn-first at introduction
+  `*Color`), no value-import of a raw palette export outside `ui/`. Completes SKYFE012 (hex).
+Catalog entries follow the SKYFE012 format in FRONTEND-CONVENTIONS.md. Warn-first at introduction
 (0004), promoted to error with the canonical screens (0005) — the house posture.
 
 ### C4 — Constitution rules (prose sections, enforced by C2/C3 or by recipe)
 - Spacing only from `space`; vertical rhythm via `Stack gap`, never margin on children.
 - One `display`-or-`title` per screen; hierarchy descends without skipping; body is the default.
 - Form anatomy, always: `Field` wraps label → control → (hint | error); error replaces hint; the
-  control gets `invalid` when error is present; mutation errors surface via the AFFE013 discipline.
+  control gets `invalid` when error is present; mutation errors surface via the SKYFE013 discipline.
 - Color by role, never by value; anything on `primary`/`danger` uses `onPrimary`/`onDanger`.
 - Touch targets ≥ 44px; contrast AA against the role pairs; focus ring never suppressed.
 - Responsiveness: `breakpoints` tokens; compact-first; layout shifts at `regular`/`wide` only.
@@ -117,8 +117,8 @@ form → `.../itemForm/` (created in 0005). Marked "canonical — instantiate, d
    layers) → The taxonomy (C1 verbatim + per-scale rationale: 4px grid, 1.25 modular) → The kit
    (C2 verbatim + closed-API rationale) → The five states → Form anatomy → Text hierarchy → Layout &
    spacing → Color discipline → Responsiveness → A11y posture (jsx-a11y/rn-a11y wiring stays; design
-   band promotes web to error at 0005) → Theming (values are yours) → The AFFE design band catalog
-   (C3, AFFE012 cross-referenced) → Recipes (C5) → Non-goals (the Killed list from `.specs/index.md`).
+   band promotes web to error at 0005) → Theming (values are yours) → The SKYFE design band catalog
+   (C3, SKYFE012 cross-referenced) → Recipes (C5) → Non-goals (the Killed list from `.specs/index.md`).
 3. Rewrite the FRONTEND-CONVENTIONS.md styling non-goal + a11y note (Surface section above).
 4. Add the layout line to `CLAUDE.md`; apply the identical diff to `AGENTS.md`.
 5. Self-check: every C1–C5 identifier appears in the doc exactly as written here; no TODO/placeholder
@@ -127,7 +127,7 @@ form → `.../itemForm/` (created in 0005). Marked "canonical — instantiate, d
 ## Tests first (TDD)
 Doc-only stage — the contract checks are structural:
 - [ ] `DESIGN-CONVENTIONS.md` contains the C1 type block and C2 signature block character-exact.
-- [ ] Every AFFE024–026 entry states: what it flags, where it's exempt, the message's "use instead".
+- [ ] Every SKYFE024–026 entry states: what it flags, where it's exempt, the message's "use instead".
 - [ ] `FRONTEND-CONVENTIONS.md` no longer claims "the design tokens are the app's choice" un-qualified.
 - [ ] `CLAUDE.md` and `AGENTS.md` diffs are byte-identical.
 
@@ -144,7 +144,7 @@ escape hatch for non-automatable acceptance). Everything downstream is automated
 
 ## As-Built
 Shipped 2026-06-09, commit `ccd3569` (specs scaffold `1f6c9bd`). Deltas: the band was renumbered
-023–025 → 024–026 BEFORE execution — the FRONTEND-CONVENTIONS catalog already reserves AFFE023 for
+023–025 → 024–026 BEFORE execution — the FRONTEND-CONVENTIONS catalog already reserves SKYFE023 for
 the planned orphan-placeholder rule (caught by grounding in the doc, not memory). Two locked
 contracts were superseded later in the wave, this spec updated in place both times: C2 `Text` gained
 `alert?: boolean` (the form's command-error surface, 0005, `c447c4b`) and C1 `ColorRole` gained

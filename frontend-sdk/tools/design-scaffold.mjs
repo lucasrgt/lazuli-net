@@ -5,7 +5,7 @@
 //   node tools/design-scaffold.mjs [tokensDir]          # the token contract (default core/src/design)
 //   node tools/design-scaffold.mjs --kit web [kitDir]   # the closed-API web kit (default web/src/ui)
 // The emitted tokens.ts is the taxonomy with starting values; edit the VALUES (brand, dark mode),
-// never the names — the design band (AFFE024-026 + AFFE012) polices the names. The kit is the app's
+// never the names — the design band (SKYFE024-026 + SKYFE012) polices the names. The kit is the app's
 // `@/ui` door: extend it there, repoint tokens-bridge.ts if your tokens live elsewhere.
 
 import { mkdirSync, writeFileSync, existsSync } from "node:fs";

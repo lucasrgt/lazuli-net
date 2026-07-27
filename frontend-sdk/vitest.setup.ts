@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 import { delay, http, HttpResponse } from "msw";
-import { server } from "@aerofortress/assay/react";
+import { server } from "avp-assay/react";
 import { SAMPLE_API_BASE } from "../examples/sample-app/frontend/core/src/api";
 
 const MISSING_WALLET = "99999999-9999-4999-8999-999999999999";

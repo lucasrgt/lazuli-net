@@ -1,6 +1,6 @@
 "use strict";
 
-// Self-test for the AeroFortress Framework frontend harness — the parallel of the backend's self-doctor / SelfHarness. Every AFFE
+// Self-test for the Skies Framework frontend harness — the parallel of the backend's self-doctor / SelfHarness. Every SKYFE
 // rule is proven here with RuleTester: it must FIRE on the violation it polices and PASS on the shapes it allows. A
 // rule the linter merely "accepts" is not done until a test pins both edges (the same discipline the framework
 // applies to its own backend rules). Run: `node index.test.cjs` (exits non-zero on any failing case). eslint + the
@@ -26,7 +26,7 @@ const ruleTester = new RuleTester({
 
 const ASSAY_COLOCATION_FIX = path.join(__dirname, "__fixtures__", "assay-colocation");
 
-// AFFE005 — a canonical Assay suite is executable Vitest and can carry the ViewModel mount proof itself.
+// SKYFE005 — a canonical Assay suite is executable Vitest and can carry the ViewModel mount proof itself.
 ruleTester.run("test-colocated", plugin.rules["test-colocated"], {
   valid: [
     {
@@ -43,7 +43,7 @@ ruleTester.run("test-colocated", plugin.rules["test-colocated"], {
   ],
 });
 
-// AFFE001 — a View (*.view.tsx) imports no data layer (generated client / axios / react-query); it consumes its
+// SKYFE001 — a View (*.view.tsx) imports no data layer (generated client / axios / react-query); it consumes its
 // ViewModel.
 ruleTester.run("view-purity", plugin.rules["view-purity"], {
   valid: [
@@ -60,7 +60,7 @@ ruleTester.run("view-purity", plugin.rules["view-purity"], {
   ],
 });
 
-// AFFE002 — the generated client has two data doors: a screen's *.viewModel.ts, and the framework auth/routing
+// SKYFE002 — the generated client has two data doors: a screen's *.viewModel.ts, and the framework auth/routing
 // infra (lib/session, lib/guards). Everything else is forbidden; type-only imports are always fine.
 ruleTester.run("data-door", plugin.rules["data-door"], {
   valid: [
@@ -76,11 +76,11 @@ ruleTester.run("data-door", plugin.rules["data-door"], {
   invalid: [
     { filename: "Foo.view.tsx", code: `import { useThing } from "@/client.gen/sample";`, errors: [{ messageId: "offdoor" }] },
     { filename: "src/app/_layout.tsx", code: `import { refresh } from "@/client.gen/sample";`, errors: [{ messageId: "offdoor" }] },
-    { filename: "src/lib/aerofortress-client.ts", code: `import { thing } from "@/client.gen/sample";`, errors: [{ messageId: "offdoor" }] },
+    { filename: "src/lib/skies-client.ts", code: `import { thing } from "@/client.gen/sample";`, errors: [{ messageId: "offdoor" }] },
   ],
 });
 
-// AFFE009 — a *.viewModel.ts is platform-agnostic: no react-native / expo import (value OR type).
+// SKYFE009 — a *.viewModel.ts is platform-agnostic: no react-native / expo import (value OR type).
 ruleTester.run("viewmodel-platform-agnostic", plugin.rules["viewmodel-platform-agnostic"], {
   valid: [
     { filename: "Foo.viewModel.ts", code: `import { useState } from "react";` },
@@ -95,7 +95,7 @@ ruleTester.run("viewmodel-platform-agnostic", plugin.rules["viewmodel-platform-a
   ],
 });
 
-// AFFE003 — no mock / fixture / MSW import in production code (only under *.test.*).
+// SKYFE003 — no mock / fixture / MSW import in production code (only under *.test.*).
 ruleTester.run("no-mock", plugin.rules["no-mock"], {
   valid: [
     { filename: "Foo.test.tsx", code: `import { server } from "msw";` },
@@ -107,7 +107,7 @@ ruleTester.run("no-mock", plugin.rules["no-mock"], {
   ],
 });
 
-// AFFE010 — a View routes async state through <Resource>, never raw react-query booleans (member access OR
+// SKYFE010 — a View routes async state through <Resource>, never raw react-query booleans (member access OR
 // destructuring). The booleans are the ViewModel's; the View consumes the AsyncState union.
 ruleTester.run("state-completeness", plugin.rules["state-completeness"], {
   valid: [
@@ -121,7 +121,7 @@ ruleTester.run("state-completeness", plugin.rules["state-completeness"], {
   ],
 });
 
-// AFFE011 — every locale catalog in a *.i18n.ts declares the same keys; a key in one but not its siblings is a
+// SKYFE011 — every locale catalog in a *.i18n.ts declares the same keys; a key in one but not its siblings is a
 // silent untranslated string. Scope is the *.i18n.ts file only.
 ruleTester.run("i18n-completeness", plugin.rules["i18n-completeness"], {
   valid: [
@@ -143,7 +143,7 @@ ruleTester.run("i18n-completeness", plugin.rules["i18n-completeness"], {
   ],
 });
 
-// AFFE012 — no inline hex color outside the token/theme definition files.
+// SKYFE012 — no inline hex color outside the token/theme definition files.
 ruleTester.run("design-tokens", plugin.rules["design-tokens"], {
   valid: [
     { filename: "Foo.view.tsx", code: `const c = theme.colors.primary;` },
@@ -156,7 +156,7 @@ ruleTester.run("design-tokens", plugin.rules["design-tokens"], {
   ],
 });
 
-// AFFE013 — a ViewModel's mutation must surface its failure (no silent failure). Scoped to *.viewModel.ts. Four
+// SKYFE013 — a ViewModel's mutation must surface its failure (no silent failure). Scoped to *.viewModel.ts. Four
 // legitimate surfaces are accepted: (A) inline onError, (B) a read `.isError` state, (C) mutateAsync in try/catch
 // or .catch(), (D) a returned/propagated mutateAsync. Each is a real surface; demanding a redundant onError on top
 // would be the very test-theater the rule exists to prevent.
@@ -190,7 +190,7 @@ ruleTester.run("mutation-error-handled", plugin.rules["mutation-error-handled"],
   ],
 });
 
-// AFFE014 — no hardcoded user-facing copy in a View (JSX text children must go through t()).
+// SKYFE014 — no hardcoded user-facing copy in a View (JSX text children must go through t()).
 ruleTester.run("no-hardcoded-copy", plugin.rules["no-hardcoded-copy"], {
   valid: [
     // t() result is an expression, not text — never flagged.
@@ -217,7 +217,7 @@ ruleTester.run("no-hardcoded-copy", plugin.rules["no-hardcoded-copy"], {
   ],
 });
 
-// AFFE006 — a screen View (one that imports a ViewModel) needs a co-located render test. Detection is by IMPORT,
+// SKYFE006 — a screen View (one that imports a ViewModel) needs a co-located render test. Detection is by IMPORT,
 // not a sibling file, so it survives the monorepo split (ViewModel in `core`, View in the platform shell). In
 // RuleTester the co-located test file doesn't exist on disk, so a VM-consuming View reports `missing` (proving the
 // gate fires) while a presentational fragment passes (proving the gate skips). A unique base avoids a cwd collision.
@@ -228,21 +228,21 @@ ruleTester.run("view-integration-test", plugin.rules["view-integration-test"], {
       code: `import { useProofModel } from "./Proof.viewModel"; export const ProofView = () => null;`,
     },
     // a presentational fragment: imports no ViewModel -> not a screen, skipped (covered via its shell).
-    { filename: "Affe006Frag.view.tsx", code: `import { View } from "react-native"; export const X = () => <View />;` },
+    { filename: "Skyfe006Frag.view.tsx", code: `import { View } from "react-native"; export const X = () => <View />;` },
     // out of scope: not a *.view.tsx (even though it names a model hook).
-    { filename: "Affe006Probe.tsx", code: `import { useAffe006ProbeModel } from "@scope/app-core";` },
+    { filename: "Skyfe006Probe.tsx", code: `import { useSkyfe006ProbeModel } from "@scope/app-core";` },
     // props-in fragment: imports only a TYPE from a *.viewModel (a shared PanelProps), no data-door hook -> skipped.
-    { filename: "Affe006Panel.view.tsx", code: `import type { PanelProps } from "./HostEdit.viewModel"; export const X = (_p: PanelProps) => null;` },
+    { filename: "Skyfe006Panel.view.tsx", code: `import type { PanelProps } from "./HostEdit.viewModel"; export const X = (_p: PanelProps) => null;` },
   ],
   invalid: [
     // cross-package: imports a use<Name>Model data-door hook from a core package -> a screen, needs the render test.
-    { filename: "Affe006Probe.view.tsx", code: `import { useAffe006ProbeModel } from "@scope/app-core";`, errors: [{ messageId: "missing" }] },
+    { filename: "Skyfe006Probe.view.tsx", code: `import { useSkyfe006ProbeModel } from "@scope/app-core";`, errors: [{ messageId: "missing" }] },
     // co-located: imports the ./X.viewModel module -> still a screen.
-    { filename: "Affe006Probe.view.tsx", code: `import { useAffe006ProbeModel } from "./Affe006Probe.viewModel";`, errors: [{ messageId: "missing" }] },
+    { filename: "Skyfe006Probe.view.tsx", code: `import { useSkyfe006ProbeModel } from "./Skyfe006Probe.viewModel";`, errors: [{ messageId: "missing" }] },
   ],
 });
 
-// AFFE015 — no imperative redirect inside useEffect (a guard redirect must be declarative <Redirect>/<Navigate>, not
+// SKYFE015 — no imperative redirect inside useEffect (a guard redirect must be declarative <Redirect>/<Navigate>, not
 // an effect that loops on web). Recognizes both router idioms; user-action push/back and onPress redirect stay allowed.
 ruleTester.run("no-router-replace-in-effect", plugin.rules["no-router-replace-in-effect"], {
   valid: [
@@ -267,30 +267,30 @@ ruleTester.run("no-router-replace-in-effect", plugin.rules["no-router-replace-in
   ],
 });
 
-// AFFE016 — the session token is written through one seam (lib/session); a viewModel/view importing the token setter
+// SKYFE016 — the session token is written through one seam (lib/session); a viewModel/view importing the token setter
 // directly is the scattered-write bug that forgets the cache reset.
 ruleTester.run("session-one-door", plugin.rules["session-one-door"], {
   valid: [
     // The seam itself legitimately imports the setter (it pairs the write with the reset) — directory or file form.
-    { filename: "src/lib/session/session.ts", code: `import { setAccessToken } from "@/lib/aerofortress-client";` },
-    { filename: "src/lib/session.ts", code: `import { setAccessToken } from "@/lib/aerofortress-client";` },
+    { filename: "src/lib/session/session.ts", code: `import { setAccessToken } from "@/lib/skies-client";` },
+    { filename: "src/lib/session.ts", code: `import { setAccessToken } from "@/lib/skies-client";` },
     // A viewModel going through the seam is correct.
     { filename: "Login.viewModel.ts", code: `import { useSignIn } from "@/lib/session";` },
     // The client that DEFINES the setter exports it — it does not import it, so it is never flagged.
-    { filename: "src/lib/aerofortress-client.ts", code: `export function setAccessToken(t) {}` },
+    { filename: "src/lib/skies-client.ts", code: `export function setAccessToken(t) {}` },
   ],
   invalid: [
-    { filename: "Login.viewModel.ts", code: `import { setAccessToken } from "@/lib/aerofortress-client";`, errors: [{ messageId: "offdoor" }] },
-    { filename: "SignupWizard.viewModel.ts", code: `import { setToken } from "@/lib/aerofortress-client";`, errors: [{ messageId: "offdoor" }] },
+    { filename: "Login.viewModel.ts", code: `import { setAccessToken } from "@/lib/skies-client";`, errors: [{ messageId: "offdoor" }] },
+    { filename: "SignupWizard.viewModel.ts", code: `import { setToken } from "@/lib/skies-client";`, errors: [{ messageId: "offdoor" }] },
   ],
 });
 
-// AFFE017 — a guard redirects on a tri-state SessionState, not a raw isAuthenticated boolean.
+// SKYFE017 — a guard redirects on a tri-state SessionState, not a raw isAuthenticated boolean.
 ruleTester.run("guard-tristate", plugin.rules["guard-tristate"], {
   valid: [
     // Branch on the union — loading is a distinct, handled case.
     { filename: "src/app/routes/index.tsx", code: `function H() { if (session.status === "anonymous") return <Navigate to="/login" />; return null; }` },
-    // A non-auth presence guard (a param) is AFFE018's domain, not this rule's.
+    // A non-auth presence guard (a param) is SKYFE018's domain, not this rule's.
     { filename: "src/app/routes/index.tsx", code: `function H() { if (!chatId) return <Redirect href="/m" />; return null; }` },
     // out of scope: a plain feature view is not a route/guard.
     { filename: "Foo.view.tsx", code: `function H() { if (!isAuthenticated) return <Navigate to="/login" />; return null; }` },
@@ -301,7 +301,7 @@ ruleTester.run("guard-tristate", plugin.rules["guard-tristate"], {
   ],
 });
 
-// AFFE018 — a route reading a required id param must guard its absence with a declarative redirect.
+// SKYFE018 — a route reading a required id param must guard its absence with a declarative redirect.
 ruleTester.run("route-param-guard", plugin.rules["route-param-guard"], {
   valid: [
     // The param is guarded before the View renders.
@@ -325,7 +325,7 @@ ruleTester.run("route-param-guard", plugin.rules["route-param-guard"], {
   ],
 });
 
-// AFFE019 — no bare router.back() / history.back(); route Back through a guarded helper.
+// SKYFE019 — no bare router.back() / history.back(); route Back through a guarded helper.
 ruleTester.run("safe-back", plugin.rules["safe-back"], {
   valid: [
     // The guarded helper — the correct shape.
@@ -343,27 +343,27 @@ ruleTester.run("safe-back", plugin.rules["safe-back"], {
   ],
 });
 
-// AFFE020 — the API base URL comes from configuration, not a hardcoded host baked into the client's construction.
+// SKYFE020 — the API base URL comes from configuration, not a hardcoded host baked into the client's construction.
 ruleTester.run("no-hardcoded-base-url", plugin.rules["no-hardcoded-base-url"], {
   valid: [
     // env-driven with a relative fallback (web) — the blessed shape.
-    { filename: "src/lib/aerofortress-client.ts", code: `const c = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? "" });` },
+    { filename: "src/lib/skies-client.ts", code: `const c = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? "" });` },
     // env-driven with an env fallback (mobile).
-    { filename: "src/lib/aerofortress-client.ts", code: `const c = axios.create({ baseURL: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8080" });` },
+    { filename: "src/lib/skies-client.ts", code: `const c = axios.create({ baseURL: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8080" });` },
     // a relative base is configuration, not a baked host.
-    { filename: "src/lib/aerofortress-client.ts", code: `const c = axios.create({ baseURL: "/api" });` },
+    { filename: "src/lib/skies-client.ts", code: `const c = axios.create({ baseURL: "/api" });` },
     // an injectable default overridden at boot (the hostpoint pattern) is an assignment, not a construction prop.
-    { filename: "src/lib/aerofortress-client.ts", code: `instance.defaults.baseURL = "http://localhost:8080";` },
+    { filename: "src/lib/skies-client.ts", code: `instance.defaults.baseURL = "http://localhost:8080";` },
     // out of scope: a test fixture may hardcode a URL.
     { filename: "Foo.test.tsx", code: `const c = axios.create({ baseURL: "http://localhost:8080" });` },
   ],
   invalid: [
-    { filename: "src/lib/aerofortress-client.ts", code: `const c = axios.create({ baseURL: "http://localhost:8080" });`, errors: [{ messageId: "hardcoded" }] },
+    { filename: "src/lib/skies-client.ts", code: `const c = axios.create({ baseURL: "http://localhost:8080" });`, errors: [{ messageId: "hardcoded" }] },
     { filename: "src/lib/client.ts", code: `const c = makeClient({ baseUrl: "https://api.example.com" });`, errors: [{ messageId: "hardcoded" }] },
   ],
 });
 
-// AFFE021 — no dangerouslySetInnerHTML outside the lib/html seam (the one audited, sanitizing door).
+// SKYFE021 — no dangerouslySetInnerHTML outside the lib/html seam (the one audited, sanitizing door).
 ruleTester.run("no-raw-html", plugin.rules["no-raw-html"], {
   valid: [
     // The seam owns rich-HTML rendering — the sanitizer is wired there.
@@ -379,7 +379,7 @@ ruleTester.run("no-raw-html", plugin.rules["no-raw-html"], {
   ],
 });
 
-// AFFE022 — never navigate to a value that arrived in the URL (open redirect); map it through an allowlist first.
+// SKYFE022 — never navigate to a value that arrived in the URL (open redirect); map it through an allowlist first.
 ruleTester.run("no-open-redirect", plugin.rules["no-open-redirect"], {
   valid: [
     // Navigating to a literal route is fine.
@@ -397,7 +397,7 @@ ruleTester.run("no-open-redirect", plugin.rules["no-open-redirect"], {
   ],
 });
 
-// AFFE016 (storage half) — a token-ish storage write outside the seam is the same scattered session write as
+// SKYFE016 (storage half) — a token-ish storage write outside the seam is the same scattered session write as
 // importing the setter; only lib/session touches token storage.
 ruleTester.run("session-one-door", plugin.rules["session-one-door"], {
   valid: [
@@ -415,7 +415,7 @@ ruleTester.run("session-one-door", plugin.rules["session-one-door"], {
   ],
 });
 
-// AFFE002 (re-export half) — `export … from "client.gen"` outside the doors launders the client to every importer.
+// SKYFE002 (re-export half) — `export … from "client.gen"` outside the doors launders the client to every importer.
 ruleTester.run("data-door", plugin.rules["data-door"], {
   valid: [
     // Type re-exports are the shared contract vocabulary, not data access.
@@ -430,7 +430,7 @@ ruleTester.run("data-door", plugin.rules["data-door"], {
   ],
 });
 
-// AFFE013 (empty-handler half) — `onError: () => {}` is the silent failure with paperwork; the structure must
+// SKYFE013 (empty-handler half) — `onError: () => {}` is the silent failure with paperwork; the structure must
 // route the error somewhere, not merely exist.
 ruleTester.run("mutation-error-handled", plugin.rules["mutation-error-handled"], {
   valid: [
@@ -442,7 +442,7 @@ ruleTester.run("mutation-error-handled", plugin.rules["mutation-error-handled"],
   ],
 });
 
-// AFFE011 (nested half) — keys are compared as flattened paths, so a key missing inside a nested group is caught.
+// SKYFE011 (nested half) — keys are compared as flattened paths, so a key missing inside a nested group is caught.
 ruleTester.run("i18n-completeness", plugin.rules["i18n-completeness"], {
   valid: [
     {
@@ -459,8 +459,8 @@ ruleTester.run("i18n-completeness", plugin.rules["i18n-completeness"], {
   ],
 });
 
-// AFFE024 — the ui-door: a View renders no host element and carries no style/className; paint reaches a screen
-// through @/ui only (the AFFE002 one-door pattern applied to paint).
+// SKYFE024 — the ui-door: a View renders no host element and carries no style/className; paint reaches a screen
+// through @/ui only (the SKYFE002 one-door pattern applied to paint).
 ruleTester.run("ui-door", plugin.rules["ui-door"], {
   valid: [
     {
@@ -491,7 +491,7 @@ ruleTester.run("ui-door", plugin.rules["ui-door"], {
   ],
 });
 
-// AFFE025 — spacing/typography only from the scale: off-scale literals in style contexts and Tailwind arbitrary
+// SKYFE025 — spacing/typography only from the scale: off-scale literals in style contexts and Tailwind arbitrary
 // values are the rhythm leak; ui/, the token files, and tests legitimately speak pixels.
 ruleTester.run("scale-only", plugin.rules["scale-only"], {
   valid: [
@@ -521,8 +521,8 @@ ruleTester.run("scale-only", plugin.rules["scale-only"], {
   ],
 });
 
-// AFFE026 — color is a semantic role: no rgb()/hsl()/oklch() literals, no named colors in color-ish keys, no
-// value-import of the raw palette outside ui/. Hex is AFFE012's half of the same pair.
+// SKYFE026 — color is a semantic role: no rgb()/hsl()/oklch() literals, no named colors in color-ish keys, no
+// value-import of the raw palette outside ui/. Hex is SKYFE012's half of the same pair.
 ruleTester.run("semantic-colors", plugin.rules["semantic-colors"], {
   valid: [
     { filename: "core/src/design/tokens.ts", code: `export const shadow = { raised: "0 1px 3px rgba(0,0,0,0.12)" };` },
@@ -533,7 +533,7 @@ ruleTester.run("semantic-colors", plugin.rules["semantic-colors"], {
     { filename: "Foo.test.tsx", code: `const c = "rgb(1,2,3)";` },
     // Semantic, theme-mapped utilities carry a role, not a palette family + shade — the conformant shape.
     { filename: "Foo.tsx", code: `export const X = () => <div className="bg-primary text-danger border-muted" />;` },
-    // Stock spacing/layout utilities are the scale (AFFE025's concern), not a color leak.
+    // Stock spacing/layout utilities are the scale (SKYFE025's concern), not a color leak.
     { filename: "Foo.tsx", code: `export const X = () => <div className="p-4 gap-2 flex rounded-lg" />;` },
     // ui/ composes the primitives from the raw palette — it reaches deeper, like the palette import.
     { filename: "web/src/ui/Button.tsx", code: `export const B = () => <button className="bg-red-500 text-white" />;` },
@@ -562,7 +562,7 @@ ruleTester.run("semantic-colors", plugin.rules["semantic-colors"], {
   ],
 });
 
-// AFFE027 — a QueryClient carries the mutation defaults (mutationCache: new MutationCache({ onSuccess, onError })).
+// SKYFE027 — a QueryClient carries the mutation defaults (mutationCache: new MutationCache({ onSuccess, onError })).
 // Tests and the shared test harness construct bare clients freely; an inline or same-file-declared cache is checked,
 // anything built further away is trusted as visible-in-review.
 ruleTester.run("query-client-defaults", plugin.rules["query-client-defaults"], {
@@ -613,7 +613,7 @@ ruleTester.run("query-client-defaults", plugin.rules["query-client-defaults"], {
   ],
 });
 
-// AFFE028 — an onSuccess whose entire body is refetch/invalidate calls duplicates the AFFE027 defaults (the pilot's
+// SKYFE028 — an onSuccess whose entire body is refetch/invalidate calls duplicates the SKYFE027 defaults (the pilot's
 // hand-rolled ritual, 30 of 43 ViewModels). A handler that does MORE than refetch is real behavior — never flagged.
 ruleTester.run("no-manual-refetch-ritual", plugin.rules["no-manual-refetch-ritual"], {
   valid: [
@@ -652,7 +652,7 @@ ruleTester.run("no-manual-refetch-ritual", plugin.rules["no-manual-refetch-ritua
   ],
 });
 
-// AFFE013 ({ globalSurface: true } half) — with the AFFE027 defaults wired, the global MutationCache.onError IS the
+// SKYFE013 ({ globalSurface: true } half) — with the SKYFE027 defaults wired, the global MutationCache.onError IS the
 // surface (react-query fires it regardless of per-call handlers), so a bare .mutate() passes; the empty onError stays
 // flagged — it is dead paperwork either way.
 ruleTester.run("mutation-error-handled", plugin.rules["mutation-error-handled"], {
@@ -671,17 +671,17 @@ ruleTester.run("mutation-error-handled", plugin.rules["mutation-error-handled"],
   ],
 });
 
-// AFFE029 — refresh-one-door: the session rotation has exactly one consumer surface (the client seam's
+// SKYFE029 — refresh-one-door: the session rotation has exactly one consumer surface (the client seam's
 // single-flight interceptor / the session seam's gated bootstrap). A second consumer — the refresh hook/op
 // imported into a screen, or a hand-rolled POST to a refresh route — eventually rotates in parallel and the
 // backend's theft detection burns the session family.
 ruleTester.run("refresh-one-door", plugin.rules["refresh-one-door"], {
   valid: [
     // The session seam may consume the rotation (a gated boot bootstrap composes the client's single-flight).
-    { filename: "src/lib/session.ts", code: `import { refreshAccessToken } from "@/lib/aerofortress-client";` },
+    { filename: "src/lib/session.ts", code: `import { refreshAccessToken } from "@/lib/skies-client";` },
     { filename: "src/lib/session/useSession.ts", code: `import { refresh } from "@/client.gen/sample";` },
     // The client seam itself defines the rotation — its own raw post is the door's inside.
-    { filename: "src/lib/aerofortress-client.ts", code: `instance.post("/account/refresh", {});` },
+    { filename: "src/lib/skies-client.ts", code: `instance.post("/account/refresh", {});` },
     // Type-only imports are contract vocabulary, not a rotation path.
     { filename: "Foo.viewModel.ts", code: `import type { refresh } from "@/client.gen/sample";` },
     // Unrelated names from the client are fine.
@@ -689,20 +689,20 @@ ruleTester.run("refresh-one-door", plugin.rules["refresh-one-door"], {
     // A refresh-named import from a NON-client source is not the rotation (e.g. a UI helper).
     { filename: "Foo.viewModel.ts", code: `import { refresh } from "@/lib/animation";` },
     // Tests exercise freely.
-    { filename: "Session.test.tsx", code: `import { refreshAccessToken } from "@/lib/aerofortress-client";` },
+    { filename: "Session.test.tsx", code: `import { refreshAccessToken } from "@/lib/skies-client";` },
   ],
   invalid: [
     // The near-miss shapes: the hook/op consumed outside the doors…
     { filename: "Foo.viewModel.ts", code: `import { useRefresh } from "@/client.gen/sample";`, errors: [{ messageId: "offdoor" }] },
     { filename: "src/app/_layout.tsx", code: `import { refresh } from "@/client.gen/sample";`, errors: [{ messageId: "offdoor" }] },
-    { filename: "Foo.viewModel.ts", code: `import { refreshAccessToken } from "@/lib/aerofortress-client";`, errors: [{ messageId: "offdoor" }] },
+    { filename: "Foo.viewModel.ts", code: `import { refreshAccessToken } from "@/lib/skies-client";`, errors: [{ messageId: "offdoor" }] },
     // …and the hand-rolled rotation.
     { filename: "Foo.viewModel.ts", code: `instance.post("/account/refresh", {});`, errors: [{ messageId: "raw" }] },
     { filename: "src/lib/api-helpers.ts", code: `axios.post("/auth/refresh-token");`, errors: [{ messageId: "raw" }] },
   ],
 });
 
-// AFFE030 — no `as never`/`as any`/`as unknown` on a navigation target: the cast silences typed routes, and a
+// SKYFE030 — no `as never`/`as any`/`as unknown` on a navigation target: the cast silences typed routes, and a
 // silenced router lets a drifted route literal compile clean and 404 in prod (the pilot's server-minted routes).
 ruleTester.run("no-cast-navigation", plugin.rules["no-cast-navigation"], {
   valid: [
@@ -736,8 +736,8 @@ ruleTester.run("no-cast-navigation", plugin.rules["no-cast-navigation"], {
   ],
 });
 
-// AFFE031 — handleSubmit(onValid) without the invalid path is a silent validation failure (the mute Save button:
-// the failure happens BEFORE the mutation, so AFFE013/027 never see it). submitOrReveal or a second arg passes.
+// SKYFE031 — handleSubmit(onValid) without the invalid path is a silent validation failure (the mute Save button:
+// the failure happens BEFORE the mutation, so SKYFE013/027 never see it). submitOrReveal or a second arg passes.
 ruleTester.run("submit-handles-invalid", plugin.rules["submit-handles-invalid"], {
   valid: [
     // Both paths passed by hand.
@@ -757,7 +757,7 @@ ruleTester.run("submit-handles-invalid", plugin.rules["submit-handles-invalid"],
   ],
 });
 
-// AFFE032 — a <Controller> render that never reads fieldState leaves a validated error with no surface on its
+// SKYFE032 — a <Controller> render that never reads fieldState leaves a validated error with no surface on its
 // field (the pilot's Description input). Destructured or accessed both count; only inline functions are analyzed.
 ruleTester.run("controller-field-state", plugin.rules["controller-field-state"], {
   valid: [
@@ -794,9 +794,9 @@ ruleTester.run("controller-field-state", plugin.rules["controller-field-state"],
   ],
 });
 
-// AFFE033 — a `@verify` obligation has its executable `@avp` proof in the co-located *.assay.test.tsx.
+// SKYFE033 — a `@verify` obligation has its executable `@avp` proof in the co-located *.assay.test.tsx.
 // An ordinary component test marker is deliberately insufficient: the subject-bound Assay file is the proof.
-const AFFE033_FIX = path.join(__dirname, "__fixtures__", "affe033");
+const SKYFE033_FIX = path.join(__dirname, "__fixtures__", "skyfe033");
 ruleTester.run("verify-has-avp-proof", plugin.rules["verify-has-avp-proof"], {
   valid: [
     // A view may leave the feature-level obligation on its ViewModel.
@@ -804,10 +804,10 @@ ruleTester.run("verify-has-avp-proof", plugin.rules["verify-has-avp-proof"], {
     // Out of scope: not a View/ViewModel (the marker in a plain file is ignored).
     { filename: "Foo.tsx", code: `/** @verify fires-primary-effect */\nexport const X = () => null;` },
     // The obligation IS proven: the co-located fixture assay carries the marker + defineVerification.
-    { filename: path.join(AFFE033_FIX, "Proven.view.tsx"), code: `/** @verify proven-x */\nexport const X = () => null;` },
+    { filename: path.join(SKYFE033_FIX, "Proven.view.tsx"), code: `/** @verify proven-x */\nexport const X = () => null;` },
     // The reverse edge holds too: a proof whose subject declares the same obligation is visible to E2E coverage.
     {
-      filename: path.join(AFFE033_FIX, "Proven.assay.test.tsx"),
+      filename: path.join(SKYFE033_FIX, "Proven.assay.test.tsx"),
       code: `/** @avp proven-x */\ndefineVerification(...productVerification("Proven", "proven-x", "proves x", () => { expect(true).toBe(true); }));`,
     },
     {
@@ -831,37 +831,37 @@ ruleTester.run("verify-has-avp-proof", plugin.rules["verify-has-avp-proof"], {
     },
     // No co-located assay on disk -> the obligation has no proof (missing). Unique base avoids a cwd collision.
     {
-      filename: "Affe033Probe.view.tsx",
+      filename: "Skyfe033Probe.view.tsx",
       code: `/** @verify fires-primary-effect */\nexport const X = () => null;`,
       errors: [{ messageId: "missing" }],
     },
     // A ViewModel obligation with no co-located assay -> missing too.
     {
-      filename: "Affe033Probe.viewModel.ts",
+      filename: "Skyfe033Probe.viewModel.ts",
       code: `/** @verify single-flight */\nexport const useX = () => null;`,
       errors: [{ messageId: "missing" }],
     },
     // The same-subject file lacks the `.test` segment, so Vitest cannot discover it as executable evidence.
     {
-      filename: path.join(AFFE033_FIX, "OldStyle.view.tsx"),
+      filename: path.join(SKYFE033_FIX, "OldStyle.view.tsx"),
       code: `/** @verify old-file */\nexport const X = () => null;`,
       errors: [{ messageId: "missing" }],
     },
     // The co-located assay EXISTS but proves a different criterion -> unproven.
     {
-      filename: path.join(AFFE033_FIX, "Unproven.view.tsx"),
+      filename: path.join(SKYFE033_FIX, "Unproven.view.tsx"),
       code: `/** @verify needs-y */\nexport const X = () => null;`,
       errors: [{ messageId: "unproven" }],
     },
     // A comment marker without an executable Assay registration is test theater.
     {
-      filename: path.join(AFFE033_FIX, "Inert.view.tsx"),
+      filename: path.join(SKYFE033_FIX, "Inert.view.tsx"),
       code: `/** @verify inert-z */\nexport const X = () => null;`,
       errors: [{ messageId: "inert" }],
     },
     // A second @avp marker cannot borrow an unrelated defineVerification call in the same Assay file.
     {
-      filename: path.join(AFFE033_FIX, "Borrowed.view.tsx"),
+      filename: path.join(SKYFE033_FIX, "Borrowed.view.tsx"),
       code: `/** @verify borrowed-b */\nexport const X = () => null;`,
       errors: [{ messageId: "inert" }],
     },
@@ -872,14 +872,14 @@ ruleTester.run("verify-has-avp-proof", plugin.rules["verify-has-avp-proof"], {
     },
     // An executable Assay without the subject-side obligation would run but disappear from the E2E inventory.
     {
-      filename: path.join(AFFE033_FIX, "Orphan.assay.test.tsx"),
+      filename: path.join(SKYFE033_FIX, "Orphan.assay.test.tsx"),
       code: `/** @avp orphan-y */\ndefineVerification(...productVerification("Orphan", "orphan-y", "proves an undeclared criterion", () => { expect(true).toBe(true); }));`,
       errors: [{ messageId: "orphan" }],
     },
   ],
 });
 
-// AFFE034 — skipped/conditional/focused tests turn runner exit 0 into a false green, so all common
+// SKYFE034 — skipped/conditional/focused tests turn runner exit 0 into a false green, so all common
 // Vitest/Jest/Playwright omission forms are rejected statically.
 ruleTester.run("no-disabled-tests", plugin.rules["no-disabled-tests"], {
   valid: [
@@ -902,7 +902,7 @@ ruleTester.run("no-disabled-tests", plugin.rules["no-disabled-tests"], {
   ],
 });
 
-// AFFE035 — a ViewModel must name the real surface flow that covers its visible behavior.
+// SKYFE035 — a ViewModel must name the real surface flow that covers its visible behavior.
 ruleTester.run("feature-has-e2e-flow", plugin.rules["feature-has-e2e-flow"], {
   valid: [
     { filename: "Feature.viewModel.ts", code: `/** @e2e feature-happy\n * @e2e feature-sad */\nexport const useFeature = () => null;` },
@@ -923,4 +923,4 @@ ruleTester.run("feature-has-e2e-flow", plugin.rules["feature-has-e2e-flow"], {
 });
 
 // eslint-disable-next-line no-console
-console.log("eslint-plugin-aerofortress: all AFFE rule tests passed");
+console.log("eslint-plugin-skies: all SKYFE rule tests passed");

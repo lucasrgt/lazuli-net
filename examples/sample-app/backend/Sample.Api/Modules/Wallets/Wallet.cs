@@ -21,7 +21,7 @@ public class Wallet
     public Money? LastDeposit { get; private set; }
 
     /// <summary>
-    /// The optimistic-concurrency token (AF0026). Without this, two concurrent
+    /// The optimistic-concurrency token (SKY0026). Without this, two concurrent
     /// deposits read the same row and the second save silently erases the first. With it, the loser gets
     /// a <c>DbUpdateConcurrencyException</c> — a loud failure where a balance would have been lost.
     /// </summary>

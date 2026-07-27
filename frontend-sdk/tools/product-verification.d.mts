@@ -1,5 +1,5 @@
-import type { Archetype } from "@aerofortress/assay";
-import type { VerificationOptions } from "@aerofortress/assay/react/vitest";
+import type { Archetype } from "avp-assay";
+import type { VerificationOptions } from "avp-assay/react/vitest";
 
 /** A product behavior executed through Assay without hiding its test assertion. */
 export interface ProductBehaviorSubject {

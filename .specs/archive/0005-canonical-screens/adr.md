@@ -19,7 +19,7 @@ a promotion trigger.
 ## Decision
 Recipes are full feature units in `examples/sample-app/frontend`, held to every rule at error tier —
 list (relift) and form (new). The recipe index in the constitution links to the files; the files are
-the truth. Landing them is the promotion event: AFFE024–026 and web jsx-a11y go to error in the same
+the truth. Landing them is the promotion event: SKYFE024–026 and web jsx-a11y go to error in the same
 stage, so "canonical" and "enforced" become the same commit.
 
 ## Alternatives considered

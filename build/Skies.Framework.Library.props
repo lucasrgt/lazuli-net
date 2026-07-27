@@ -1,0 +1,54 @@
+<Project>
+
+  <!--
+    Shared standard for the Skies libraries (not the user's app). Imported by every
+    Skies.Framework.* project so the bar is declared once: nullable on, latest language, and missing
+    public XML documentation is a build error. Tracking-style analyzer noise is silenced.
+  -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <WarningsAsErrors>$(WarningsAsErrors);CS1591</WarningsAsErrors>
+    <!-- RS2008: analyzer release-tracking noise. CS8524: exhaustive enum switches flag a
+         cast-to-unnamed-value that a closed enum can't produce — suppress it, but keep CS8509
+         (a new named enum value with no case) so the switch warns when the catalog grows. -->
+    <NoWarn>$(NoWarn);RS2008;CS8524</NoWarn>
+  </PropertyGroup>
+
+  <!-- The same security floor the doctor ships to the user's app (see buildTransitive/skies.globalconfig):
+       the libraries hold themselves to it too. -->
+  <ItemGroup>
+    <GlobalAnalyzerConfigFiles Include="$(MSBuildThisFileDirectory)..\analyzers\Skies.Framework.Doctor\buildTransitive\skies.globalconfig" />
+  </ItemGroup>
+
+  <!--
+    NuGet package metadata, shared. The framework ships to nuget.org as a set of small, focused packages (the
+    publish workflow packs them on a v* tag). Only the projects that pack use this; the rest ignore it. The
+    package id defaults to the assembly name (Skies.Framework.*); per-package Description can override the default below.
+  -->
+  <PropertyGroup>
+    <Version>4.0.0</Version>
+    <Authors>Lucas Tinoco</Authors>
+    <Company>Skies</Company>
+    <Product>Skies</Product>
+    <Description>Part of Skies — the opinionated .NET convention bundle: vertical-slice architecture, a build-time doctor, and an AI-context discipline. Plain, idiomatic C#; the harness is removable.</Description>
+    <PackageTags>skies;conventions;vertical-slice;architecture;analyzers;aspnetcore;result</PackageTags>
+    <PackageProjectUrl>https://github.com/lucasrgt/skies</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/lucasrgt/skies</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Copyright>Copyright (c) Lucas Tinoco</Copyright>
+    <!-- Reproducible, debuggable packages: link the sources to the commit + ship a symbol package. -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\README.md" Pack="true" PackagePath="\" Link="README.md" />
+  </ItemGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-using AeroFortress.Framework.Abstractions;
+using Skies.Framework.Abstractions;
 
 namespace Sample.Api.Modules.Wallets;
 
@@ -29,7 +29,7 @@ public static class WalletsModule
 
     public static void Map(IEndpointRouteBuilder app)
     {
-        // The sample ships no identity provider, so the group is anonymous *on purpose* — the doctor (AF0022)
+        // The sample ships no identity provider, so the group is anonymous *on purpose* — the doctor (SKY0022)
         // demands the decision be written down either way. A real app says .RequireAuthorization() here.
         var wallets = app.MapGroup("/wallets").AllowAnonymous();
 

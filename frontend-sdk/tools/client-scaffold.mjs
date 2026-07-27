@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-// AFFE — the generated client's hand-owned half. orval generates the hooks, but the MUTATOR they all call
+// SKYFE — the generated client's hand-owned half. orval generates the hooks, but the MUTATOR they all call
 // through (auth injection, base-URL port, the X-Client header that turns on the web cookie session), the
 // orval config itself, AND the QueryClient + feedback seam every mutation rides are hand-owned files nothing
 // scaffolded — every pilot re-derived them (and the one that re-derived the QueryClient bare shipped the
 // created-it-but-only-saw-it-after-F5 bug). This renders all four, conformant by construction: the base URL is
-// an injectable default overridden at boot via configureClient() (the AFFE020-blessed shape — never a baked
+// an injectable default overridden at boot via configureClient() (the SKYFE020-blessed shape — never a baked
 // host in axios.create), the token sink is the seam's setAccessToken, the 401 rotation is the seam's
 // single-flight bootstrapSession injected via setTokenRefresher (one door, cookie AND body — never a
 // cookie-only fork baked into this transport file), the audience filter keeps non-app endpoints out of the
-// client (so AFFE008 stays high-signal), and the QueryClient carries the write-side
-// mutation defaults — invalidate on success, feedback on error (the AFFE027-blessed shape). Graduated from the
-// hostpoint pilot's aerofortress-client.ts + orval.config.ts and the pauta pilot's state-management gap.
+// client (so SKYFE008 stays high-signal), and the QueryClient carries the write-side
+// mutation defaults — invalidate on success, feedback on error (the SKYFE027-blessed shape). Graduated from the
+// hostpoint pilot's skies-client.ts + orval.config.ts and the pauta pilot's state-management gap.
 //
 // Usage: node tools/client-scaffold.mjs <client-name> <contract-path> [target-dir]
 //   node tools/client-scaffold.mjs hostpoint ./contract/Hostpoint.Api.json ../app-core/src
@@ -18,7 +18,7 @@
 import { mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-/** The orval mutator + client seam (lib/aerofortress-client.ts) — the single HTTP door every generated hook calls. */
+/** The orval mutator + client seam (lib/skies-client.ts) — the single HTTP door every generated hook calls. */
 export function renderMutator() {
   return `import axios, {
   type AxiosRequestConfig,
@@ -35,7 +35,7 @@ const isWeb = typeof document !== "undefined";
 // *.gen.ts hooks are boring plumbing on top of this; all behaviour lives above, in the ViewModels.
 //
 // withCredentials so the session cookie (set by the API on login) rides cross-origin requests. X-Client: web
-// is the AeroFortress.Framework.Auth convention: the API delivers the refresh token as an httpOnly cookie ONLY when the
+// is the Skies.Framework.Auth convention: the API delivers the refresh token as an httpOnly cookie ONLY when the
 // request carries it; without it the refresh rides the response body (the native mode) and the web cookie
 // session never forms.
 const instance = axios.create({
@@ -45,7 +45,7 @@ const instance = axios.create({
 
 // The base URL is INJECTED by the platform shell at boot (configureClient), never read from platform config
 // here — so this data-door module stays platform-agnostic. The localhost default keeps tests + pre-configure
-// dev working; AFFE020 blesses exactly this injectable-default shape.
+// dev working; SKYFE020 blesses exactly this injectable-default shape.
 instance.defaults.baseURL = "http://localhost:8080";
 
 /** Point the client at the resolved API base URL. Called once at app start by the shell — the same
@@ -61,7 +61,7 @@ export function setAccessToken(token: string | null): void {
   accessToken = token;
 }
 
-// ── Token refresh — the SEAM rotates, the client only retries (AFFE029: refresh-one-door) ───────────────
+// ── Token refresh — the SEAM rotates, the client only retries (SKYFE029: refresh-one-door) ───────────────
 // The 401 interceptor restores the session transparently, but it does NOT know HOW to rotate. Cookie mode
 // (web: an empty post, the refresh rides the httpOnly cookie) and body mode (native: the secure-stored refresh
 // token) are the session seam's concern — and it rotates SINGLE-FLIGHT there (its bootstrapSession), so
@@ -103,7 +103,7 @@ instance.interceptors.response.use(
 );
 
 /** The mutator orval wires every endpoint through: inject auth, return the body. */
-export const aerofortressClient = async <T>(config: AxiosRequestConfig): Promise<T> => {
+export const skiesClient = async <T>(config: AxiosRequestConfig): Promise<T> => {
   const response = await instance.request<T>({
     ...config,
     headers: {
@@ -114,13 +114,13 @@ export const aerofortressClient = async <T>(config: AxiosRequestConfig): Promise
   return response.data;
 };
 
-export default aerofortressClient;
+export default skiesClient;
 `;
 }
 
-/** The feedback seam (lib/feedback.ts) — the one door for transient user feedback (AFFE016's shape, applied to toasts). */
+/** The feedback seam (lib/feedback.ts) — the one door for transient user feedback (SKYFE016's shape, applied to toasts). */
 export function renderFeedback() {
-  return `// The one door for transient user feedback (toasts/banners) — the "one seam" shape (AFFE016) applied to
+  return `// The one door for transient user feedback (toasts/banners) — the "one seam" shape (SKYFE016) applied to
 // notifications. The app picks its toast library and wires it ONCE at boot (wireFeedback); everything below
 // the shell — the mutation defaults in lib/query.ts, any ViewModel — speaks to this seam and never imports a
 // toast lib directly. Swapping the library is a one-file change no ViewModel notices.
@@ -151,16 +151,16 @@ export const feedback: FeedbackSink = {
 `;
 }
 
-/** The QueryClient factory (lib/query.ts) — the write-side mutation defaults, the AFFE027-blessed shape. */
+/** The QueryClient factory (lib/query.ts) — the write-side mutation defaults, the SKYFE027-blessed shape. */
 export function renderQueryClient() {
   return `import { MutationCache, QueryClient } from "@tanstack/react-query";
 
 import { feedback } from "./feedback";
 
-// The write-side defaults the convention pins (AFFE027). A successful mutation marks EVERY query stale
+// The write-side defaults the convention pins (SKYFE027). A successful mutation marks EVERY query stale
 // (TanStack refetches the active ones immediately), so no screen hand-rolls \`onSuccess: refetch\` and no list
 // is ever one F5 behind its server — the safe, slightly-wasteful default that is always correct. A failed
-// mutation always surfaces through the feedback seam — the global half of AFFE013 (no silent failure).
+// mutation always surfaces through the feedback seam — the global half of SKYFE013 (no silent failure).
 // Targeted invalidation and optimistic updates remain the per-screen opt-in LAYERED ABOVE this default for the
 // screen that proves it needs them, never a replacement for it.
 
@@ -184,7 +184,7 @@ export interface MutationCopy {
   failed(error: unknown): string;
 }
 
-/** Build the app's QueryClient with the convention's mutation defaults wired (AFFE027). */
+/** Build the app's QueryClient with the convention's mutation defaults wired (SKYFE027). */
 export function createQueryClient(copy: MutationCopy): QueryClient {
   const queryClient: QueryClient = new QueryClient({
     mutationCache: new MutationCache({
@@ -217,9 +217,9 @@ export default defineConfig({
   ${name}: {
     input: {
       target: "${contract}",
-      // Audience filter: webhooks/internal endpoints carry an aerofortress:* tag (WithEndpointKind on the backend)
-      // and never become a hook — so they never trip the AFFE008 loose-endpoint warning.
-      filters: { mode: "exclude", tags: ["aerofortress:asset", "aerofortress:webhook", "aerofortress:internal"] },
+      // Audience filter: webhooks/internal endpoints carry an skies:* tag (WithEndpointKind on the backend)
+      // and never become a hook — so they never trip the SKYFE008 loose-endpoint warning.
+      filters: { mode: "exclude", tags: ["skies:asset", "skies:webhook", "skies:internal"] },
     },
     output: {
       mode: "split",
@@ -230,7 +230,7 @@ export default defineConfig({
       clean: true,
       prettier: false,
       override: {
-        mutator: { path: "./src/lib/aerofortress-client.ts", name: "aerofortressClient" },
+        mutator: { path: "./src/lib/skies-client.ts", name: "skiesClient" },
         // No hook-kind override on purpose: orval's verb-based default IS the convention — GET verbs
         // generate a read hook, write verbs (POST/PUT/PATCH/DELETE) generate a mutation hook with
         // { data: <Input> } variables. Do NOT add an override that forces both hook kinds on every
@@ -252,7 +252,7 @@ if (invokedDirectly) {
     console.error("usage: node tools/client-scaffold.mjs <client-name> <contract-path> [target-dir]");
     process.exit(2);
   }
-  const mutatorPath = join(targetDir, "src", "lib", "aerofortress-client.ts");
+  const mutatorPath = join(targetDir, "src", "lib", "skies-client.ts");
   const feedbackPath = join(targetDir, "src", "lib", "feedback.ts");
   const queryPath = join(targetDir, "src", "lib", "query.ts");
   const orvalPath = join(targetDir, "orval.config.ts");

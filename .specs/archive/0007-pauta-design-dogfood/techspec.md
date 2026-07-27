@@ -53,10 +53,10 @@ All paths under `C:\Users\lucas\dev\pauta-web\frontend\` unless noted.
   `color.surfaceRaised`, radius `lg`, padding `xl`; `role="dialog" aria-modal aria-labelledby`
   (title); Esc + backdrop click → `onClose`; focus moves in on open, returns on close; Tab cycles
   inside (minimal trap: first/last sentinel, no dependency). This is kit-v2 candidate evidence, not kit code.
-- **Relift bar:** the relifted `.view.tsx` passes AFFE024 at error — zero host elements, zero
+- **Relift bar:** the relifted `.view.tsx` passes SKYFE024 at error — zero host elements, zero
   className — i.e. it consumes `@/ui` only. Where pauta's existing copy/i18n setup doesn't match the
   sample's (`*.i18n.ts`), keep pauta's current copy mechanism and note the delta in the report
-  (i18n harness adoption is the other wave; do NOT import AFFE011/014 obligations here).
+  (i18n harness adoption is the other wave; do NOT import SKYFE011/014 obligations here).
 - **Harvest report format** (appended to PORTBACK-CHECKLIST.md): per rule — fired count, true/false
   positive split with one example each; missing vocabulary — primitive/token/recipe requests with
   the screen that needed them; verdict line per item: `portback | narrow-rule | app-owned`.
@@ -90,7 +90,7 @@ All paths under `C:\Users\lucas\dev\pauta-web\frontend\` unless noted.
 Dialog once (the "asqueroso → recipe-grade" check is visual by nature).
 
 ## Risks & rollback
-- AFFE025 noise on Tailwind idioms → expected; that's harvest data. If >50% false positives, stop
+- SKYFE025 noise on Tailwind idioms → expected; that's harvest data. If >50% false positives, stop
   relifting, file the narrowing as a 0004 follow-up finding, continue with 012/024/026 only.
 - Pauta brand doesn't fit the role taxonomy → finding with `portback` verdict (taxonomy gap beats
   local fork); never invent role names locally.
@@ -111,7 +111,7 @@ audit/soft-delete fields dropped from the form — the partial update schema mak
 payload legal). Pauta's palette IS the default theme (aerocoding used stock Tailwind blue/red), so
 token values needed no edits. The baseline produced the headline finding: the band fired **0× over
 533 files** — Tailwind utility classes are invisible to it (HIGH portback). The mirror was rebased
-mid-stage to 0.6.0 when the mutation band (AFFE027/028) landed in parallel. `'use client'` added
+mid-stage to 0.6.0 when the mutation band (SKYFE027/028) landed in parallel. `'use client'` added
 app-side to the hooky primitives (template-portback candidate). Gate: lint 0 errors, 456 tests green
 (98 files, 8 new). Maker eyeballed and approved 2026-06-09. The full-app relift is the next wave
 (`pauta-web/frontend/docs/design-relift-worklist.md`).

@@ -1,0 +1,35 @@
+<Solution>
+  <Folder Name="/analyzers/">
+    <Project Path="analyzers/Skies.Framework.Doctor/Skies.Framework.Doctor.csproj" />
+    <Project Path="analyzers/Skies.Framework.SelfHarness/Skies.Framework.SelfHarness.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Skies/Skies.Framework.csproj" />
+    <Project Path="src/Skies.Framework.Abstractions/Skies.Framework.Abstractions.csproj" />
+    <Project Path="src/Skies.Framework.Auth/Skies.Framework.Auth.csproj" />
+    <Project Path="src/Skies.Framework.Cli/Skies.Framework.Cli.csproj" />
+    <Project Path="src/Skies.Framework.AspNetCore/Skies.Framework.AspNetCore.csproj" />
+    <Project Path="src/Skies.Framework.EntityFrameworkCore/Skies.Framework.EntityFrameworkCore.csproj" />
+    <Project Path="src/Skies.Framework.Mail/Skies.Framework.Mail.csproj" />
+    <Project Path="src/Skies.Framework.Sms/Skies.Framework.Sms.csproj" />
+    <Project Path="src/Skies.Framework.Identity/Skies.Framework.Identity.csproj" />
+    <Project Path="src/Skies.Framework.Storage/Skies.Framework.Storage.csproj" />
+    <Project Path="src/Skies.Framework.Testing/Skies.Framework.Testing.csproj" />
+    <Project Path="src/Skies.Framework.Testing.InMemory/Skies.Framework.Testing.InMemory.csproj" />
+    <Project Path="src/Skies.Framework.Testing.Postgres/Skies.Framework.Testing.Postgres.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Skies.Framework.Abstractions.Tests/Skies.Framework.Abstractions.Tests.csproj" />
+    <Project Path="tests/Skies.Framework.Cli.Tests/Skies.Framework.Cli.Tests.csproj" />
+    <Project Path="tests/Skies.Framework.Doctor.Tests/Skies.Framework.Doctor.Tests.csproj" />
+    <Project Path="tests/Skies.Framework.EntityFrameworkCore.Tests/Skies.Framework.EntityFrameworkCore.Tests.csproj" />
+    <Project Path="tests/Skies.Framework.SelfHarness.Tests/Skies.Framework.SelfHarness.Tests.csproj" />
+    <Project Path="tests/Skies.Framework.Testing.Postgres.Tests/Skies.Framework.Testing.Postgres.Tests.csproj" />
+    <Project Path="tests/Skies.Framework.AspNetCore.Tests/Skies.Framework.AspNetCore.Tests.csproj" />
+    <Project Path="tests/Skies.Framework.Auth.Tests/Skies.Framework.Auth.Tests.csproj" />
+  </Folder>
+  <Folder Name="/examples/">
+    <Project Path="examples/sample-app/backend/Sample.Api/Sample.Api.csproj" />
+    <Project Path="examples/sample-app/backend/Sample.Tests/Sample.Tests.csproj" />
+  </Folder>
+</Solution>

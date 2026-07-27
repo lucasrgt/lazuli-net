@@ -1,11 +1,11 @@
 name: publish
 
-# Publishes the AeroFortress framework — both engines off ONE version tag (e.g. `v1.0.0`): the .NET backend to
+# Publishes the Skies framework — both engines off ONE version tag (e.g. `v1.0.0`): the .NET backend to
 # nuget.org and the React frontend to npm. Bump the version first (back: <Version> in
-# build/AeroFortress.Framework.Library.props; front: each publishable packages/* package.json), then tag.
+# build/Skies.Framework.Library.props; front: each publishable packages/* package.json), then tag.
 # Auth: nuget uses Trusted Publishing (OIDC — no stored key; a policy on nuget.org binds owner/repo/workflow and
-# issues a short-lived key per run); npm uses the NPM_TOKEN secret (an automation token for the @aerofortress
-# scope). The two jobs are independent — one ecosystem failing does not block the other. The nuget set below is
+# issues a short-lived key per run); npm uses the NPM_TOKEN secret. The two jobs are independent — one
+# ecosystem failing does not block the other. The nuget set below is
 # the public framework surface: SelfHarness (framework-dev only), Geocoding (not yet on the library standard),
 # and the sample/tests are deliberately excluded.
 on:
@@ -49,24 +49,24 @@ jobs:
       - name: pack
         run: |
           for proj in \
-            src/AeroFortress/AeroFortress.Framework.csproj \
-            src/AeroFortress.Framework.Abstractions/AeroFortress.Framework.Abstractions.csproj \
-            src/AeroFortress.Framework.AspNetCore/AeroFortress.Framework.AspNetCore.csproj \
-            src/AeroFortress.Framework.Auth/AeroFortress.Framework.Auth.csproj \
-            src/AeroFortress.Framework.EntityFrameworkCore/AeroFortress.Framework.EntityFrameworkCore.csproj \
-            src/AeroFortress.Framework.Identity/AeroFortress.Framework.Identity.csproj \
-            src/AeroFortress.Framework.Mail/AeroFortress.Framework.Mail.csproj \
-            src/AeroFortress.Framework.Sms/AeroFortress.Framework.Sms.csproj \
-            src/AeroFortress.Framework.Storage/AeroFortress.Framework.Storage.csproj \
-            src/AeroFortress.Framework.Testing/AeroFortress.Framework.Testing.csproj \
-            src/AeroFortress.Framework.Testing.InMemory/AeroFortress.Framework.Testing.InMemory.csproj \
-            src/AeroFortress.Framework.Testing.Postgres/AeroFortress.Framework.Testing.Postgres.csproj \
-            src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj \
-            analyzers/AeroFortress.Framework.Doctor/AeroFortress.Framework.Doctor.csproj ; do
+            src/Skies/Skies.Framework.csproj \
+            src/Skies.Framework.Abstractions/Skies.Framework.Abstractions.csproj \
+            src/Skies.Framework.AspNetCore/Skies.Framework.AspNetCore.csproj \
+            src/Skies.Framework.Auth/Skies.Framework.Auth.csproj \
+            src/Skies.Framework.EntityFrameworkCore/Skies.Framework.EntityFrameworkCore.csproj \
+            src/Skies.Framework.Identity/Skies.Framework.Identity.csproj \
+            src/Skies.Framework.Mail/Skies.Framework.Mail.csproj \
+            src/Skies.Framework.Sms/Skies.Framework.Sms.csproj \
+            src/Skies.Framework.Storage/Skies.Framework.Storage.csproj \
+            src/Skies.Framework.Testing/Skies.Framework.Testing.csproj \
+            src/Skies.Framework.Testing.InMemory/Skies.Framework.Testing.InMemory.csproj \
+            src/Skies.Framework.Testing.Postgres/Skies.Framework.Testing.Postgres.csproj \
+            src/Skies.Framework.Cli/Skies.Framework.Cli.csproj \
+            analyzers/Skies.Framework.Doctor/Skies.Framework.Doctor.csproj ; do
             dotnet pack "$proj" -c Release -o nupkgs
           done
       # Trusted Publishing: exchange the GitHub OIDC token for a short-lived (1h) nuget.org key — no stored secret.
-      # `user` is the public nuget.org profile name; the bound policy (owner lucasrgt, repo aerofortress-framework,
+      # `user` is the public nuget.org profile name; the bound policy (owner lucasrgt, repo skies,
       # workflow publish.yml) lives on nuget.org. Requested right before push so the 1h key stays fresh.
       - name: nuget login (OIDC → temp key)
         uses: NuGet/login@v1

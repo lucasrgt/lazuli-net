@@ -1,4 +1,4 @@
-using AeroFortress.Framework.EntityFrameworkCore;
+using Skies.Framework.EntityFrameworkCore;
 
 namespace Sample.Api.Modules.Wallets;
 

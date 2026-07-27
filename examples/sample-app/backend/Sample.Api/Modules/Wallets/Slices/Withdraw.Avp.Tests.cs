@@ -4,7 +4,7 @@ using Sample.Api.Modules;
 using Sample.Api.Modules.Wallets;
 using Assay.Net;
 using Assay.Net.Archetypes;
-using AeroFortress.Framework.AspNetCore;
+using Skies.Framework.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -60,7 +60,7 @@ public class WithdrawAvpProof
         Assert.Equal(Assay.Net.VerdictStatus.Fail, StatusOf(verdict, "idempotency-key-honored"));
     }
 
-    // ---- real-app harness: the sample's own wiring (AddAeroFortress + modules) on a real Kestrel port, so the
+    // ---- real-app harness: the sample's own wiring (AddSkies + modules) on a real Kestrel port, so the
     // AVP verifier reaches the actual /wallets/withdraw over HTTP (an isolated in-memory store per run). ----
     private sealed record RunningApp(WebApplication App, string BaseUrl, Guid WalletId) : IAsyncDisposable
     {
@@ -73,13 +73,13 @@ public class WithdrawAvpProof
         builder.WebHost.UseUrls("http://127.0.0.1:0");
         builder.Logging.ClearProviders();
         var dbName = Guid.NewGuid().ToString(); // one stable in-memory store, shared by every AppDb in this app
-        builder.Services.AddAeroFortress();
+        builder.Services.AddSkies();
         builder.Services.AddDbContext<AppDb>(o => o.UseInMemoryDatabase(dbName));
         builder.Services.AddIdempotency();
         builder.Services.AddModules(builder.Configuration);
 
         var app = builder.Build();
-        app.UseAeroFortress();
+        app.UseSkies();
         app.MapModules();
 
         var walletId = Guid.NewGuid();

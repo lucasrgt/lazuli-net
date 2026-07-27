@@ -1,4 +1,4 @@
-# AeroFortress (.NET) — Design Conventions & the Design SDK
+# Skies (.NET) — Design Conventions & the Design SDK
 
 The design layer is the third third of the framework. The backend constitution makes architecture
 decisions default-good ([CONVENTIONS.md](CONVENTIONS.md)); the frontend constitution makes wiring
@@ -13,11 +13,11 @@ in four layers of decreasing strength:
 
 1. **Closed vocabulary** — kit props are unions of token names; a wrong value is *inexpressible*.
    What cannot be typed cannot be wrong. (The strongest layer; everything else guards it.)
-2. **Mechanical enforcement** — the design band (`AFFE024–026`, beside `AFFE012`) trips every
+2. **Mechanical enforcement** — the design band (`SKYFE024–026`, beside `SKYFE012`) trips every
    named escape hatch: raw elements, off-scale values, raw color.
 3. **Copyable exemplars** — canonical screens (the recipes). An agent instantiates the nearest
    recipe; it never composes a screen from a blank file.
-4. **Loaded context** — the `aerofortress-design` skill puts 1–3 in front of the agent at build time and
+4. **Loaded context** — the `skies-design` skill puts 1–3 in front of the agent at build time and
    closes with a visual self-review (lint can verify consistency; only eyes verify beauty).
 
 Ground every design convention here, never memory. The decision trail lives in the Design SDK wave
@@ -28,13 +28,13 @@ Ground every design convention here, never memory. The decision trail lives in t
 ## The two laws — restated for design
 
 1. **Stranger-maintainable.** The kit is plain React / React Native components **in the app's own
-   repo**, styled by direct lookup into a plain tokens file. A dev who has never heard of AeroFortress
+   repo**, styled by direct lookup into a plain tokens file. A dev who has never heard of Skies
    opens `ui/Stack.tsx` and reads a flexbox container. No theme provider to learn, no styled-system
    DSL, no runtime.
 2. **Doctor-removable.** Remove the design band and the app still builds and renders **pixel-
    identical** — tokens are data, the kit is the app's code. You lose enforcement, never function.
 
-**Vocabulary, not mechanism — the posture in one line.** AeroFortress prescribes the token **names** and
+**Vocabulary, not mechanism — the posture in one line.** Skies prescribes the token **names** and
 the kit **shape**; it never prescribes the styling **library**. CSS vars, Tailwind/NativeWind,
 StyleSheet, Unistyles — the mechanism is the app's, mapped *from* `tokens.ts` by hand, once. Token
 **values** are the app's too: that is the entire theming and white-label story. What is fixed is
@@ -47,8 +47,8 @@ what things are *called* and what shape the door has — because names and shape
 
 The single source of truth is one plain TS file the app owns — canonically
 `core/src/design/tokens.ts` (tokens are platform-neutral data; they live in the shared core, the
-hostpoint precedent). Scaffolded by `af`'s design scaffold; edited freely **in values**, never
-in names. Hex belongs ONLY in this file (`AFFE012` exempts it by filename; `AFFE026` completes the
+hostpoint precedent). Scaffolded by `skies`'s design scaffold; edited freely **in values**, never
+in names. Hex belongs ONLY in this file (`SKYFE012` exempts it by filename; `SKYFE026` completes the
 pair for every other raw-color spelling).
 
 ```ts
@@ -96,7 +96,7 @@ Why these scales, and why closed:
 
 ## The kit — a closed API is the convention
 
-The kit is scaffolded **into the app** (`ui/` — code you own), never published as a package. AeroFortress
+The kit is scaffolded **into the app** (`ui/` — code you own), never published as a package. Skies
 ships the *standard* a kit follows plus a conformant starting kit; it does not ship a component
 library you version against (that is the MUI/aerocoding vector, rejected by construction). The
 locked v1 surface:
@@ -121,7 +121,7 @@ ErrorState({ title, retryLabel, onRetry })
 ```
 
 - **No `className`. No `style`. No `as`. No render props.** One escape hatch reopens 100% of the
-  decision space, and the ui-door rule (`AFFE024`) would then police a fiction. The door is closed.
+  decision space, and the ui-door rule (`SKYFE024`) would then police a fiction. The door is closed.
 - **A missing primitive is extended in YOUR `ui/`** — following this constitution (tokens only, the
   five states, the a11y wiring) — never worked around with inline paint. The kit is the app's code;
   growing it is normal. (Overlay primitives — Dialog, Select, Toast — are deliberately not in v1:
@@ -154,7 +154,7 @@ Field
 
 - Field-level validation errors render **inside the Field** — never as a toast, never only at the top.
 - The **mutation error** (the command failed) is a separate `role="alert"` block rendered above the
-  submit (`Text role="label" tone="danger" alert`) — the visible half of the `AFFE013` discipline
+  submit (`Text role="label" tone="danger" alert`) — the visible half of the `SKYFE013` discipline
   (every mutation surfaces its error).
 - The submit `Button` carries `loading` while the mutation is pending. Double-submit is a kit
   guarantee (loading blocks), not a per-form fix.
@@ -185,8 +185,8 @@ Field
 
 ## Color discipline — roles, never values
 
-- Components reference `color.<role>` only. Raw values — hex (`AFFE012`), `rgb()/hsl()/oklch()`,
-  CSS named colors, and Tailwind palette-family utilities (`bg-red-500`, `text-blue-600`) (`AFFE026`) —
+- Components reference `color.<role>` only. Raw values — hex (`SKYFE012`), `rgb()/hsl()/oklch()`,
+  CSS named colors, and Tailwind palette-family utilities (`bg-red-500`, `text-blue-600`) (`SKYFE026`) —
   live exclusively in the tokens file / the theme; a screen uses semantic, theme-mapped utilities
   (`bg-primary`, `text-danger`) instead.
 - Anything rendered **on** a filled role uses its on-pair: `onPrimary` on `primary`, `onDanger` on
@@ -233,7 +233,7 @@ Field
 
 ## The design band — rule catalog
 
-The enforcement half. Same grain as the `AFFE*` catalog in
+The enforcement half. Same grain as the `SKYFE*` catalog in
 [FRONTEND-CONVENTIONS.md](FRONTEND-CONVENTIONS.md) (these rows are mirrored there); same posture as
 every band before it: **warn-first, promoted to error when the canonical code is clean**. What the
 kit guarantees by construction (states, anatomy) is deliberately NOT linted — heuristic lint on
@@ -241,13 +241,13 @@ undecidable properties teaches agents to suppress, the worst harness outcome.
 
 | Rule | Enforces | Status | Origin |
 |------|----------|--------|--------|
-| `AFFE012` | **Design tokens (hex half)** — no inline hex outside token/theme/palette files | **shipped** | one palette; theming survives |
-| `AFFE024` | **UI door** — a `*.view.tsx` renders no host element (no lowercase JSX) and carries no `style`/`className` attribute; everything visual comes from `@/ui`. A missing primitive is extended in the app's `ui/`, never inlined. The `AFFE002` one-door pattern applied to paint | planned (design band) | the sample's pre-kit `ui.tsx` leaked `className` — one passthrough reopened every decision |
-| `AFFE025` | **Scale only** — outside `ui/`, token files, and tests: no numeric literal in spacing/typography style keys (`padding*`, `margin*`, `gap`, `rowGap`, `columnGap`, `borderRadius`, `fontSize`, `lineHeight`; `0` allowed), and no Tailwind arbitrary value on a **spacing/typography utility** (`p-[13px]`, `text-[14px]`, `gap-[7px]`). Layout dimensions (`max-w-[560px]`, `h-[80vh]`) are deliberately free — the style half allows `width: 320`, and the class spelling of the same decision must agree (asymmetry caught by the hostpoint-os dogfood) | **shipped** | off-scale values are how rhythm dies one screen at a time |
-| `AFFE026` | **Semantic colors** — outside token files: no `rgb()/rgba()/hsl()/hsla()/oklch()` literals, no CSS named colors in color-ish style keys, no value-import of a raw palette export outside `ui/`, and no Tailwind palette-family utility (`bg-red-500`, `hover:border-rose-400/50`) in a `className` outside `ui/`. Completes `AFFE012` (hex) — together: color is a role, or it does not ship | planned (design band) | a forked palette defeats theming silently; hex and `bg-red-500` were just other spellings of the leak |
+| `SKYFE012` | **Design tokens (hex half)** — no inline hex outside token/theme/palette files | **shipped** | one palette; theming survives |
+| `SKYFE024` | **UI door** — a `*.view.tsx` renders no host element (no lowercase JSX) and carries no `style`/`className` attribute; everything visual comes from `@/ui`. A missing primitive is extended in the app's `ui/`, never inlined. The `SKYFE002` one-door pattern applied to paint | planned (design band) | the sample's pre-kit `ui.tsx` leaked `className` — one passthrough reopened every decision |
+| `SKYFE025` | **Scale only** — outside `ui/`, token files, and tests: no numeric literal in spacing/typography style keys (`padding*`, `margin*`, `gap`, `rowGap`, `columnGap`, `borderRadius`, `fontSize`, `lineHeight`; `0` allowed), and no Tailwind arbitrary value on a **spacing/typography utility** (`p-[13px]`, `text-[14px]`, `gap-[7px]`). Layout dimensions (`max-w-[560px]`, `h-[80vh]`) are deliberately free — the style half allows `width: 320`, and the class spelling of the same decision must agree (asymmetry caught by the hostpoint-os dogfood) | **shipped** | off-scale values are how rhythm dies one screen at a time |
+| `SKYFE026` | **Semantic colors** — outside token files: no `rgb()/rgba()/hsl()/hsla()/oklch()` literals, no CSS named colors in color-ish style keys, no value-import of a raw palette export outside `ui/`, and no Tailwind palette-family utility (`bg-red-500`, `hover:border-rose-400/50`) in a `className` outside `ui/`. Completes `SKYFE012` (hex) — together: color is a role, or it does not ship | planned (design band) | a forked palette defeats theming silently; hex and `bg-red-500` were just other spellings of the leak |
 
 Exemption boundaries, locked: the app's `ui/` folder (the kit implements the vocabulary, so it
-touches primitives and values), the token files (`AFFE012`'s filename pattern:
+touches primitives and values), the token files (`SKYFE012`'s filename pattern:
 `theme|tokens|palette|colors`), and tests.
 
 ---
@@ -256,7 +256,7 @@ touches primitives and values), the token files (`AFFE012`'s filename pattern:
 
 Recipes are **real, compiled, tested screens** in the sample app — never doc snippets (snippets
 don't lint, so they rot). A new screen starts as a copy of the nearest archetype; composition is
-the recipe's job, binding is yours. (Agents: the `aerofortress-design` skill routes you here —
+the recipe's job, binding is yours. (Agents: the `skies-design` skill routes you here —
 instantiate, do not invent.)
 
 | Archetype | Canonical unit | Use for |
@@ -271,11 +271,11 @@ spec the recipe) — dashboards, wizards, settings screens arrive that way, neve
 
 ## Scope — and non-goals
 
-**In:** the token taxonomy, the closed kit API + scaffold, the design band (`AFFE024–026`), the
-recipes, the `aerofortress-design` skill.
+**In:** the token taxonomy, the closed kit API + scaffold, the design band (`SKYFE024–026`), the
+recipes, the `skies-design` skill.
 
 **Out (non-goals), by decision:**
-- **No published `@aerofortress/ui` component library.** A versioned UI lib is theming-API surface +
+- **No published `skies-ui` component library.** A versioned UI lib is theming-API surface +
   breaking releases + platform sprawl — the MUI/aerocoding vector. Scaffolded code-you-own, always.
 - **No styling-mechanism prescription.** Tailwind/NativeWind/StyleSheet/CSS vars stay the app's;
   the app maps them *from* `tokens.ts` once, by hand.

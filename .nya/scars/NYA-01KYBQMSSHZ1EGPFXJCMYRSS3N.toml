@@ -3,8 +3,8 @@ id = "NYA-01KYBQMSSHZ1EGPFXJCMYRSS3N"
 title = "Gate scan treated markers in prose as attributes"
 lesson = "Source scanners must recognize markers only in their syntactic declaration form; prose and comments may bridge scanning regions but must never activate marker semantics."
 scope = [
-    "src/AeroFortress.Framework.Cli/GateScan.cs",
-    "tests/AeroFortress.Framework.Cli.Tests/GateScanTests.cs",
+    "src/Skies.Framework.Cli/GateScan.cs",
+    "tests/Skies.Framework.Cli.Tests/GateScanTests.cs",
 ]
 tags = [
     "cli",

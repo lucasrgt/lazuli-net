@@ -11,10 +11,10 @@ describe("framework-sync", () => {
       declarations: [{
         path: "clients/app/package.json",
         packages: {
-          "@aerofortress/frontend-sdk": `^${canonical.find((entry) => entry.name === "@aerofortress/frontend-sdk")?.version}`,
-          "@aerofortress/assay": `^${canonical.find((entry) => entry.name === "@aerofortress/assay")?.version}`,
-          "eslint-plugin-aerofortress": `^${canonical.find((entry) => entry.name === "eslint-plugin-aerofortress")?.version}`,
-          "@aerofortress/react": `~${canonical.find((entry) => entry.name === "@aerofortress/react")?.version}`,
+          "skies-frontend-sdk": `^${canonical.find((entry) => entry.name === "skies-frontend-sdk")?.version}`,
+          "avp-assay": `^${canonical.find((entry) => entry.name === "avp-assay")?.version}`,
+          "eslint-plugin-skies": `^${canonical.find((entry) => entry.name === "eslint-plugin-skies")?.version}`,
+          "skies-react": `~${canonical.find((entry) => entry.name === "skies-react")?.version}`,
         },
       }],
       hasFrontend: true,
@@ -29,8 +29,8 @@ describe("framework-sync", () => {
       declarations: [{
         path: "clients/app/package.json",
         packages: {
-          "@aerofortress/frontend-sdk": "^0.1.0",
-          "eslint-plugin-aerofortress": "^0.10.0",
+          "skies-frontend-sdk": "^0.1.0",
+          "eslint-plugin-skies": "^0.10.0",
         },
       }],
       hasFrontend: true,
@@ -38,8 +38,8 @@ describe("framework-sync", () => {
     });
     expect(result.status).toBe("drifted");
     expect(result.messages.join("\n")).toContain("0.10.0");
-    expect(result.messages.join("\n")).toContain("@aerofortress/react");
-    expect(result.messages.join("\n")).toContain("@aerofortress/assay");
+    expect(result.messages.join("\n")).toContain("skies-react");
+    expect(result.messages.join("\n")).toContain("avp-assay");
   });
 
   it("rejects the retired in-repo plugin mirror", () => {

@@ -1,6 +1,6 @@
-# AeroFortress Framework — frontend
+# Skies Framework — frontend
 
-The frontend side of aerofortress-framework. Where the .NET packages under `src/` give the backend its spine (`[Slice]`,
+The frontend side of Skies. Where the .NET packages under `src/` give the backend its spine (`[Slice]`,
 `Result<T>`, the Roslyn analyzers), this gives the React Native + web frontend an equally tight spine — **as
 idiomatic React/TS primitives the app composes, not a DSL** (the "poisoned frontend": real React, enriched by
 convention + tooling, never a second language). It is multi-target by construction: the same code serves web
@@ -15,9 +15,9 @@ frontend/
   tsconfig.base.json  # strict TS config every package/sample extends
   vitest.config.ts    # jsdom + the @/… aliases that let the sample run wired (not mocked)
   packages/
-    aerofortress-react/     # @aerofortress/react — the spine: AsyncState, Resource (+ guards, session as they graduate)
-    eslint-plugin/    # eslint-plugin-aerofortress — the AFFE harness (rules + RuleTester self-tests)
-  tools/              # generators + cross-file doctors used by af doctor/af gate
+    skies-react/     # skies-react — the spine: AsyncState, Resource (+ guards, session as they graduate)
+    eslint-plugin/    # eslint-plugin-skies — the SKYFE harness (rules + RuleTester self-tests)
+  tools/              # generators + cross-file doctors used by skies doctor/skies gate
 ../examples/sample-app/frontend/
   core/               # canonical shared ViewModel/View/Assay feature units
   web/                # real web surface + Playwright journeys
@@ -25,17 +25,17 @@ frontend/
 ```
 
 The framework-development gate (`npm run check`) runs strict typecheck, the plugin self-tests, unit/integration
-tests, and the Assay partition. In consuming apps, `af gate` additionally promotes the mandatory release-evidence
-AFFE rules to errors, verifies the AVP/E2E inventory, and executes the Git-derived proof closure.
+tests, and the Assay partition. In consuming apps, `skies gate` additionally promotes the mandatory release-evidence
+SKYFE rules to errors, verifies the AVP/E2E inventory, and executes the Git-derived proof closure.
 Project-scoped architecture and design rules retain the file scopes and severities declared by the app rather than
 being sprayed over every source file. The sample's tests mount data doors against the real generated-client shape
 — **wired, not mocked**.
 
-Apps (e.g. the Hostpoint dogfood) consume `@aerofortress/react` + the eslint plugin as packages; the `af` .NET CLI
-scaffolds them in and `af doctor` shells out to `npm run lint` for the frontend slice (Roslyn in-proc for the
+Apps (e.g. the Hostpoint dogfood) consume `skies-react` + the eslint plugin as packages; the `skies` .NET CLI
+scaffolds them in and `skies doctor` shells out to `npm run lint` for the frontend slice (Roslyn in-proc for the
 backend slice — two native engines, one front door).
 
-## The spine — `@aerofortress/react`
+## The spine — `skies-react`
 
 The read-side analogue of `Result<T>`. A screen's **ViewModel** (the data door) exposes its resource as an
 `AsyncState<T>` discriminated union; the **View** renders it through `<Resource>`, so loading / error / empty are
@@ -71,10 +71,10 @@ runner is Playwright and the native runner is Maestro.
 
 ## The harness (the frontend self-audit)
 
-`eslint-plugin-aerofortress` (the AFFE rules) is the front-side parallel of the backend's Roslyn/`AeroFortress.Framework.Doctor`
-self-audit. It polices the unit: View renders only (AFFE001), the ViewModel is the one data door (AFFE002, with
-`lib/session` + `lib/guards` as the sanctioned infra doors), the ViewModel is platform-agnostic (AFFE009), every
-ViewModel has a co-located test (AFFE005), no mocks in production (AFFE003). The plugin **self-proves** with
+`eslint-plugin-skies` (the SKYFE rules) is the front-side parallel of the backend's Roslyn/`Skies.Framework.Doctor`
+self-audit. It polices the unit: View renders only (SKYFE001), the ViewModel is the one data door (SKYFE002, with
+`lib/session` + `lib/guards` as the sanctioned infra doors), the ViewModel is platform-agnostic (SKYFE009), every
+ViewModel has a co-located test (SKYFE005), no mocks in production (SKYFE003). The plugin **self-proves** with
 RuleTester (`npm test`) — a rule isn't done until a test pins that it fires on the violation and passes on the
 allowed shape.
 

@@ -10,7 +10,7 @@ on:
 # slice each get a gate. A change to either fails CI on its own terms.
 jobs:
   dotnet:
-    name: backend (af gate)
+    name: backend (skies gate)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -19,7 +19,7 @@ jobs:
           dotnet-version: "10.0.x"
       # The framework's own suite is small enough to stay exhaustive. This avoids a same-branch push comparing
       # against its freshly updated origin/HEAD and exercises every declaration × proof × TRX join on Linux.
-      - run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- gate --full AeroFortress.Framework.slnx -c Release
+      - run: dotnet run --project src/Skies.Framework.Cli/Skies.Framework.Cli.csproj -c Release -- gate --full Skies.Framework.slnx -c Release
 
   frontend:
     name: frontend-sdk (typecheck + lint + test)

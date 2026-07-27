@@ -24,8 +24,8 @@ pauta relift (0007) instantiates these recipes; without them it re-invents — t
 - The sample app holds two canonical screens, kit-composed, band-clean, a11y-clean, tested:
   - **list** — `items/` relifted onto the kit (loading/empty/error/ready via `<Resource>`).
   - **form** — `itemForm/` created: Field anatomy, zod + react-hook-form per the blessed shape,
-    visual validation, mutation error surfaced (AFFE013 discipline), submit states.
-- AFFE024–026 promoted `warn → error`; web jsx-a11y promoted to error for the sample tree.
+    visual validation, mutation error surfaced (SKYFE013 discipline), submit states.
+- SKYFE024–026 promoted `warn → error`; web jsx-a11y promoted to error for the sample tree.
 - DESIGN-CONVENTIONS.md recipe index points at the real paths, marked "instantiate, do not invent".
 
 ## Non-goals
@@ -41,7 +41,7 @@ pauta relift (0007) instantiates these recipes; without them it re-invents — t
 
 ## Constraints
 - Each recipe is a complete blessed feature unit: `.viewModel.ts` + `.view.tsx` + `.test.tsx` +
-  `.i18n.ts` (3 locales) — every existing AFFE rule green at error.
+  `.i18n.ts` (3 locales) — every existing SKYFE rule green at error.
 - Form recipe binds only to endpoints already in `client.gen/sample.ts`.
 
 ## Open questions

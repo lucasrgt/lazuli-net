@@ -1,57 +1,57 @@
-// AFFE doctor — the aggregation core behind the single front-door that captures "the whole crew" in one pass.
-// A consumer (e.g. an app's `scripts/affe-doctor.mjs`) does the I/O — runs `eslint --format json`, resolves each
-// rule's configured level via `eslint --print-config`, and runs the script-doctors (AFFE008 endpoint coverage,
-// AFFE-E2E, AFFE-JOURNEY) — then feeds the raw results here. `aggregateReport` is PURE (no I/O), so it is unit-
+// SKYFE doctor — the aggregation core behind the single front-door that captures "the whole crew" in one pass.
+// A consumer (e.g. an app's `scripts/skyfe-doctor.mjs`) does the I/O — runs `eslint --format json`, resolves each
+// rule's configured level via `eslint --print-config`, and runs the script-doctors (SKYFE008 endpoint coverage,
+// SKYFE-E2E, SKYFE-JOURNEY) — then feeds the raw results here. `aggregateReport` is PURE (no I/O), so it is unit-
 // testable and the same core powers both the human dashboard and the `--json` machine output.
 //
-// Why one report: a frontend has many lint surfaces (AFFE architecture rules, the community kit, expo's set) plus
+// Why one report: a frontend has many lint surfaces (SKYFE architecture rules, the community kit, expo's set) plus
 // the fullstack loops. Scattered across four commands they are easy to half-read. Aggregated and BUCKETED, a
 // warn->error promotion becomes an evidence-backed move: you can see, in one place, which rules are gated, which
 // are a revealed backlog, and which are already clean (0 hits) and therefore ready to promote.
 
-/** The AFFE rule -> code map. Drives the architecture bucket + the clean-roster view. */
-export const AFFE_CODES = {
-  "aerofortress/view-purity": "AFFE001",
-  "aerofortress/data-door": "AFFE002",
-  "aerofortress/no-mock": "AFFE003",
-  "aerofortress/test-colocated": "AFFE005",
-  "aerofortress/view-integration-test": "AFFE006",
-  "aerofortress/viewmodel-platform-agnostic": "AFFE009",
-  "aerofortress/state-completeness": "AFFE010",
-  "aerofortress/i18n-completeness": "AFFE011",
-  "aerofortress/design-tokens": "AFFE012",
-  "aerofortress/mutation-error-handled": "AFFE013",
-  "aerofortress/no-hardcoded-copy": "AFFE014",
-  "aerofortress/no-router-replace-in-effect": "AFFE015",
-  "aerofortress/session-one-door": "AFFE016",
-  "aerofortress/guard-tristate": "AFFE017",
-  "aerofortress/route-param-guard": "AFFE018",
-  "aerofortress/safe-back": "AFFE019",
-  "aerofortress/no-hardcoded-base-url": "AFFE020",
-  "aerofortress/no-raw-html": "AFFE021",
-  "aerofortress/no-open-redirect": "AFFE022",
-  "aerofortress/ui-door": "AFFE024",
-  "aerofortress/scale-only": "AFFE025",
-  "aerofortress/semantic-colors": "AFFE026",
-  "aerofortress/query-client-defaults": "AFFE027",
-  "aerofortress/no-manual-refetch-ritual": "AFFE028",
-  "aerofortress/refresh-one-door": "AFFE029",
-  "aerofortress/no-cast-navigation": "AFFE030",
-  "aerofortress/submit-handles-invalid": "AFFE031",
-  "aerofortress/controller-field-state": "AFFE032",
-  "aerofortress/verify-has-avp-proof": "AFFE033",
-  "aerofortress/no-disabled-tests": "AFFE034",
-  "aerofortress/feature-has-e2e-flow": "AFFE035",
+/** The SKYFE rule -> code map. Drives the architecture bucket + the clean-roster view. */
+export const SKYFE_CODES = {
+  "skies/view-purity": "SKYFE001",
+  "skies/data-door": "SKYFE002",
+  "skies/no-mock": "SKYFE003",
+  "skies/test-colocated": "SKYFE005",
+  "skies/view-integration-test": "SKYFE006",
+  "skies/viewmodel-platform-agnostic": "SKYFE009",
+  "skies/state-completeness": "SKYFE010",
+  "skies/i18n-completeness": "SKYFE011",
+  "skies/design-tokens": "SKYFE012",
+  "skies/mutation-error-handled": "SKYFE013",
+  "skies/no-hardcoded-copy": "SKYFE014",
+  "skies/no-router-replace-in-effect": "SKYFE015",
+  "skies/session-one-door": "SKYFE016",
+  "skies/guard-tristate": "SKYFE017",
+  "skies/route-param-guard": "SKYFE018",
+  "skies/safe-back": "SKYFE019",
+  "skies/no-hardcoded-base-url": "SKYFE020",
+  "skies/no-raw-html": "SKYFE021",
+  "skies/no-open-redirect": "SKYFE022",
+  "skies/ui-door": "SKYFE024",
+  "skies/scale-only": "SKYFE025",
+  "skies/semantic-colors": "SKYFE026",
+  "skies/query-client-defaults": "SKYFE027",
+  "skies/no-manual-refetch-ritual": "SKYFE028",
+  "skies/refresh-one-door": "SKYFE029",
+  "skies/no-cast-navigation": "SKYFE030",
+  "skies/submit-handles-invalid": "SKYFE031",
+  "skies/controller-field-state": "SKYFE032",
+  "skies/verify-has-avp-proof": "SKYFE033",
+  "skies/no-disabled-tests": "SKYFE034",
+  "skies/feature-has-e2e-flow": "SKYFE035",
 };
 
 /**
  * Which dashboard bucket a fired rule belongs to.
  * @param {string} ruleId
- * @returns {"affe"|"community"|"platform"|"parse"}
+ * @returns {"skyfe"|"community"|"platform"|"parse"}
  */
 export function bucket(ruleId) {
   if (!ruleId) return "parse";
-  if (ruleId.startsWith("aerofortress/")) return "affe";
+  if (ruleId.startsWith("skies/")) return "skyfe";
   if (
     ruleId.startsWith("@tanstack/") ||
     ruleId.startsWith("no-secrets/") ||
@@ -98,20 +98,20 @@ export function aggregateReport({ eslintResults, ruleLevels = {}, loops = {} }) 
       files: v.files.size,
       bucket: bucket(id),
       level: ruleLevels[id] ?? "?",
-      code: AFFE_CODES[id],
+      code: SKYFE_CODES[id],
     };
   }
 
-  // AFFE rules with 0 hits — the clean roster. A `warn`-level clean rule is a promotion candidate; an `error`-level
+  // SKYFE rules with 0 hits — the clean roster. A `warn`-level clean rule is a promotion candidate; an `error`-level
   // one is already a gate proving its invariant holds.
-  const cleanAffe = Object.keys(AFFE_CODES)
+  const cleanSkyfe = Object.keys(SKYFE_CODES)
     .filter((id) => !byRule[id])
-    .map((id) => ({ id, code: AFFE_CODES[id], level: ruleLevels[id] ?? "?" }));
+    .map((id) => ({ id, code: SKYFE_CODES[id], level: ruleLevels[id] ?? "?" }));
 
   return {
     summary: { errors, warnings, rules: Object.keys(byRule).length },
     rules,
-    cleanAffe,
+    cleanSkyfe,
     loops,
     ok: errors === 0,
   };

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\Skies.Framework.Library.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <!-- The OpenAPI document generator (AddOpenApi / OpenApiOptions) ships as a separate package, not in the
+         shared framework. Skies owns the slice-aware document conventions so apps don't re-derive them. -->
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <!-- The ASP.NET package declares only a 2.0.0 minimum, which lets NuGet choose the vulnerable floor.
+         Pin the current patched 2.x line so every consumer receives the circular-reference fix. -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.10.0" />
+    <!-- NOTE: build-time OpenAPI emission (Microsoft.Extensions.ApiDescription.Server) is referenced by the APP,
+         not here — its GetDocument target needs the app's entry assembly (a library has none) and it ships no
+         buildTransitive targets, so it can't flow through the framework. The framework's part is the doc-gen
+         awareness: IsGeneratingOpenApiDocument + OnStartup (below), so the build emits the contract with no database. -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Skies.Framework.Abstractions\Skies.Framework.Abstractions.csproj" />
+    <ProjectReference Include="..\Skies.Framework.Storage\Skies.Framework.Storage.csproj" />
+    <ProjectReference Include="..\..\analyzers\Skies.Framework.SelfHarness\Skies.Framework.SelfHarness.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

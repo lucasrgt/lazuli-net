@@ -22,3 +22,11 @@ source = "git:20bab0c84959baa7f60da8ea364e9bb8d56e082d"
 corrected_by = "git:lucas.tinoco@hotmail.com"
 recorded_by = "nya:collector"
 commit = "20bab0c84959"
+
+[[occurrences]]
+occurred_at = "2026-07-27T18:31:46Z"
+source = "task:skies-4.0.0-canonical-version-drift"
+reported_by = "nya:check"
+corrected_by = "agent:codex"
+recorded_by = "agent:codex"
+commit = "0f2e7f1"

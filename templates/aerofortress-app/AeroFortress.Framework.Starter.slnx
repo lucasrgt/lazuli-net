@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/AeroFortress.Framework.Starter.Api/AeroFortress.Framework.Starter.Api.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/AeroFortress.Framework.Starter.Tests/AeroFortress.Framework.Starter.Tests.csproj" />
-  </Folder>
-</Solution>

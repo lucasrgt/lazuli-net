@@ -1,17 +1,17 @@
 {
-  "name": "eslint-plugin-aerofortress",
-  "version": "1.0.10",
-  "description": "The AeroFortress Framework frontend harness — AFFE* rules that keep React Native + web screens wired, not mocked.",
+  "name": "eslint-plugin-skies",
+  "version": "4.0.0",
+  "description": "The Skies Framework frontend harness — SKYFE* rules that keep React Native + web screens wired, not mocked.",
   "license": "MIT",
   "author": "Lucas Tinoco",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lucasrgt/aerofortress-framework.git",
+    "url": "git+https://github.com/lucasrgt/skies.git",
     "directory": "frontend-sdk/packages/eslint-plugin"
   },
-  "homepage": "https://github.com/lucasrgt/aerofortress-framework#readme",
-  "bugs": "https://github.com/lucasrgt/aerofortress-framework/issues",
-  "keywords": ["eslint", "eslintplugin", "eslint-plugin", "aerofortress", "mvvm", "react", "react-native"],
+  "homepage": "https://skies.build",
+  "bugs": "https://github.com/lucasrgt/skies/issues",
+  "keywords": ["eslint", "eslintplugin", "eslint-plugin", "skies", "mvvm", "react", "react-native"],
   "main": "index.cjs",
   "files": ["index.cjs", "README.md"],
   "peerDependencies": {

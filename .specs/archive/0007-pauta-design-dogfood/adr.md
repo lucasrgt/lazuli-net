@@ -32,7 +32,7 @@ with zero visual delta, specced only after the pauta harvest is digested.
   pattern error by N screens.
 - **Lint-only harvest (no relift)** — rejected: warn counts measure violations, not whether the kit
   + recipes actually transfer to Next+Tailwind; one real screen + the modal is the minimum honest probe.
-- **Adopt the full AFFE harness while we're there** — rejected: scope explosion (MVVM restructure of
+- **Adopt the full SKYFE harness while we're there** — rejected: scope explosion (MVVM restructure of
   six feature dirs); the design band is separable by construction — prove it separately.
 
 ## Consequences
@@ -41,5 +41,5 @@ until the fan-out wave; the mirror lands in a repo without the rest of the harne
 **We gain:** the layer is tested exactly where it must win; the modal — the named worst offender —
 becomes the constitution's first real overlay, feeding the Dialog-in-kit decision with evidence; the
 fan-out wave starts with a proven pattern and a ranked worklist instead of faith.
-**We watch:** the harvest's false-positive rate on Tailwind idioms (AFFE025's arbitrary-value regex
+**We watch:** the harvest's false-positive rate on Tailwind idioms (SKYFE025's arbitrary-value regex
 meeting real-world classes) — high noise there means the rule needs narrowing BEFORE the fan-out wave.

@@ -1,0 +1,26 @@
+<Project>
+
+  <!--
+    Make the Skies doctor flow TRANSITIVELY. NuGet only auto-applies an analyzer to its DIRECT reference, so an
+    app that gets the doctor through the `Skies` meta-package would otherwise restore it but never run it. This
+    target lives in buildTransitive/ — imported by every consumer, direct AND transitive — and adds the analyzer
+    to @(Analyzer) explicitly. So `dotnet add package Skies` alone runs the SKY* rules; no separate Skies.Framework.Doctor
+    reference is needed. The DLL sits next to this file (buildTransitive/Skies.Framework.Doctor.dll), not under analyzers/,
+    precisely so NuGet does NOT also auto-apply it — this target is the single, transitive-safe wiring.
+  -->
+  <ItemGroup Condition="'$(Language)' == 'C#'">
+    <Analyzer Include="$(MSBuildThisFileDirectory)Skies.Framework.Doctor.dll" />
+  </ItemGroup>
+
+  <!--
+    The security floor for the built-in .NET analyzers (CA*): a curated globalconfig that raises the
+    defect classes the SKY* rules don't cover (dropped CancellationToken, insecure deserialization, broken
+    crypto, disabled cert validation, deprecated TLS) to error tier. Same removability story as the doctor:
+    opt out per-project with <SkiesSecurityAnalysis>false</SkiesSecurityAnalysis>, or tune a single rule
+    in your own .globalconfig with a higher global_level — this one sits at 50.
+  -->
+  <ItemGroup Condition="'$(Language)' == 'C#' and '$(SkiesSecurityAnalysis)' != 'false'">
+    <GlobalAnalyzerConfigFiles Include="$(MSBuildThisFileDirectory)skies.globalconfig" />
+  </ItemGroup>
+
+</Project>

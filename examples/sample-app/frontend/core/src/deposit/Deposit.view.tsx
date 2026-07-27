@@ -6,17 +6,17 @@ import { useDepositModel } from "./Deposit.viewModel";
 // CANONICAL FORM VIEW — THE form recipe (DESIGN-CONVENTIONS.md §Recipes): Screen > Stack > Text(title) > Card >
 // one Field+Input per field > the role=alert command error > Button(primary, loading while pending). Field-level
 // errors render inside their Field (anatomy: label → control → hint|error); the command's failure renders above
-// the submit (AFFE013 made visible). Instantiate this shape for any create/edit screen — never compose from blank.
+// the submit (SKYFE013 made visible). Instantiate this shape for any create/edit screen — never compose from blank.
 /**
  * @verify no-phantom-success — on a failed deposit the entered amount persists and the command error is visible;
  * the form never reports a phantom success. Proven by the co-located `@avp no-phantom-success` test — the
- * front-side of the backend's AF0030 (spec criterion ↔ subject-bound AVP) bridge, enforced by AFFE033.
+ * front-side of the backend's SKY0030 (spec criterion ↔ subject-bound AVP) bridge, enforced by SKYFE033.
  */
 export function DepositView() {
   const { t } = useTranslation("deposit");
   const { control, submit, submitting, submitError, completed } = useDepositModel();
 
-  // The success surface. A routed app returns a declarative <Redirect> here (AFFE015); the sample renders done.
+  // The success surface. A routed app returns a declarative <Redirect> here (SKYFE015); the sample renders done.
   if (completed) {
     return (
       <Screen>

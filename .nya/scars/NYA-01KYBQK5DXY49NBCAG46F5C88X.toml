@@ -2,7 +2,7 @@ schema = 1
 id = "NYA-01KYBQK5DXY49NBCAG46F5C88X"
 title = "Default command timeout flaked serialized database setup"
 lesson = "Serialized, one-time database setup operations need a bounded timeout sized for peak suite contention; retrying after a client timeout is unsafe when the server operation continues."
-scope = ["src/AeroFortress.Framework.Testing.Postgres/PostgresTestDatabase.cs"]
+scope = ["src/Skies.Framework.Testing.Postgres/PostgresTestDatabase.cs"]
 tags = [
     "postgresql",
     "test-infrastructure",

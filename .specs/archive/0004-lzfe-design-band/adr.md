@@ -16,7 +16,7 @@ Four candidate enforcement targets: (a) bypassing the kit, (b) off-scale values,
 and the kit already makes them unavoidable (Button owns its states, Field owns its anatomy).
 
 ## Decision
-Ship exactly three rules — AFFE024 `ui-door`, AFFE025 `scale-only`, AFFE026 `semantic-colors` — as
+Ship exactly three rules — SKYFE024 `ui-door`, SKYFE025 `scale-only`, SKYFE026 `semantic-colors` — as
 narrow AST checks with the same exemption boundaries the constitution locks (`ui/`, token files,
 tests). States and anatomy are NOT linted; they are guaranteed by the closed kit API (0003) plus the
 recipes (0005). Warn-first introduction, error at 0005 — the proven a11y/backlog posture.
@@ -24,9 +24,9 @@ recipes (0005). Warn-first introduction, error at 0005 — the proven a11y/backl
 ## Alternatives considered
 - **Lint interactive states / form anatomy** — rejected: undecidable statically; heuristic versions
   produce false positives that teach agents to suppress, the worst outcome for a harness.
-- **One mega-rule "design-system"** — rejected: per-concern rules match the AFFE catalog grain,
+- **One mega-rule "design-system"** — rejected: per-concern rules match the SKYFE catalog grain,
   carry separate messages ("use the kit" vs "use a token"), and promote to error independently.
-- **Extend AFFE012 in place instead of AFFE026** — rejected: 012 is shipped and pinned in pilot
+- **Extend SKYFE012 in place instead of SKYFE026** — rejected: 012 is shipped and pinned in pilot
   configs/docs; changing its semantics mid-flight breaks the mirror-rebase contract. 026 composes
   beside it; both are cataloged as the color pair.
 - **Stylelint for CSS files** — rejected: the canonical kit emits no CSS; apps with CSS pick their
@@ -34,7 +34,7 @@ recipes (0005). Warn-first introduction, error at 0005 — the proven a11y/backl
 
 ## Consequences
 **We accept:** the band cannot catch every aesthetic crime (a legal-token ugly screen survives lint —
-recipes and the skill exist for that); AFFE025's key list is a curated subset (spacing/typography),
+recipes and the skill exist for that); SKYFE025's key list is a curated subset (spacing/typography),
 not exhaustive CSS.
 **We gain:** every side door named by the constitution has a tripwire; messages double as agent
 teaching (each names the door to use instead); pilots inherit the band by the normal mirror rebase.

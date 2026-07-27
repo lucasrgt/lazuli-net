@@ -387,7 +387,7 @@ export function ErrorState({
   );
 }
 `,
-    "index.ts": `// The app's design system — the one paint door (AFFE024). The API is closed by construction: props
+    "index.ts": `// The app's design system — the one paint door (SKYFE024). The API is closed by construction: props
 // are token unions (DESIGN-CONVENTIONS.md), no className/style passthrough anywhere. A missing
 // primitive is added HERE, following the constitution — never inlined in a screen.
 export { Screen } from "./Screen";

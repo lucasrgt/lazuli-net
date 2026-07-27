@@ -55,7 +55,7 @@ themes.dark:  { bg:"#0b1220", surface:"#111a2c", surfaceRaised:"#16213a", border
 color = themes.light
 ```
 File header comment (in the template): tokens are the app's values for the Lazuli taxonomy; names
-are the convention (DESIGN-CONVENTIONS.md), values are yours; hex lives ONLY here (AFFE012/026).
+are the convention (DESIGN-CONVENTIONS.md), values are yours; hex lives ONLY here (SKYFE012/026).
 
 ## Plan — for the executing agent
 1. Read `tools/generate.mjs` + `tools/scaffold-feature.mjs`; copy their structure and voice.

@@ -38,7 +38,7 @@ means every app hand-rolls the taxonomy from prose — the exact non-determinism
 ## Constraints
 - `tokens.ts` is plain data — zero imports, zero functions beyond object literals. jsdom/RN-safe.
 - Types must match 0001 §C1 character-exact.
-- Hex literals are legal ONLY here (AFFE012's exemption already covers `design/tokens.ts` via the
+- Hex literals are legal ONLY here (SKYFE012's exemption already covers `design/tokens.ts` via the
   `tokens` filename pattern — keep the filename).
 
 ## Open questions

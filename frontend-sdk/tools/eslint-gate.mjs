@@ -18,17 +18,17 @@ export const MANDATORY_RELEASE_RULES = Object.freeze([
   "view-integration-test",
 ]);
 
-/** Build a closed ESLint invocation that cannot lose the plugin or an AFFE rule through consumer configuration. */
+/** Build a closed ESLint invocation that cannot lose the plugin or an SKYFE rule through consumer configuration. */
 export function eslintGateArguments(sourcePaths, ruleNames) {
   const arguments_ = [
     ...sourcePaths,
     "--quiet",
     "--no-inline-config",
     "--plugin",
-    "aerofortress",
+    "skies",
   ];
   for (const rule of [...ruleNames].sort()) {
-    arguments_.push("--rule", `aerofortress/${rule}:error`);
+    arguments_.push("--rule", `skies/${rule}:error`);
   }
   return arguments_;
 }
@@ -36,22 +36,22 @@ export function eslintGateArguments(sourcePaths, ruleNames) {
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const sourcePaths = process.argv.slice(2);
   if (sourcePaths.length === 0) {
-    console.error("usage: affe-eslint-gate <source-path> [more-source-paths...]");
+    console.error("usage: skyfe-eslint-gate <source-path> [more-source-paths...]");
     process.exit(2);
   }
 
   let plugin;
   try {
-    plugin = require("eslint-plugin-aerofortress");
+    plugin = require("eslint-plugin-skies");
   } catch {
     console.error(
-      "AFFE release gate: eslint-plugin-aerofortress is unavailable; install the framework-pinned frontend packages.",
+      "SKYFE release gate: eslint-plugin-skies is unavailable; install the framework-pinned frontend packages.",
     );
     process.exit(1);
   }
   const missing = MANDATORY_RELEASE_RULES.filter((rule) => !plugin.rules?.[rule]);
   if (missing.length > 0) {
-    console.error(`AFFE release gate: installed plugin is missing mandatory rule(s): ${missing.join(", ")}.`);
+    console.error(`SKYFE release gate: installed plugin is missing mandatory rule(s): ${missing.join(", ")}.`);
     process.exit(1);
   }
 
@@ -59,7 +59,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   try {
     eslint = join(dirname(require.resolve("eslint/package.json")), "bin", "eslint.js");
   } catch {
-    console.error("AFFE release gate: ESLint is unavailable; install the framework-pinned frontend packages.");
+    console.error("SKYFE release gate: ESLint is unavailable; install the framework-pinned frontend packages.");
     process.exit(1);
   }
   const result = spawnSync(
@@ -68,7 +68,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     { cwd: process.cwd(), stdio: "inherit" },
   );
   if (result.error) {
-    console.error(`AFFE release gate: could not start ESLint (${result.error.message}).`);
+    console.error(`SKYFE release gate: could not start ESLint (${result.error.message}).`);
     process.exit(1);
   }
   process.exit(result.status ?? 1);

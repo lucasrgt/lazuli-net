@@ -6,10 +6,10 @@ import { useDepositModel } from "./Deposit.viewModel";
 import { DepositView } from "./Deposit.view";
 
 // CANONICAL FORM TESTS — the recipe's behavior contract:
-//  - AFFE005 (unit): renderHook the data door against the real client stand-in (wired, not mocked).
-//  - AFFE006 (integration) + behavior: validation blocks inside the Field anatomy, the command failure surfaces
+//  - SKYFE005 (unit): renderHook the data door against the real client stand-in (wired, not mocked).
+//  - SKYFE006 (integration) + behavior: validation blocks inside the Field anatomy, the command failure surfaces
 //    as a role=alert block, the submit announces while pending, and success replaces the form (a routed app
-//    would <Redirect> — AFFE015).
+//    would <Redirect> — SKYFE015).
 function wrapper({ children }: { children: ReactNode }) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -29,7 +29,7 @@ function fill(wallet: string, amount: string) {
 }
 
 describe("Deposit", () => {
-  it("mounts the data door against the real client (AFFE005)", () => {
+  it("mounts the data door against the real client (SKYFE005)", () => {
     const { result } = renderHook(() => useDepositModel(), { wrapper });
     expect(result.current.submitting).toBe(false);
     expect(result.current.completed).toBeNull();

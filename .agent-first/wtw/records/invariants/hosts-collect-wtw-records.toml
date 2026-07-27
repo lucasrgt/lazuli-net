@@ -12,7 +12,7 @@ scopes = [
     "**/GEMINI.md",
 ]
 evidence = [
-    "+Hosts call `dotnet tool run af wtw collect` after an authoritative source",
+    "+Hosts call `dotnet tool run skies wtw collect` after an authoritative source",
     "+contains a durable choice or falsifiable invariant. There is no manual add",
 ]
 recorded_at = "2026-07-27T04:00:38.092726300Z"
@@ -23,5 +23,5 @@ recorded_commit = "e91425015330c1b55ed8cb24d0f1209ffacd10a6"
 kind = "policy"
 source = "diff"
 quote = """
-4. The host runs `dotnet tool run af wtw collect` after accepted plans, ADRs, explicit decisions,
+4. The host runs `dotnet tool run skies wtw collect` after accepted plans, ADRs, explicit decisions,
 +   and completed work. Agents never add records manually."""

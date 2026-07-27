@@ -2,7 +2,7 @@
 // Scaffold a feature unit (ViewModel + View + test + i18n) — the frontend parallel of the backend scaffold.
 // Usage: node tools/scaffold-feature.mjs <plural-name> --verify <happy-id,sad-id,...> [targetDir]
 //   node tools/scaffold-feature.mjs bookings --verify lists-authoritative-bookings,reveals-list-failure sample/bookings
-// The emitted unit is the blessed shape with names substituted; it passes the AFFE rules + typechecks by
+// The emitted unit is the blessed shape with names substituted; it passes the SKYFE rules + typechecks by
 // construction (the sample it is templated from does). Refine the entity fields, the copy, and the slice after.
 
 import { mkdirSync, writeFileSync, existsSync } from "node:fs";

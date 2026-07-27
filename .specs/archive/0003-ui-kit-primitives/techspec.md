@@ -53,7 +53,7 @@ the honest mirror (same names/props, RN primitives). Then template the web kit i
   - `Text`: `role` maps 1:1 to `text[role]`; `tone` maps to `color.text/textMuted/danger/textInverse`.
   - `Stack`: flex; `gap: space[gap]`; never margins.
   - All touch targets: `minHeight: 44` on Button/Input.
-- Kit files under `ui/` — the AFFE024/025/026 exemption path (locked in 0001 §C3).
+- Kit files under `ui/` — the SKYFE024/025/026 exemption path (locked in 0001 §C3).
 
 ## Plan — for the executing agent
 1. Read `web/src/ui.tsx`, `mobile/src/ui.tsx`, `Items.view.tsx`, `Items.test.tsx`, the frontend

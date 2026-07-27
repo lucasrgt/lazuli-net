@@ -2,7 +2,7 @@
 // Assemble the i18n resource tree from every feature's *.i18n.ts catalog — what the harness wired by hand. It
 // discovers the catalogs, derives each namespace from the filename, and emits a generated module that imports the
 // locale catalogs and composes `resources` (locale -> namespace). The output typechecks, so a missing/renamed
-// catalog fails the build; pair it with AFFE011 (keys parity within each catalog) — the aerofortress/i18n-completeness
+// catalog fails the build; pair it with SKYFE011 (keys parity within each catalog) — the skies/i18n-completeness
 // eslint rule when catalogs are in lint scope, or tools/i18n-parity.mjs when they are cross-package.
 // Usage: node tools/assemble-i18n.mjs <featuresDir> <outFile>
 //   node tools/assemble-i18n.mjs sample sample/harness/resources.generated.ts

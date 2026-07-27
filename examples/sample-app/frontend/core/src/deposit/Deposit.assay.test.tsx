@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { actionEffect } from "@aerofortress/assay";
-import type { ActionEffectSubject } from "@aerofortress/assay/react";
-import { defineVerification } from "@aerofortress/assay/react/vitest";
+import { actionEffect } from "avp-assay";
+import type { ActionEffectSubject } from "avp-assay/react";
+import { defineVerification } from "avp-assay/react/vitest";
 import { SAMPLE_API_BASE } from "../api";
 import { DepositView } from "./Deposit.view";
 

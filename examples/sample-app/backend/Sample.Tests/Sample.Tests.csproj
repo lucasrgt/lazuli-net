@@ -20,14 +20,14 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
-    <Using Include="AeroFortress.Framework.Abstractions" />
-    <Using Include="AeroFortress.Framework.Testing" />
+    <Using Include="Skies.Framework.Abstractions" />
+    <Using Include="Skies.Framework.Testing" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Sample.Api\Sample.Api.csproj" />
-    <ProjectReference Include="..\..\..\..\src\AeroFortress.Framework.Testing\AeroFortress.Framework.Testing.csproj" />
-    <ProjectReference Include="..\..\..\..\src\AeroFortress.Framework.Testing.InMemory\AeroFortress.Framework.Testing.InMemory.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Skies.Framework.Testing\Skies.Framework.Testing.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Skies.Framework.Testing.InMemory\Skies.Framework.Testing.InMemory.csproj" />
   </ItemGroup>
 
   <ItemGroup>

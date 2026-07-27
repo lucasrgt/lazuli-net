@@ -2,7 +2,7 @@ schema = 1
 id = "NYA-01KYBQK5DMFGZVCNCW0NDR7NSN"
 title = "WAL-logged PostgreSQL test clones caused checkpoint timeouts"
 lesson = "High-volume PostgreSQL test cloning should avoid WAL-logged template copies and unnecessary durability when the server is disposable, or checkpoint pressure can stall and time out suites."
-scope = ["src/AeroFortress.Framework.Testing.Postgres/PostgresTestDatabase.cs"]
+scope = ["src/Skies.Framework.Testing.Postgres/PostgresTestDatabase.cs"]
 tags = [
     "postgresql",
     "test-infrastructure",

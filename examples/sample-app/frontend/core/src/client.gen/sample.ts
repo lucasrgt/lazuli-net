@@ -16,7 +16,7 @@ export function useListItems() {
 }
 
 // Stand-in for the orval hook of the backend's REAL `Deposit` slice (`MapPost("/deposit").WithName(nameof(Deposit))`
-// → operationId `Deposit` → `useDeposit`, the AF0012 1:1).
+// → operationId `Deposit` → `useDeposit`, the SKY0012 1:1).
 export interface DepositInput {
   walletId: string;
   amount: number;

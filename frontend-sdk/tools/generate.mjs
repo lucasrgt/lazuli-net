@@ -1,9 +1,9 @@
 // Frontend generators — the parallel of the backend scaffold. Beyond the typed client (orval), these emit the
 // *structure*: a feature unit (ViewModel + View + tests + AVP assay + i18n) from a name, and the assembled i18n resource tree
 // from every feature's catalog. Pure render functions (testable, no I/O); the *.mjs CLIs wrap them with file
-// writes, and the `af` .NET CLI front-door shells out to those CLIs (the way `af doctor` shells out to
+// writes, and the `skies` .NET CLI front-door shells out to those CLIs (the way `skies doctor` shells out to
 // `npm run lint`). The unit they emit is the blessed sample/items with names substituted — conformant by
-// construction (it passes the AFFE rules + typecheck + its own test, because the sample does).
+// construction (it passes the SKYFE rules + typecheck + its own test, because the sample does).
 
 /** "user-profile" / "userProfiles" -> "UserProfiles" */
 export function pascal(s) {
@@ -62,13 +62,13 @@ defineVerification(...productVerification(
   },
 ));`).join("\n\n");
 
-  const viewModel = `import { toAsyncState, type AsyncState } from "@aerofortress/react";
+  const viewModel = `import { toAsyncState, type AsyncState } from "skies-react";
 // The orval-generated typed hook for the \`list_${lower}\` slice — the ONLY data the door touches.
 import { useList${Plural} } from "@/client.gen/${lower}";
 import i18n from "@/i18n";
 
 // FEATURE UNIT — the ViewModel (the "data door", the front-side of a backend [Slice]). Only place that touches the
-// generated client (AFFE002), platform-agnostic so it tests in jsdom (AFFE009), exposes its resource as
+// generated client (SKYFE002), platform-agnostic so it tests in jsdom (SKYFE009), exposes its resource as
 // AsyncState<T> (the spine) so the View handles every state by construction.
 
 export interface ${Entity} {
@@ -103,14 +103,14 @@ export function use${Plural}Model(): ${Plural}Model {
 `;
 
   const view = `import { useTranslation } from "react-i18next";
-import { Resource } from "@aerofortress/react";
+import { Resource } from "skies-react";
 // The design system — the View reaches it through these names only (never react-native directly).
 import { Screen, Stack, Text, EmptyState } from "@/ui";
 import { use${Plural}Model } from "./${Plural}.viewModel";
 import type { ${Entity} } from "./${Plural}.viewModel";
 
-// VIEW — render only (AFFE001). Consumes the resource through <Resource>, so loading / error / empty are handled by
-// construction and the body only ever runs with resolved data. No isPending/isError here (AFFE010).
+// VIEW — render only (SKYFE001). Consumes the resource through <Resource>, so loading / error / empty are handled by
+// construction and the body only ever runs with resolved data. No isPending/isError here (SKYFE010).
 export function ${Plural}View() {
   const { t } = useTranslation("${lower}");
   const { state } = use${Plural}Model();
@@ -150,35 +150,35 @@ import { use${Plural}Model } from "./${Plural}.viewModel";
 import { ${Plural}View } from "./${Plural}.view";
 
 // CANONICAL TESTS — the two co-located tiers the harness enforces:
-//  - AFFE005 (unit): renderHook the ViewModel (the data door) against the real client — wired, not mocked.
-//  - AFFE006 (integration): render the View so it composes with its ViewModel + design system and mounts.
+//  - SKYFE005 (unit): renderHook the ViewModel (the data door) against the real client — wired, not mocked.
+//  - SKYFE006 (integration): render the View so it composes with its ViewModel + design system and mounts.
 function wrapper({ children }: { children: ReactNode }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
 
 describe("${Plural}", () => {
-  it("starts its resource in loading while the list is fetched (AFFE005)", () => {
+  it("starts its resource in loading while the list is fetched (SKYFE005)", () => {
     const { result } = renderHook(() => use${Plural}Model(), { wrapper });
     expect(result.current.state.${collection}.status).toBe("loading");
   });
 
-  it("renders the View without crashing (AFFE006)", () => {
+  it("renders the View without crashing (SKYFE006)", () => {
     const { container } = render(<${Plural}View />, { wrapper });
     expect(container).toBeTruthy();
   });
 });
 `;
 
-  const assay = `import { productVerification } from "@aerofortress/frontend-sdk/product-verification";
-import { defineVerification } from "@aerofortress/assay/react/vitest";
+  const assay = `import { productVerification } from "skies-frontend-sdk/product-verification";
+import { defineVerification } from "avp-assay/react/vitest";
 
 // AVP PROOFS — deliberately red until every declared product outcome is proven by a concrete assertion.
 // Keep internal/unit mechanics in ${Plural}.test.tsx; only user-observable acceptance behavior belongs here.
 ${assayProofs}
 `;
 
-  const i18n = `// Feature-scoped copy. Three locales with identical keys (AFFE011) — fill in the real strings.
+  const i18n = `// Feature-scoped copy. Three locales with identical keys (SKYFE011) — fill in the real strings.
 export const ptBR = {
   error: "Não foi possível carregar.",
   "empty.title": "Nada por aqui ainda",
@@ -214,10 +214,10 @@ export const enUS = {
  * platform-neutral (web inline styles, RN StyleSheet, a Tailwind theme all map FROM it), zero imports, zero deps.
  */
 export function renderDesign() {
-  const tokens = `// DESIGN TOKENS — this app's values for the AeroFortress design taxonomy (docs/DESIGN-CONVENTIONS.md).
-// Names are the convention, protected by the design band (AFFE024-026); values are YOURS — edit the
+  const tokens = `// DESIGN TOKENS — this app's values for the Skies design taxonomy (docs/DESIGN-CONVENTIONS.md).
+// Names are the convention, protected by the design band (SKYFE024-026); values are YOURS — edit the
 // values freely (brand, dark mode, white-label), never the names. Raw colors (hex) live ONLY here
-// (AFFE012 exempts this file by name); everything else references the semantic \`color.*\` roles.
+// (SKYFE012 exempts this file by name); everything else references the semantic \`color.*\` roles.
 
 export type SpaceToken = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 export type RadiusToken = "none" | "sm" | "md" | "lg" | "full";

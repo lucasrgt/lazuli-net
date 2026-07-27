@@ -10,9 +10,9 @@
 //
 // A flow declares its `target` (web|native), which selects its runner without another decision: Playwright for WEB
 // and Maestro for NATIVE. Its `spec` therefore has the matching visible form (`.spec.ts` / `.yaml`).
-// `checkE2e(root)` is pure (no process.exit) so a CLI, a test, or `af doctor` decides what to do with it.
+// `checkE2e(root)` is pure (no process.exit) so a CLI, a test, or `skies doctor` decides what to do with it.
 //
-// DEPTH, not just existence (AFFE-JOURNEY-002). A spec existing does NOT mean the journey is covered — a spec can
+// DEPTH, not just existence (SKYFE-JOURNEY-002). A spec existing does NOT mean the journey is covered — a spec can
 // stop at the door (assert the entry screen and return), punting the rest to the backend twin. That is the exact
 // shape that let a pilot's onboarding ship a "complete -> back to step 0" bug under a green doctor. So a LINKED flow
 // flow must also declare `terminal`: the marker — a testID or route — its spec asserts
@@ -92,7 +92,7 @@ function classifySource(spec, source) {
  * Inspect a project's e2e tier. Returns
  * `{ runners, flows, gaps, depthGaps, execution, seedPending, messages }`:
  *   - runners: detected runners; flows: count of curated journeys; gaps: hard existence problems; messages: lines
- *   - depthGaps: blocking journey-depth findings (AFFE-JOURNEY-002) — a flow with no `terminal`, or a spec
+ *   - depthGaps: blocking journey-depth findings (SKYFE-JOURNEY-002) — a flow with no `terminal`, or a spec
  *     that never asserts its declared `terminal`.
  * Each flow: `{ id, name, path, area?, target, spec, case?, backendSlices?, backendContract?, backendOutcome?, terminal }` where `id` is the stable
  * ViewModel linkage key, `path` is happy|sad, `spec` is relative to root, and optional `case` names one test in a
@@ -298,7 +298,7 @@ export function checkE2e(root) {
       qualityCheckedSpecs.add(specPath);
       if (!importsCanonicalPlaywrightTest(specSource)) {
         messages.push(
-          `${spec} must import test from @aerofortress/frontend-sdk/playwright so page errors and browser `
+          `${spec} must import test from skies-frontend-sdk/playwright so page errors and browser `
             + "warnings fail the E2E gate",
         );
         gaps++;
@@ -349,7 +349,7 @@ export function checkE2e(root) {
         `journey "${name}" names backendSlices but its own case is ${executionClass}; `
           + "collect and assert its exact OpenAPI operations with observeBackend and expectBackendSlices or "
           + "waitForBackendSlices from "
-          + "@aerofortress/frontend-sdk/playwright-backend in that case",
+          + "skies-frontend-sdk/playwright-backend in that case",
       );
       gaps++;
     }
@@ -397,7 +397,7 @@ export function checkE2e(root) {
       }
     }
 
-    // Depth (AFFE-JOURNEY-002): every flow must declare its `terminal` and actually assert it in the spec —
+    // Depth (SKYFE-JOURNEY-002): every flow must declare its `terminal` and actually assert it in the spec —
     // otherwise "covered" only proves the journey starts. The focused assertion heuristic ignores comments and
     // requires the marker near an assertion API, so merely mentioning a route in prose never manufactures green.
     const terminal = typeof flow.terminal === "string" ? flow.terminal.trim() : "";
@@ -427,7 +427,7 @@ function declaresFrontendSdk(root) {
       packageJson.devDependencies,
       packageJson.peerDependencies,
     ].some((dependencies) => dependencies
-      && typeof dependencies["@aerofortress/frontend-sdk"] === "string");
+      && typeof dependencies["skies-frontend-sdk"] === "string");
   } catch {
     return false;
   }
@@ -436,7 +436,7 @@ function declaresFrontendSdk(root) {
 function importsCanonicalPlaywrightTest(source) {
   const executable = stripComments(source);
   for (const match of executable.matchAll(
-    /\bimport\s*\{([^}]*)\}\s*from\s*["']@aerofortress\/frontend-sdk\/playwright["']/g,
+    /\bimport\s*\{([^}]*)\}\s*from\s*["']skies-frontend-sdk\/playwright["']/g,
   )) {
     const bindings = match[1].split(",").map((binding) => binding.trim());
     if (bindings.some((binding) => /^test(?:\s+as\s+[A-Za-z_$][\w$]*)?$/.test(binding))) return true;
@@ -497,7 +497,7 @@ export function checkPlaywrightInventory(root) {
     // Collection imports spec modules but never starts globalSetup, webServer, or a browser. Let modules whose
     // top-level guard normally requires the real preflight load for inventory purposes; the release execution
     // still receives PW_API_READY only from the canonical successful probe.
-    env: { ...process.env, AF_E2E_INVENTORY: "1", PW_API_READY: "1" },
+    env: { ...process.env, SKY_E2E_INVENTORY: "1", PW_API_READY: "1" },
     shell: false,
   });
   if (run.status !== 0) {
@@ -599,14 +599,14 @@ function isWithin(root, path) {
 function canonicalBackendImport(source) {
   const executable = stripComments(source);
   return [...executable.matchAll(
-    /\bimport\s*\{([^}]*)\}\s*from\s*["']@aerofortress\/frontend-sdk\/playwright-backend["']\s*;?/g,
+    /\bimport\s*\{([^}]*)\}\s*from\s*["']skies-frontend-sdk\/playwright-backend["']\s*;?/g,
   )].map((match) => match[0]).join("\n");
 }
 
 function importsCanonicalBackendProof(source) {
   const identifiers = new Set();
   for (const match of source.matchAll(
-    /\bimport\s*\{([^}]*)\}\s*from\s*["']@aerofortress\/frontend-sdk\/playwright-backend["']/g,
+    /\bimport\s*\{([^}]*)\}\s*from\s*["']skies-frontend-sdk\/playwright-backend["']/g,
   )) {
     for (const raw of match[1].split(",")) {
       const name = raw.trim();
@@ -704,14 +704,14 @@ function assertsTerminal(source, terminal) {
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const [, , root] = process.argv;
   if (!root) {
-    console.error("usage: affe-e2e-doctor <frontend-root>");
+    console.error("usage: skyfe-e2e-doctor <frontend-root>");
     process.exit(2);
   }
   const result = checkE2e(root);
   const inventoryMessages = result.runners.includes("playwright") ? checkPlaywrightInventory(root) : [];
   const execution = result.execution;
   console.log(
-    `AFFE-E2E: ${result.flows} curated journey(s) `
+    `SKYFE-E2E: ${result.flows} curated journey(s) `
       + `[real-browser CI gate: ${execution["ci-gated"]}, front-only smoke: ${execution["front-only"]}, `
       + `seed-pending: ${execution["seed-pending"]}, disabled: ${execution.disabled}, native: ${execution.native}], `
       + `runners=[${result.runners.join(", ") || "none"}], ${result.gaps} roadmap gap(s), `

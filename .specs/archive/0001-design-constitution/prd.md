@@ -12,7 +12,7 @@ created: 2026-06-09
 ## Problem
 Agent-built UIs in Lazuli apps come out visually inconsistent ("porca", per the maker): arbitrary
 spacing, forked palettes, unaligned typography, ad-hoc form layouts. The framework stops at the data
-seam (`FRONTEND-CONVENTIONS.md` is styling-neutral by construction); AFFE012 forbids inline hex but
+seam (`FRONTEND-CONVENTIONS.md` is styling-neutral by construction); SKYFE012 forbids inline hex but
 defines nothing to use instead. Every app reinvents design from zero and every agent invents layout
 per-screen. There is no contract for later stages (tokens, kit, lint band, recipes) to build against.
 
@@ -25,7 +25,7 @@ first" move — everything else in the wave parallelizes only after it lands.
 - `docs/DESIGN-CONVENTIONS.md` exists: token taxonomy (exact TS type signatures), scale values'
   structure (4px grid, 1.25 modular type scale), semantic color roles, the five interactive states,
   form-field anatomy, text hierarchy, layout/spacing rules, kit API surface (locked signatures),
-  AFFE024–026 catalog entries, recipe index (forward links to 0005 paths), a11y posture.
+  SKYFE024–026 catalog entries, recipe index (forward links to 0005 paths), a11y posture.
 - `docs/FRONTEND-CONVENTIONS.md` non-goal "No prescribed styling system" is rewritten: Lazuli stays
   **mechanism**-neutral (styling library is the app's) but now prescribes the **vocabulary** (token
   names, kit shape, ui-door).

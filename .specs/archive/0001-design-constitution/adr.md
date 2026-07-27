@@ -19,7 +19,7 @@ generation). Hostpoint already proved tokens migrate to `core/` when an app matu
 ## Decision
 We prescribe the design **vocabulary** and enforce it, in four layers of decreasing strength:
 1. **Closed API** — kit primitives whose props are unions of token names (wrong = inexpressible).
-2. **Lint band** — AFFE024–026 catch the escape hatches (wrong = detectable).
+2. **Lint band** — SKYFE024–026 catch the escape hatches (wrong = detectable).
 3. **Canonical screens** — recipes agents instantiate instead of inventing layout (right = copyable).
 4. **Skill** — loads constitution + recipe into agent context at build time (right = loaded).
 Token **names and types** are the convention; token **values** are the app's (that is the whole

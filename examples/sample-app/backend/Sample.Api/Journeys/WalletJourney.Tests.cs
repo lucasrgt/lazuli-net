@@ -8,7 +8,7 @@ namespace Sample.Tests.Journeys;
 // single slice to co-locate with. The file is *.Tests.cs, so the test project compiles it (via glob)
 // and the production assembly excludes it — same mechanism as the slice tests.
 //
-// Deposit and Withdraw are writes, so AF0008 requires a happy and a sad journey for each here.
+// Deposit and Withdraw are writes, so SKY0008 requires a happy and a sad journey for each here.
 // Each is declared with [Journey(typeof(<Slice>), JourneyPath.…)] so the doctor can match them to the slice.
 public class WalletJourney
 {

@@ -3,8 +3,8 @@ using Sample.Api.Modules.Wallets;
 namespace Sample.Api.Modules;
 
 /// <summary>The module registry — the one explicit list of the app's modules, wired on both sides: AddModules
-/// registers each module's services, MapModules its routes. Adding a module is a line in each (af g appends
-/// them). Explicit on purpose — AeroFortress discovers nothing by reflection; the doctor (AF0015) checks every
+/// registers each module's services, MapModules its routes. Adding a module is a line in each (skies g appends
+/// them). Explicit on purpose — Skies discovers nothing by reflection; the doctor (SKY0015) checks every
 /// [Module] appears here, so a module can't be silently left unwired.</summary>
 public static class Modules
 {

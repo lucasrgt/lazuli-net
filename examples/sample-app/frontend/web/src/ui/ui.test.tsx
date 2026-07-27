@@ -148,7 +148,7 @@ describe("states", () => {
 });
 
 it("keeps the API closed — no className/style passthrough anywhere", () => {
-  // Compile-time assertions: the door AFFE024 polices must not exist in the type surface either.
+  // Compile-time assertions: the door SKYFE024 polices must not exist in the type surface either.
   // @ts-expect-error className is not part of the kit vocabulary
   const a = <Stack className="x">k</Stack>;
   // @ts-expect-error style is not part of the kit vocabulary

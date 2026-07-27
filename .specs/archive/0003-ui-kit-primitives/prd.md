@@ -15,7 +15,7 @@ offers four loose components. An agent composing a screen still makes every visu
 the kit must make for it. The strongest determinism layer (wrong = inexpressible) does not exist.
 
 ## Why now (or why ever)
-The recipes (0005) and the ui-door rule (AFFE024, enforced at error in 0005) are only honest if a
+The recipes (0005) and the ui-door rule (SKYFE024, enforced at error in 0005) are only honest if a
 closed kit exists for views to consume. Without it, the band would just forbid things and offer no door.
 
 ## Outcome — done means
@@ -43,7 +43,7 @@ closed kit exists for views to consume. Without it, the band would just forbid t
 ## Constraints
 - Public API = 0001 §C2 character-exact; deviations are a 0001 ADR supersession, not a local fix.
 - Web impl must render in jsdom (the existing test harness); mobile impl must not import web APIs.
-- Kit files live under `ui/` (the AFFE024/025 exemption boundary — keep the path).
+- Kit files live under `ui/` (the SKYFE024/025 exemption boundary — keep the path).
 
 ## Open questions
 None.

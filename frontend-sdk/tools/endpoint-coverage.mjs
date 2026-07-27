@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-// AFFE008 — back->front endpoint coverage. Every app-facing generated operation should be consumed through its
+// SKYFE008 — back->front endpoint coverage. Every app-facing generated operation should be consumed through its
 // generated hook (`use<Slice>`) or imperative function (`slice`) by at least one ViewModel; one with no consumer is
 // a "loose endpoint" — the backend slice exists but no screen wired it.
-// This is advisory during feature construction and blocking at `af gate`: the front->back direction (a UI calling
+// This is advisory during feature construction and blocking at `skies gate`: the front->back direction (a UI calling
 // an endpoint that does not exist) is already free from `tsc`, while this back->front direction reveals "backend
 // done, UI not wired." Non-app endpoints never reach the client (orval's audience filter drops them), so the metric
-// is high-signal by construction. See docs/FRONTEND-CONVENTIONS.md (AFFE008).
+// is high-signal by construction. See docs/FRONTEND-CONVENTIONS.md (SKYFE008).
 //
 // The core is pure (no I/O) so it is unit-testable; the CLI tail wires it to the filesystem. The scan also backs
-// AFFE002 directly: a consumer can accidentally scope the ESLint rule to `features/` and otherwise let a helper
+// SKYFE002 directly: a consumer can accidentally scope the ESLint rule to `features/` and otherwise let a helper
 // import an operation outside the ViewModel. Because this command receives every product source root, that config
 // mistake cannot turn an off-door endpoint into an invisible green.
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
@@ -62,7 +62,7 @@ export function extractGeneratedExports(sourceText) {
 
 /**
  * Whether a file is a legal data door whose hook references count as "wired": a screen's `*.viewModel.ts`, or
- * the auth/routing infra seams (`lib/session*`, `lib/guards*`) that AFFE002 already blesses as client consumers.
+ * the auth/routing infra seams (`lib/session*`, `lib/guards*`) that SKYFE002 already blesses as client consumers.
  * Without the doors, the session hooks (`useMe`/`useRefresh`/`useLogout`) report loose from day one — wallpaper
  * that buries the real gaps the metric exists to reveal.
  */
@@ -144,14 +144,14 @@ function walk(dir, pred) {
 // doors — the ViewModels plus the lib/session|guards infra seams — so multi-app products and legally-consumed
 // session hooks do not pollute the loose list.
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const strict = process.argv.includes("--strict") || process.env.AF_GATE === "1";
+  const strict = process.argv.includes("--strict") || process.env.SKY_GATE === "1";
   const [clientPath, ...srcDirs] = process.argv.slice(2).filter((argument) => argument !== "--strict");
   if (!clientPath || srcDirs.length === 0) {
     console.error("usage: node tools/endpoint-coverage.mjs [--strict] <client.gen file-or-directory> <srcDir> [moreSrcDirs...]");
     process.exit(2);
   }
   if (!existsSync(clientPath)) {
-    console.log(`AFFE008 endpoint coverage: no generated client at ${clientPath} (bootstrap) — nothing to check yet.`);
+    console.log(`SKYFE008 endpoint coverage: no generated client at ${clientPath} (bootstrap) — nothing to check yet.`);
     process.exit(0);
   }
   const clientFiles = statSync(clientPath).isDirectory()
@@ -167,14 +167,14 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     .map(({ source }) => source)
     .join("\n");
   const r = checkEndpointCoverage(hooks, wiredText);
-  console.log(`AFFE008 endpoint coverage: ${r.wired}/${r.total} app-facing operations wired by a ViewModel.`);
+  console.log(`SKYFE008 endpoint coverage: ${r.wired}/${r.total} app-facing operations wired by a ViewModel.`);
   for (const m of r.messages) console.log(`  ${m}`);
   const offDoor = findOffDoorOperations(hooks, sources);
   if (offDoor.length > 0) {
-    console.error(`AFFE002 data door: ${offDoor.length} file(s) consume generated operations outside a legal data door:`);
+    console.error(`SKYFE002 data door: ${offDoor.length} file(s) consume generated operations outside a legal data door:`);
     for (const { filePath, operations } of offDoor) console.error(`  - ${filePath}: ${operations.join(", ")}`);
   }
   if (strict && r.loose.length > 0)
-    console.error(`AFFE008 release gate: ${r.loose.length} app-facing endpoint(s) remain unwired.`);
+    console.error(`SKYFE008 release gate: ${r.loose.length} app-facing endpoint(s) remain unwired.`);
   process.exit(endpointCoverageExitCode(r, offDoor, strict));
 }

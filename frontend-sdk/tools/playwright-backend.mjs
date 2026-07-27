@@ -42,7 +42,7 @@ export async function probeBackend({
 
   delete env.PW_API_READY;
   const detail = lastFailure instanceof Error ? lastFailure.message : String(lastFailure ?? "no response");
-  throw new Error(`AeroFortress E2E backend probe failed at ${probeUrl}: ${detail}`);
+  throw new Error(`Skies E2E backend probe failed at ${probeUrl}: ${detail}`);
 }
 
 /** Create a Playwright globalSetup function backed by the canonical real-API probe. */
@@ -157,7 +157,7 @@ function requireReadyBackend(env) {
   const url = configuredBackendUrl(env);
   if (env.PW_API_READY !== "1") {
     throw new Error(
-      "AeroFortress E2E backend is not ready. Run probeBackend() from Playwright globalSetup before the suite.",
+      "Skies E2E backend is not ready. Run probeBackend() from Playwright globalSetup before the suite.",
     );
   }
   return url;

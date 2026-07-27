@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Frontend package sync — the npm half of the package-first law. The frontend framework is published:
-// pilots consume eslint-plugin-aerofortress and @aerofortress/react as packages, never as in-repo mirrors.
+// pilots consume eslint-plugin-skies and skies-react as packages, never as in-repo mirrors.
 
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -27,8 +27,8 @@ export function checkPackages({ canonical, declarations, hasFrontend, vendoredMi
   const messages = [];
   if (vendoredMirror)
     messages.push(
-      "framework-sync: clients/eslint-plugin-aerofortress is a retired vendored plugin copy — delete it and "
-      + "consume eslint-plugin-aerofortress from npm.",
+      "framework-sync: clients/eslint-plugin-skies is a retired vendored plugin copy — delete it and "
+      + "consume eslint-plugin-skies from npm.",
     );
   if (!hasFrontend) return { status: messages.length ? "drifted" : "ok", messages };
 
@@ -91,14 +91,14 @@ const invokedDirectly = process.argv[1] && fileURLToPath(import.meta.url) === pr
 if (invokedDirectly) {
   const [, , appRoot] = process.argv;
   if (!appRoot) {
-    console.error("usage: affe-framework-sync <app-root>");
+    console.error("usage: skyfe-framework-sync <app-root>");
     process.exit(2);
   }
   const result = checkPackages({
     canonical: FRONTEND_PACKAGE_VERSIONS,
     declarations: packageDeclarations(appRoot),
     hasFrontend: frontendExists(appRoot),
-    vendoredMirror: existsSync(join(appRoot, "clients", "eslint-plugin-aerofortress")),
+    vendoredMirror: existsSync(join(appRoot, "clients", "eslint-plugin-skies")),
   });
   for (const message of result.messages) console.error(message);
   if (result.status === "ok") console.log("framework-sync: frontend package versions match the published SDK contract.");

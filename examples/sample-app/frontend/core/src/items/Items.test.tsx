@@ -6,9 +6,9 @@ import { useItemsModel } from "./Items.viewModel";
 import { ItemsView } from "./Items.view";
 
 // CANONICAL TESTS — the two co-located test tiers the harness enforces:
-//  - AFFE005 (unit): renderHook the ViewModel (the data door) against the real client — wired, not mocked. On
+//  - SKYFE005 (unit): renderHook the ViewModel (the data door) against the real client — wired, not mocked. On
 //    mount the query is pending, so the resource is in its `loading` state.
-//  - AFFE006 (integration): render the View so it composes with its ViewModel + design system and mounts.
+//  - SKYFE006 (integration): render the View so it composes with its ViewModel + design system and mounts.
 // Neither asserts behavior beyond "it mounts in the right state" — behavior stays per-screen judgment.
 function wrapper({ children }: { children: ReactNode }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -18,12 +18,12 @@ function wrapper({ children }: { children: ReactNode }) {
 afterEach(cleanup);
 
 describe("Items", () => {
-  it("starts its resource in loading while the list is fetched (AFFE005)", () => {
+  it("starts its resource in loading while the list is fetched (SKYFE005)", () => {
     const { result } = renderHook(() => useItemsModel(), { wrapper });
     expect(result.current.state.items.status).toBe("loading");
   });
 
-  it("renders the View without crashing (AFFE006)", () => {
+  it("renders the View without crashing (SKYFE006)", () => {
     const { container } = render(<ItemsView />, { wrapper });
     expect(container).toBeTruthy();
   });

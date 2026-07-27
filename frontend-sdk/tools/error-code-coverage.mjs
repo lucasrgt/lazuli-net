@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// AFFE — error-code coverage (cross-package). The backend ships every error as a stable code (the registry consts
-// behind AF0018/AF0019), enumerated into the OpenAPI `ErrorBody.code`; the front owns the copy. This proves every
-// code has a catalog entry, so no error reaches a user untranslated. Pair with i18n-parity (AFFE011), which proves
+// SKYFE — error-code coverage (cross-package). The backend ships every error as a stable code (the registry consts
+// behind SKY0018/SKY0019), enumerated into the OpenAPI `ErrorBody.code`; the front owns the copy. This proves every
+// code has a catalog entry, so no error reaches a user untranslated. Pair with i18n-parity (SKYFE011), which proves
 // that entry exists in EVERY locale: coverage = code → copy, parity = copy → every language. Together they are the
-// front end of the AF0018/AF0019 discipline.
+// front end of the SKY0018/SKY0019 discipline.
 //
 // It reads the GENERATED client's ErrorBody union (orval output) directly — the cross-package analogue of an
 // in-source rule — and is a NOTICE until the client is regenerated against the enum-bearing contract, a hard gate
@@ -15,7 +15,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { exportedObjectLiterals, topLevelObjectKeys } from "./object-literals.mjs";
 
-// Keys across all exported catalog objects (locale-agnostic; AFFE011 guarantees the locales agree, so the union is
+// Keys across all exported catalog objects (locale-agnostic; SKYFE011 guarantees the locales agree, so the union is
 // the catalog's key set). Same flat-catalog parsing as i18n-parity: a key is a quoted/bare token after `{` or `,`.
 export function catalogKeys(src) {
   const keys = new Set();
@@ -49,7 +49,7 @@ export function checkErrorCodeCoverage(catalog, contract) {
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const [, , catalogFile, errorBodyFile] = process.argv;
   if (!catalogFile || !errorBodyFile) {
-    console.error("usage: affe-error-code-coverage <catalog.i18n.ts> <errorBody-or-enum.ts>");
+    console.error("usage: skyfe-error-code-coverage <catalog.i18n.ts> <errorBody-or-enum.ts>");
     process.exit(2);
   }
   const catalog = catalogKeys(readFileSync(catalogFile, "utf8"));
@@ -61,11 +61,11 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   }
   const result = checkErrorCodeCoverage(catalog, contract);
   if (contract === null) {
-    console.log(`AFFE error-codes: ${catalog.size} code(s) in the catalog.`);
+    console.log(`SKYFE error-codes: ${catalog.size} code(s) in the catalog.`);
     console.log("  note: regenerate the client against the enum-bearing contract to check ErrorBody.code coverage.");
     process.exit(0);
   }
-  console.log(`AFFE error-codes: ${contract.size} code(s) in the contract, ${catalog.size} in the catalog.`);
+  console.log(`SKYFE error-codes: ${contract.size} code(s) in the contract, ${catalog.size} in the catalog.`);
   if (result.orphan.length)
     console.log(`  ${result.orphan.length} catalog key(s) not in the contract (stale?): ${result.orphan.join(", ")}`);
   if (result.uncovered.length) {

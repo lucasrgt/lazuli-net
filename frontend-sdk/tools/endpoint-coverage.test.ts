@@ -11,7 +11,7 @@ import {
   isDataDoor,
 } from "./endpoint-coverage.mjs";
 
-// AFFE008 — every app-facing generated hook should be consumed by a ViewModel; an unconsumed one is a warn-tier
+// SKYFE008 — every app-facing generated hook should be consumed by a ViewModel; an unconsumed one is a warn-tier
 // "loose endpoint" (backend done, UI not wired). Pin extraction + the wired/loose split on the pure core.
 describe("extractHooks", () => {
   it("pulls use<Name> hooks from generated-client source (function or const exports)", () => {
@@ -188,7 +188,7 @@ describe("findOffDoorOperations", () => {
 });
 
 describe("isDataDoor", () => {
-  it("counts the ViewModels and the AFFE002 infra seams (lib/session*, lib/guards*) as wiring", () => {
+  it("counts the ViewModels and the SKYFE002 infra seams (lib/session*, lib/guards*) as wiring", () => {
     expect(isDataDoor("src/features/foo/Foo.viewModel.ts")).toBe(true);
     expect(isDataDoor("src/lib/session.ts")).toBe(true);
     expect(isDataDoor("src/lib/session/useSession.ts")).toBe(true);
@@ -199,7 +199,7 @@ describe("isDataDoor", () => {
 
   it("does not count a View, a lib helper, or a test", () => {
     expect(isDataDoor("src/features/foo/Foo.view.tsx")).toBe(false);
-    expect(isDataDoor("src/lib/aerofortress-client.ts")).toBe(false);
+    expect(isDataDoor("src/lib/skies-client.ts")).toBe(false);
     expect(isDataDoor("src/features/foo/Foo.test.tsx")).toBe(false);
   });
 });

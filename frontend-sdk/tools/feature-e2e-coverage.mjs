@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// AFFE-FEATURE-E2E — visible feature -> executable journey coverage.
+// SKYFE-FEATURE-E2E — visible feature -> executable journey coverage.
 //
 // e2e-doctor proves every flow declared by a surface has an executable spec. This tool proves the inverse:
 // every ViewModel (the convention's user-visible feature boundary) declares `@e2e <flow-id>`, and every id
@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 const IGNORED_DIRECTORIES = new Set([
   ".git",
-  ".aerofortress",
+  ".skies",
   "bin",
   "node_modules",
   "obj",
@@ -353,7 +353,7 @@ function readFlows(surface) {
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const [, , workspaceArgument, ...packageArguments] = process.argv;
   if (!workspaceArgument || packageArguments.length === 0) {
-    console.error("usage: affe-feature-e2e <workspace-root> <core=path|surface=path> [...more-packages]");
+    console.error("usage: skyfe-feature-e2e <workspace-root> <core=path|surface=path> [...more-packages]");
     process.exit(2);
   }
 
@@ -383,7 +383,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
       .flatMap(({ path }) => readFlows(path));
     const result = checkFeatureE2e(viewModels, flows, slices, infrastructure);
     console.log(
-      `AFFE-FEATURE-E2E: ${result.linked}/${result.features} ViewModel feature(s) linked; `
+      `SKYFE-FEATURE-E2E: ${result.linked}/${result.features} ViewModel feature(s) linked; `
         + `${result.complete} complete happy+sad feature(s); `
         + `${result.coveredCriteria}/${result.criteria} AVP/Assay criterion/criteria covered; `
         + `${result.gaps} coverage gap(s).`,
@@ -391,7 +391,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     for (const message of result.messages) console.log(`  - ${message}`);
     process.exit(result.gaps > 0 ? 1 : 0);
   } catch (error) {
-    console.log(`AFFE-FEATURE-E2E: invalid coverage input — ${error.message}`);
+    console.log(`SKYFE-FEATURE-E2E: invalid coverage input — ${error.message}`);
     process.exit(1);
   }
 }

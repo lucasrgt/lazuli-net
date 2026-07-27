@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace Sample.Tests;
 
 // The error-code contract, dogfooded: the framework enumerates every *ErrorCodes constant into the OpenAPI
-// ErrorBody.code schema (an OpenAPI schema transformer in AeroFortress.Framework.AspNetCore, fed by reflection — AF0018
+// ErrorBody.code schema (an OpenAPI schema transformer in Skies.Framework.AspNetCore, fed by reflection — SKY0018
 // guarantees the registries are the complete set). So the generated client is typed on the closed set of codes
 // and the frontend can be checked for an exhaustive translation of each.
 public class OpenApiErrorCodes

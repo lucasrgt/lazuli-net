@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// AFFE — contract freshness (cross-stack). The typed client (client.gen) is a MIRROR of the backend's OpenAPI
+// SKYFE — contract freshness (cross-stack). The typed client (client.gen) is a MIRROR of the backend's OpenAPI
 // document; nothing re-checks the mirror after generation, so a backend shape change leaves the front compiling
 // happily against a stale client — the drift every other loop (endpoint coverage, error-code coverage, journey
 // parity) silently inherits, because they all read the client as truth. This loop pins the client to the exact

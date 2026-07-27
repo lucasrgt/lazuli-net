@@ -1,6 +1,6 @@
 ---
 id: 0004
-title: AFFE design band — ui-door, scale-only, semantic-colors
+title: SKYFE design band — ui-door, scale-only, semantic-colors
 type: techspec
 status: done
 created: 2026-06-09
@@ -11,11 +11,11 @@ test_gate: npm --prefix frontend-sdk run check
 agent: claude-fable-5
 ---
 
-# TechSpec — AFFE design band (AFFE024–026)
+# TechSpec — SKYFE design band (SKYFE024–026)
 
 ## Approach
 Three additions to the `rules` object in `packages/eslint-plugin/index.cjs`, following the house
-pattern exactly (file-class predicates up top, rationale comment above each rule, `AFFE0NN:` message
+pattern exactly (file-class predicates up top, rationale comment above each rule, `SKYFE0NN:` message
 prefix, `meta.docs.description`). Tests extend `index.test.cjs` with the same harness the existing 22
 rules use. No new files, no new deps.
 
@@ -25,45 +25,45 @@ rules use. No new files, no new deps.
   `scale-only`, `semantic-colors`; bump `meta.version` to `0.5.0`.
 - `frontend-sdk/packages/eslint-plugin/index.test.cjs` — cases below.
 - `frontend-sdk/packages/eslint-plugin/package.json` — version 0.5.0.
-- `frontend-sdk/tools/doctor.mjs` — map `"lazuli/ui-door": "AFFE024"`, `"lazuli/scale-only":
-  "AFFE025"`, `"lazuli/semantic-colors": "AFFE026"`.
+- `frontend-sdk/tools/doctor.mjs` — map `"lazuli/ui-door": "SKYFE024"`, `"lazuli/scale-only":
+  "SKYFE025"`, `"lazuli/semantic-colors": "SKYFE026"`.
 - `frontend-sdk/eslint.config.mjs` — register the three at `"warn"` in the `{core,web}` block, with
   a comment noting 0005 promotes them.
 - `frontend-sdk/packages/eslint-plugin/README.md` — catalog rows for 024–026.
 
 ## Contracts
 Shared predicate: `const isUiKit = (f) => /(^|\/)ui(\/|\.)/.test(f.replace(/\\/g, "/"));`
-Token-file exemption: reuse AFFE012's regex `/(^|\/|\.)(theme|tokens|palette|colors)(\/|\.|$)/i`.
+Token-file exemption: reuse SKYFE012's regex `/(^|\/|\.)(theme|tokens|palette|colors)(\/|\.|$)/i`.
 
-**AFFE024 `ui-door`** — applies to `isView(f)` only:
+**SKYFE024 `ui-door`** — applies to `isView(f)` only:
 - Report `JSXOpeningElement` whose name is an `JSXIdentifier` starting lowercase (host element).
 - Report any `JSXAttribute` named `style` or `className`, on any element.
-- Messages: `host` → "AFFE024: a View renders no host element (`<{{tag}}>`) — compose `@/ui`
+- Messages: `host` → "SKYFE024: a View renders no host element (`<{{tag}}>`) — compose `@/ui`
   primitives; if one is missing, extend the kit (ui/ is yours), never inline the paint." ;
-  `attr` → "AFFE024: no `{{attr}}` in a View — visual decisions live in `@/ui` props (token unions),
+  `attr` → "SKYFE024: no `{{attr}}` in a View — visual decisions live in `@/ui` props (token unions),
   not free-form styling."
 
-**AFFE025 `scale-only`** — applies to production `.tsx`/`.ts`, skips `isTest`, `isUiKit`, token files:
+**SKYFE025 `scale-only`** — applies to production `.tsx`/`.ts`, skips `isTest`, `isUiKit`, token files:
 - `SPACING_KEYS = /^(padding|margin)([A-Z].*)?$|^(gap|rowGap|columnGap|borderRadius|fontSize|lineHeight)$/`
 - Report `Property` with key matching, inside any object literal in a JSX `style` attribute or a
   `StyleSheet.create` argument, whose value is a numeric literal not `0` (or a string `/^\d+(px|rem|em)$/`).
 - Report string literals/template chunks in a `className` attribute containing `/\[\d+(\.\d+)?(px|rem|em|%)\]/`
   (Tailwind arbitrary value).
-- Message: "AFFE025: `{{key}}: {{value}}` is off-scale — spacing/typography come from the tokens
+- Message: "SKYFE025: `{{key}}: {{value}}` is off-scale — spacing/typography come from the tokens
   (`space`/`text` in design/tokens.ts), reached through `@/ui` props."
 
-**AFFE026 `semantic-colors`** — applies to production code, skips `isTest` + token files:
+**SKYFE026 `semantic-colors`** — applies to production code, skips `isTest` + token files:
 - Report string literals matching `/^(rgb|rgba|hsl|hsla|oklch|oklab)\(/i` anywhere.
 - Report `Property` whose key matches `/(^color$|Color$)/` with a string value in the named-color
   set `red|blue|green|white|black|gray|grey|orange|purple|pink|yellow|teal|cyan|magenta|silver|maroon|navy|olive|lime|aqua|fuchsia` (case-insensitive).
 - Report non-type import of a specifier named `palette` from a token-file source outside `isUiKit`.
-- Message: "AFFE026: raw color (`{{value}}`) — color is a semantic role (`color.*` in
-  design/tokens.ts); raw values live only in the token file. (Hex is AFFE012's half of this pair.)"
+- Message: "SKYFE026: raw color (`{{value}}`) — color is a semantic role (`color.*` in
+  design/tokens.ts); raw values live only in the token file. (Hex is SKYFE012's half of this pair.)"
 
 Rule keys ↔ codes are FINAL (doctor.mjs mapping above); pilots receive them via mirror rebase.
 
 ## Plan — for the executing agent
-1. Read `index.cjs` in full (predicates, AFFE012's shape, message voice) and `index.test.cjs`'s harness.
+1. Read `index.cjs` in full (predicates, SKYFE012's shape, message voice) and `index.test.cjs`'s harness.
 2. Write the test cases below into `index.test.cjs` (red).
 3. Implement the three rules per the contracts; rationale comment above each in the house voice.
 4. Wire doctor.mjs mapping + eslint.config.mjs warn-tier registrations + README rows; bump versions.
@@ -72,14 +72,14 @@ Rule keys ↔ codes are FINAL (doctor.mjs mapping above); pilots receive them vi
    touch the sample in this stage).
 
 ## Tests first (TDD)
-- [ ] `AFFE024 flags a host element in a view` / `flags style and className attrs` —
-- [ ] `AFFE024 ignores @/ui components, <Resource>, and non-view files` —
-- [ ] `AFFE025 flags padding: 13 in a view style object and StyleSheet.create` —
-- [ ] `AFFE025 flags className="p-[13px]"` / `allows 0` / `ignores ui/ and tokens.ts and tests` —
-- [ ] `AFFE025 ignores non-spacing numerics (width, zIndex, flex)` —
-- [ ] `AFFE026 flags rgb()/hsl()/oklch() strings and named colors in color-ish keys` —
-- [ ] `AFFE026 flags value-import of palette outside ui/, allows type-only and inside ui/` —
-- [ ] `AFFE026 ignores the token file itself` —
+- [ ] `SKYFE024 flags a host element in a view` / `flags style and className attrs` —
+- [ ] `SKYFE024 ignores @/ui components, <Resource>, and non-view files` —
+- [ ] `SKYFE025 flags padding: 13 in a view style object and StyleSheet.create` —
+- [ ] `SKYFE025 flags className="p-[13px]"` / `allows 0` / `ignores ui/ and tokens.ts and tests` —
+- [ ] `SKYFE025 ignores non-spacing numerics (width, zIndex, flex)` —
+- [ ] `SKYFE026 flags rgb()/hsl()/oklch() strings and named colors in color-ish keys` —
+- [ ] `SKYFE026 flags value-import of palette outside ui/, allows type-only and inside ui/` —
+- [ ] `SKYFE026 ignores the token file itself` —
 - [ ] `doctor.mjs maps the three rule ids` —
 
 ## Gate

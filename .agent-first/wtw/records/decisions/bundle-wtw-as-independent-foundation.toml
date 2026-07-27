@@ -1,9 +1,9 @@
 schema = 1
 id = "bundle-wtw-as-independent-foundation"
 kind = "decision"
-status = "active"
+status = "superseded"
 title = "Bundle Why This Way as an independent foundation"
-statement = "AeroFortress scaffolds and operates Why This Way as a default, independent fifth foundation alongside AVP, NYA, RTW, and NWC."
+statement = "Skies scaffolds and operates Why This Way as a default, independent fifth foundation alongside AVP, NYA, RTW, and NWC."
 rationale = "WTW preserves governing decisions and invariants without merging its data or responsibilities with the other foundation protocols."
 scopes = [
     "**/.agent-first/wtw/**",
@@ -11,8 +11,8 @@ scopes = [
     "**/CLAUDE.md",
     "**/GEMINI.md",
     "**/lefthook.yml",
-    "src/AeroFortress.Framework.Cli/**",
-    "templates/aerofortress-app/**",
+    "src/Skies.Framework.Cli/**",
+    "templates/skies-app/**",
 ]
 evidence = [
     '+    ["wtw", .. var rest] => WtwCommand.Run(rest),',

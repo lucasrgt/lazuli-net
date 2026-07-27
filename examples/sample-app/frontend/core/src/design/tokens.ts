@@ -1,7 +1,7 @@
-// DESIGN TOKENS — this app's values for the AeroFortress design taxonomy (docs/DESIGN-CONVENTIONS.md).
-// Names are the convention, protected by the design band (AFFE024-026); values are YOURS — edit the
+// DESIGN TOKENS — this app's values for the Skies design taxonomy (docs/DESIGN-CONVENTIONS.md).
+// Names are the convention, protected by the design band (SKYFE024-026); values are YOURS — edit the
 // values freely (brand, dark mode, white-label), never the names. Raw colors (hex) live ONLY here
-// (AFFE012 exempts this file by name); everything else references the semantic `color.*` roles.
+// (SKYFE012 exempts this file by name); everything else references the semantic `color.*` roles.
 
 export type SpaceToken = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 export type RadiusToken = "none" | "sm" | "md" | "lg" | "full";

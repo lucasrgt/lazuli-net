@@ -3,8 +3,8 @@ id = "NYA-01KYBQMST39BB2R498TBGKG3PD"
 title = "Validation composition discarded nested field error codes"
 lesson = "When composing validation results, preserve nested field paths and their specific error codes instead of flattening them into a generic outer-field error."
 scope = [
-    "src/AeroFortress.Framework.Abstractions/Validation.cs",
-    "tests/AeroFortress.Framework.Abstractions.Tests/ValidationTests.cs",
+    "src/Skies.Framework.Abstractions/Validation.cs",
+    "tests/Skies.Framework.Abstractions.Tests/ValidationTests.cs",
 ]
 tags = [
     "validation",

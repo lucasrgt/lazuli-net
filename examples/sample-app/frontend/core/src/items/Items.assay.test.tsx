@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { dataHonesty } from "@aerofortress/assay";
-import type { DataHonestySubject } from "@aerofortress/assay/react";
-import { defineVerification } from "@aerofortress/assay/react/vitest";
+import { dataHonesty } from "avp-assay";
+import type { DataHonestySubject } from "avp-assay/react";
+import { defineVerification } from "avp-assay/react/vitest";
 import { SAMPLE_API_BASE } from "../api";
 import { ItemsView } from "./Items.view";
 

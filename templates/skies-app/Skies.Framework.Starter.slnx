@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Skies.Framework.Starter.Api/Skies.Framework.Starter.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Skies.Framework.Starter.Tests/Skies.Framework.Starter.Tests.csproj" />
+  </Folder>
+</Solution>

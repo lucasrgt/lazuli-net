@@ -1,0 +1,12 @@
+# Git hooks via lefthook. The index roots the fast commit check; commits being pushed root the complete affected
+# proof closure. Gate-control edits are doctor-validated without widening application proofs. The CLI owns
+# selection, so no feature annotation or caller-authored filter can weaken either.
+pre-commit:
+  commands:
+    foundation-check:
+      run: dotnet tool run skies check --task "pre-commit review" --staged --fast
+
+pre-push:
+  commands:
+    foundation-check:
+      run: dotnet tool run skies check --task "pre-push review" --base origin/main --fast

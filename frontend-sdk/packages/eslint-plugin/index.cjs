@@ -4,10 +4,10 @@ const fs = require("fs");
 const path = require("path");
 const { version } = require("./package.json");
 
-// eslint-plugin-aerofortress — the frontend harness (AFFE*). The front-side parallel of the backend's Roslyn analyzers
-// (AeroFortress.Framework.Doctor): it polices the MVVM seam so React Native + web screens stay wired, not mocked — the View
+// eslint-plugin-skies — the frontend harness (SKYFE*). The front-side parallel of the backend's Roslyn analyzers
+// (Skies.Framework.Doctor): it polices the MVVM seam so React Native + web screens stay wired, not mocked — the View
 // renders, the ViewModel is the only data door, and no fixture/mock leaks into production. Doctor-removable: delete
-// the plugin and the app still builds; you only lose enforcement. Canonical home: aerofortress-framework/frontend-sdk.
+// the plugin and the app still builds; you only lose enforcement. Canonical home: Skies/frontend-sdk.
 
 const GENERATED_CLIENT = /(^|\/)client\.gen(\/|$)/;     // every generated file, including contract models
 const GENERATED_OPERATIONS = /(^|\/)client\.gen(?:\/(?!model(?:\/|$))|$)/; // transport/hooks, never model values
@@ -24,9 +24,9 @@ const isGenerated = (f) => GENERATED_CLIENT.test(f.replace(/\\/g, "/"));
 // principled allowance, not a general escape hatch. (This is the cross-cutting infra Angular puts behind
 // CanActivate / an AuthService — framework primitives the app composes, not a DSL.)
 const isInfraDataDoor = (f) => /(^|\/)lib\/(session|guards)(\.|\/)/.test(f.replace(/\\/g, "/"));
-// The design band's exemption boundaries (AFFE024-026, DESIGN-CONVENTIONS.md): the app's ui/ kit implements the
+// The design band's exemption boundaries (SKYFE024-026, DESIGN-CONVENTIONS.md): the app's ui/ kit implements the
 // design vocabulary (it touches host elements and pixel values BY JOB), and the token files define the raw values
-// (the same filename pattern AFFE012 exempts). Everything else speaks roles and scales only.
+// (the same filename pattern SKYFE012 exempts). Everything else speaks roles and scales only.
 const isUiKit = (f) => /(^|\/)ui(\/|\.)/.test(f.replace(/\\/g, "/"));
 const TOKEN_FILES = /(^|\/|\.)(theme|tokens|palette|colors)(\/|\.|$)/i;
 
@@ -212,14 +212,14 @@ function hasPresenceGuard(fn, names) {
 }
 
 const rules = {
-  // AFFE001 — a View renders only; it owns no data access. Server data comes from its ViewModel.
+  // SKYFE001 — a View renders only; it owns no data access. Server data comes from its ViewModel.
   "view-purity": {
     meta: {
       type: "problem",
       docs: { description: "A View (*.view.tsx) imports no data layer; it consumes its ViewModel." },
       messages: {
         impure:
-          "AFFE001: a View renders only — get server data from its ViewModel (*.viewModel.ts), not the client/axios/react-query.",
+          "SKYFE001: a View renders only — get server data from its ViewModel (*.viewModel.ts), not the client/axios/react-query.",
       },
     },
     create(context) {
@@ -237,16 +237,16 @@ const rules = {
     },
   },
 
-  // AFFE002 — the ViewModel is the only data door: only *.viewModel.ts may import the generated client.
+  // SKYFE002 — the ViewModel is the only data door: only *.viewModel.ts may import the generated client.
   "data-door": {
     meta: {
       type: "problem",
       docs: { description: "Only a *.viewModel.ts may import the generated client." },
       messages: {
         offdoor:
-          "AFFE002: the generated client is the ViewModel's alone — import it only from a *.viewModel.ts (one data door).",
+          "SKYFE002: the generated client is the ViewModel's alone — import it only from a *.viewModel.ts (one data door).",
         laundered:
-          "AFFE002: re-exporting the generated client launders the data door — a helper that `export … from \"client.gen\"` hands every importer the client without ever naming it. The door is the ViewModel; don't re-export the client through anything else.",
+          "SKYFE002: re-exporting the generated client launders the data door — a helper that `export … from \"client.gen\"` hands every importer the client without ever naming it. The door is the ViewModel; don't re-export the client through anything else.",
       },
     },
     create(context) {
@@ -271,7 +271,7 @@ const rules = {
     },
   },
 
-  // AFFE009 — the ViewModel is platform-agnostic: no react-native / expo import. Platform capabilities
+  // SKYFE009 — the ViewModel is platform-agnostic: no react-native / expo import. Platform capabilities
   // (storage, navigation, push) are injected ports, not direct imports — so the ViewModel + the rest of the
   // core (client, types) stay shareable web<->mobile and testable in Vitest (jsdom), with the View the only
   // platform-specific layer.
@@ -281,7 +281,7 @@ const rules = {
       docs: { description: "A *.viewModel.ts imports no react-native / expo (platform-agnostic core)." },
       messages: {
         platform:
-          "AFFE009: a ViewModel is platform-agnostic — no react-native/expo import. Inject platform capabilities as ports so the core stays shareable web↔mobile.",
+          "SKYFE009: a ViewModel is platform-agnostic — no react-native/expo import. Inject platform capabilities as ports so the core stays shareable web↔mobile.",
       },
     },
     create(context) {
@@ -298,7 +298,7 @@ const rules = {
     },
   },
 
-  // AFFE005 — every ViewModel has a co-located test that *exercises* it. The triple's third leg: a screen is
+  // SKYFE005 — every ViewModel has a co-located test that *exercises* it. The triple's third leg: a screen is
   // not done when it renders + has a data door but no proof the wiring mounts. The test need not assert
   // behavior — mounting useXModel() inside QueryClientProvider already compiles the ViewModel against the real
   // generated client and proves the hook is callable without crashing. That is the "wired, not mocked"
@@ -310,9 +310,9 @@ const rules = {
       docs: { description: "Every *.viewModel.ts has a co-located *.test.tsx that renderHook()s it." },
       messages: {
         missing:
-          "AFFE005: a ViewModel needs a co-located test — create {{test}} that renderHook()s {{model}} (prove the wiring mounts; wired, not just typed).",
+          "SKYFE005: a ViewModel needs a co-located test — create {{test}} that renderHook()s {{model}} (prove the wiring mounts; wired, not just typed).",
         inert:
-          "AFFE005: {{test}} exists but doesn't exercise the ViewModel — it must import ./{{base}}.viewModel and call renderHook() (mount the data door against the real client).",
+          "SKYFE005: {{test}} exists but doesn't exercise the ViewModel — it must import ./{{base}}.viewModel and call renderHook() (mount the data door against the real client).",
       },
     },
     create(context) {
@@ -337,10 +337,10 @@ const rules = {
     },
   },
 
-  // AFFE006 — the integration tier: every SCREEN (a *.view.tsx that consumes a ViewModel) has a co-located test
-  // that RENDERS the View (not just renderHook on the ViewModel). renderHook (AFFE005) proves the data door mounts;
+  // SKYFE006 — the integration tier: every SCREEN (a *.view.tsx that consumes a ViewModel) has a co-located test
+  // that RENDERS the View (not just renderHook on the ViewModel). renderHook (SKYFE005) proves the data door mounts;
   // render(<XView/>) proves the View composes with its ViewModel + children + design system and mounts without
-  // crashing — the front-side of the backend's integration tests. Same anti-test-theater line as AFFE005: presence
+  // crashing — the front-side of the backend's integration tests. Same anti-test-theater line as SKYFE005: presence
   // + that it renders the View is enforced, the assertions stay per-screen judgment. Start as "warn" in an app with
   // a test backlog; promote to "error" once every screen has its render test.
   //
@@ -358,9 +358,9 @@ const rules = {
       docs: { description: "Every screen (a *.view.tsx that imports a ViewModel) has a co-located *.test.tsx that render()s the View." },
       messages: {
         missing:
-          "AFFE006: a screen View needs a co-located integration test — create {{test}} that render()s <{{component}}> (prove the screen mounts + composes, not only the ViewModel).",
+          "SKYFE006: a screen View needs a co-located integration test — create {{test}} that render()s <{{component}}> (prove the screen mounts + composes, not only the ViewModel).",
         inert:
-          "AFFE006: {{test}} exists but doesn't render the View — it must import ./{{base}}.view and call render() (mount the View, not only renderHook the ViewModel).",
+          "SKYFE006: {{test}} exists but doesn't render the View — it must import ./{{base}}.view and call render() (mount the View, not only renderHook the ViewModel).",
       },
     },
     create(context) {
@@ -400,13 +400,13 @@ const rules = {
     },
   },
 
-  // AFFE003 — no mock/fixture/MSW import in production code (only under *.test.*).
+  // SKYFE003 — no mock/fixture/MSW import in production code (only under *.test.*).
   "no-mock": {
     meta: {
       type: "problem",
       docs: { description: "No mock/fixture/MSW import outside tests." },
       messages: {
-        mock: "AFFE003: no mock/fixture/MSW in production code — mocks live only under *.test.* (wired, not mocked).",
+        mock: "SKYFE003: no mock/fixture/MSW in production code — mocks live only under *.test.* (wired, not mocked).",
       },
     },
     create(context) {
@@ -416,7 +416,7 @@ const rules = {
     },
   },
 
-  // AFFE010 — a View routes loading/error/empty through the spine (<Resource> over an AsyncState), never raw
+  // SKYFE010 — a View routes loading/error/empty through the spine (<Resource> over an AsyncState), never raw
   // react-query booleans. The moment a View hand-reads isPending/isError it has taken on state handling the spine
   // exists to make exhaustive — and the forgotten branch (no empty state, no error UI) is exactly what slips
   // through. So the booleans are the ViewModel's (it projects them via toAsyncState); the View consumes the union.
@@ -426,7 +426,7 @@ const rules = {
       docs: { description: "A View handles async state through <Resource>, not raw isPending/isError." },
       messages: {
         raw:
-          "AFFE010: a View routes loading/error/empty through <Resource> (the spine), not raw `{{name}}` — expose the resource as AsyncState in the ViewModel and render it via <Resource>, so every state is handled by construction.",
+          "SKYFE010: a View routes loading/error/empty through <Resource> (the spine), not raw `{{name}}` — expose the resource as AsyncState in the ViewModel and render it via <Resource>, so every state is handled by construction.",
       },
     },
     create(context) {
@@ -455,7 +455,7 @@ const rules = {
     },
   },
 
-  // AFFE011 — every locale in a *.i18n.ts declares the same keys. A feature's copy lives as sibling catalogs
+  // SKYFE011 — every locale in a *.i18n.ts declares the same keys. A feature's copy lives as sibling catalogs
   // (ptBR / esES / enUS …); a key added to one but not the others is a silent untranslated string at runtime. The
   // rule compares the top-level key sets across the file's exported object literals and flags any catalog missing a
   // key its siblings have. (Catalog assembly + the "no hardcoded string" half are the generator's / a later rule's
@@ -466,7 +466,7 @@ const rules = {
       docs: { description: "Every locale catalog in a *.i18n.ts declares the same keys." },
       messages: {
         missing:
-          "AFFE011: i18n catalog `{{catalog}}` is missing key(s) {{keys}} that sibling locales declare — every locale must carry the same keys.",
+          "SKYFE011: i18n catalog `{{catalog}}` is missing key(s) {{keys}} that sibling locales declare — every locale must carry the same keys.",
       },
     },
     create(context) {
@@ -523,7 +523,7 @@ const rules = {
     },
   },
 
-  // AFFE012 — no inline hex color in production code. Color is a design-system decision; a literal `#3b82f6` in a
+  // SKYFE012 — no inline hex color in production code. Color is a design-system decision; a literal `#3b82f6` in a
   // screen forks the palette and defeats theming (dark mode, white-label). Colors come from a token (the theme),
   // so the only place a hex literal belongs is where the tokens are DEFINED — those files (theme/tokens/palette)
   // are exempt; everywhere else a hex is the smell the rule catches.
@@ -532,7 +532,7 @@ const rules = {
       type: "problem",
       docs: { description: "No inline hex color outside the token/theme definition files." },
       messages: {
-        hex: "AFFE012: no inline hex color (`{{hex}}`) — use a design token from the theme, not a literal.",
+        hex: "SKYFE012: no inline hex color (`{{hex}}`) — use a design token from the theme, not a literal.",
       },
     },
     create(context) {
@@ -550,25 +550,25 @@ const rules = {
     },
   },
 
-  // AFFE013 — every mutation surfaces its error. A react-query `.mutate(...)` / `.mutateAsync(...)` whose options
+  // SKYFE013 — every mutation surfaces its error. A react-query `.mutate(...)` / `.mutateAsync(...)` whose options
   // object has no `onError` is a SILENT failure: the command fails and the user sees nothing. The front-side of the
   // backend's error_handling discipline — there, a Result's sad path is forced; here, a mutation must route its
   // error somewhere (a toast, a saveError state, a banner). Scoped to *.viewModel.ts (the data door owns commands).
   // It enforces PRESENCE of onError, not what it does (anti-test-theater): wiring the error out is the bar, the
   // UX of it stays per-screen judgment.
   //
-  // `{ globalSurface: true }` — for apps running the AFFE027 mutation defaults: the QueryClient's global
+  // `{ globalSurface: true }` — for apps running the SKYFE027 mutation defaults: the QueryClient's global
   // MutationCache.onError already routes EVERY failure through the feedback seam (and react-query fires it
   // regardless of per-call handlers), so a bare `.mutate()` is surfaced by construction and the per-call demand
   // would be the redundant second handler this rule refuses to require. The empty `onError: () => {}` stays
   // flagged either way — it is dead paperwork. Set the option only alongside `query-client-defaults: "error"`
-  // (AFFE027 is what makes the claim true).
+  // (SKYFE027 is what makes the claim true).
   "mutation-error-handled": {
     meta: {
       type: "problem",
       docs: {
         description:
-          "Every mutation surfaces its failure — via an onError handler, a read .isError state, or a try/catch around mutateAsync (no silent failure). With { globalSurface: true } (the AFFE027 defaults wired), the global onError is the surface and only an empty onError is flagged.",
+          "Every mutation surfaces its failure — via an onError handler, a read .isError state, or a try/catch around mutateAsync (no silent failure). With { globalSurface: true } (the SKYFE027 defaults wired), the global onError is the surface and only an empty onError is flagged.",
       },
       schema: [
         {
@@ -579,9 +579,9 @@ const rules = {
       ],
       messages: {
         unhandled:
-          "AFFE013: a mutation must surface its error (no silent failure; the front-side of the backend's error_handling). Use ANY ONE: pass `onError` to .{{method}}(args, { onError }); OR read `{{name}}.isError` and expose it as state the View renders; OR `await {{name}}.mutateAsync()` inside a try/catch that sets an error surface.",
+          "SKYFE013: a mutation must surface its error (no silent failure; the front-side of the backend's error_handling). Use ANY ONE: pass `onError` to .{{method}}(args, { onError }); OR read `{{name}}.isError` and expose it as state the View renders; OR `await {{name}}.mutateAsync()` inside a try/catch that sets an error surface.",
         empty:
-          "AFFE013: this `onError` swallows the failure — an empty handler is the silent failure with paperwork. Route the error somewhere the user can see (set an error state, show a toast), or read `{{name}}.isError` as state instead.",
+          "SKYFE013: this `onError` swallows the failure — an empty handler is the silent failure with paperwork. Route the error somewhere the user can see (set an error state, show a toast), or read `{{name}}.isError` as state instead.",
       },
     },
     create(context) {
@@ -679,7 +679,7 @@ const rules = {
               context.report({ node: handler, messageId: "empty", data: { name: objName } });
             return;
           }
-          // With the AFFE027 defaults wired, the global MutationCache.onError surfaces every failure — a bare
+          // With the SKYFE027 defaults wired, the global MutationCache.onError surfaces every failure — a bare
           // call is handled by construction, and only the empty handler above remains worth flagging.
           if (globalSurface) return;
           // B) the mutation handle's error state is read in this file (surfaced as state the View renders).
@@ -694,9 +694,9 @@ const rules = {
     },
   },
 
-  // AFFE014 — no hardcoded user-facing copy in a View. Targets JSX text children (the `>text<` between tags) that
+  // SKYFE014 — no hardcoded user-facing copy in a View. Targets JSX text children (the `>text<` between tags) that
   // contain a letter — almost always visible copy that must go through i18n (t()), so it lands in the catalog
-  // AFFE011 then keeps complete across locales. Deliberately scoped to JSXText (high signal, near-zero false
+  // SKYFE011 then keeps complete across locales. Deliberately scoped to JSXText (high signal, near-zero false
   // positives): `{t("…")}` is an expression (not text) so it's never flagged, and className / testID / name /
   // variant are attributes (not children) so they're never flagged either. The trade-off is COVERAGE not noise —
   // copy hidden in props (placeholder=…) or variables is NOT caught here (a Phase-2 copy-prop whitelist can add
@@ -707,7 +707,7 @@ const rules = {
       docs: { description: "A View has no hardcoded user-facing text — JSX text goes through i18n (t())." },
       messages: {
         hardcoded:
-          'AFFE014: user-facing text must go through i18n — wrap "{{text}}" in t() (no hardcoded copy in a View).',
+          'SKYFE014: user-facing text must go through i18n — wrap "{{text}}" in t() (no hardcoded copy in a View).',
       },
     },
     create(context) {
@@ -744,7 +744,7 @@ const rules = {
     },
   },
 
-  // AFFE015 — no imperative redirect inside useEffect. A redirect-on-state belongs in a DECLARATIVE element returned
+  // SKYFE015 — no imperative redirect inside useEffect. A redirect-on-state belongs in a DECLARATIVE element returned
   // from render (<Redirect> on expo-router, <Navigate> on TanStack), never an effect: an effect runs AFTER paint and
   // re-fires on every re-render. On expo-router web it is catastrophic — the router FREEZES the source screen instead
   // of unmounting it, so the effect loops (replace -> remount target -> refetch a guard's my-X 404 -> re-render ->
@@ -762,7 +762,7 @@ const rules = {
       },
       messages: {
         effectReplace:
-          "AFFE015: no imperative redirect (`{{call}}`) inside useEffect — it runs after render and re-fires on every re-render (a flash on TanStack; on expo-router web an infinite navigation/refetch loop that crashes the screen). Redirect declaratively instead: `if (<terminal state>) return <Redirect href={…} />;` (expo) / `<Navigate to={…} />` (TanStack).",
+          "SKYFE015: no imperative redirect (`{{call}}`) inside useEffect — it runs after render and re-fires on every re-render (a flash on TanStack; on expo-router web an infinite navigation/refetch loop that crashes the screen). Redirect declaratively instead: `if (<terminal state>) return <Redirect href={…} />;` (expo) / `<Navigate to={…} />` (TanStack).",
       },
     },
     create(context) {
@@ -803,10 +803,10 @@ const rules = {
     },
   },
 
-  // AFFE016 — the session is written through ONE seam (lib/session). The bug: token writes scattered across
+  // SKYFE016 — the session is written through ONE seam (lib/session). The bug: token writes scattered across
   // viewModels (login, signup, impersonate), each of which must REMEMBER to reset the `me` cache — and the one that
   // forgets bounces the just-authenticated user back to login (a stale anonymous `me` error survives the sign-in).
-  // Centralizing the write in the seam pairs token + cache-reset by construction. Same "one door" shape as AFFE002:
+  // Centralizing the write in the seam pairs token + cache-reset by construction. Same "one door" shape as SKYFE002:
   // only the seam may import the token setter; everywhere else goes through the seam's signIn/signOut.
   "session-one-door": {
     meta: {
@@ -817,9 +817,9 @@ const rules = {
       },
       messages: {
         offdoor:
-          "AFFE016: write the session only through the seam — import the token setter (`{{name}}`) into `lib/session` and expose signIn/signOut, not here. A scattered token write that forgets to reset the `me` query bounces the just-authenticated user back to login.",
+          "SKYFE016: write the session only through the seam — import the token setter (`{{name}}`) into `lib/session` and expose signIn/signOut, not here. A scattered token write that forgets to reset the `me` query bounces the just-authenticated user back to login.",
         storage:
-          "AFFE016: don't write the token to storage here (`{{call}}(\"{{key}}\", …)`) — that is a session write outside the seam, and it skips the `me`-cache reset the seam pairs with it. Call the seam's signIn/signOut instead; only `lib/session` touches token storage.",
+          "SKYFE016: don't write the token to storage here (`{{call}}(\"{{key}}\", …)`) — that is a session write outside the seam, and it skips the `me`-cache reset the seam pairs with it. Call the seam's signIn/signOut instead; only `lib/session` touches token storage.",
       },
     },
     create(context) {
@@ -860,10 +860,10 @@ const rules = {
     },
   },
 
-  // AFFE017 — a route guard branches its redirect on a tri-state SessionState, NEVER a raw `isAuthenticated`
+  // SKYFE017 — a route guard branches its redirect on a tri-state SessionState, NEVER a raw `isAuthenticated`
   // boolean. The boolean has no "still loading" — it is false while the session is in flight, so the guard fires its
   // redirect before the answer settles (the canonical bounce-to-login). Branch on `session.status` instead, where
-  // `loading` is a distinct case you must handle. The read-side twin of AFFE010 (a View routes state through the
+  // `loading` is a distinct case you must handle. The read-side twin of SKYFE010 (a View routes state through the
   // spine's union, not raw `isPending`). Scoped to route/guard files — where redirects live.
   "guard-tristate": {
     meta: {
@@ -874,7 +874,7 @@ const rules = {
       },
       messages: {
         boolRedirect:
-          "AFFE017: don't redirect on a raw `{{name}}` boolean — it reads 'still loading' as 'signed out', bouncing a not-yet-settled user to login. Branch on a tri-state session: handle `loading` (defer), then `if (session.status === 'anonymous') return <Navigate…/>` (use the spine's SessionState).",
+          "SKYFE017: don't redirect on a raw `{{name}}` boolean — it reads 'still loading' as 'signed out', bouncing a not-yet-settled user to login. Branch on a tri-state session: handle `loading` (defer), then `if (session.status === 'anonymous') return <Navigate…/>` (use the spine's SessionState).",
       },
     },
     create(context) {
@@ -892,7 +892,7 @@ const rules = {
     },
   },
 
-  // AFFE018 — a route that reads a REQUIRED id param must guard its absence with a declarative redirect. Hitting the
+  // SKYFE018 — a route that reads a REQUIRED id param must guard its absence with a declarative redirect. Hitting the
   // route param-less (a bookmark, a stale/mis-wired link) otherwise renders a "ghost" screen bound to an empty id —
   // the pilot's empty "Propriedade" thread. The fix is `if (!id) return <Redirect href={…} />` before the View. Scoped
   // to expo-router's `useLocalSearchParams` (the one router where a path/search param can be absent at render; on
@@ -906,7 +906,7 @@ const rules = {
       },
       messages: {
         unguarded:
-          "AFFE018: the route reads `{{name}}` from useLocalSearchParams but never guards its absence — a param-less hit (bookmark / stale link) renders a ghost screen on an empty id. Add `if (!{{name}}) return <Redirect href={…} />;` before rendering the View.",
+          "SKYFE018: the route reads `{{name}}` from useLocalSearchParams but never guards its absence — a param-less hit (bookmark / stale link) renders a ghost screen on an empty id. Add `if (!{{name}}) return <Redirect href={…} />;` before rendering the View.",
       },
     },
     create(context) {
@@ -930,7 +930,7 @@ const rules = {
     },
   },
 
-  // AFFE019 — no bare `router.back()` / `history.back()`. On web a deep-linked / refreshed screen has no in-app
+  // SKYFE019 — no bare `router.back()` / `history.back()`. On web a deep-linked / refreshed screen has no in-app
   // history, so back() is a no-op and the "Back" button is dead (the pilot migrated ~13 screens off it). Route every
   // Back affordance through a guarded helper — the spine's `safeBack(router, fallback)` / an app `useGoBack` — that
   // pops when it can and otherwise replaces to a parent. A file that already guards with `canGoBack` is fine; the
@@ -944,7 +944,7 @@ const rules = {
       },
       messages: {
         bareBack:
-          "AFFE019: no bare `{{call}}` — on web a deep-linked / refreshed screen has no in-app history, so it does nothing (a dead 'Back' button). Use a guarded helper: `useGoBack(fallback)` / `safeBack(router, fallback)` (pops when it can, else replaces to a parent).",
+          "SKYFE019: no bare `{{call}}` — on web a deep-linked / refreshed screen has no in-app history, so it does nothing (a dead 'Back' button). Use a guarded helper: `useGoBack(fallback)` / `safeBack(router, fallback)` (pops when it can, else replaces to a parent).",
       },
     },
     create(context) {
@@ -968,7 +968,7 @@ const rules = {
     },
   },
 
-  // AFFE020 — the API base URL comes from CONFIGURATION, never a hardcoded host baked into the client's construction
+  // SKYFE020 — the API base URL comes from CONFIGURATION, never a hardcoded host baked into the client's construction
   // (`axios.create({ baseURL: "http://localhost:8080" })`). A baked literal can't follow dev/prod or a different
   // port, so it silently 404s when the backend runs elsewhere — the pilot's "front says :8080, API runs on :5000"
   // bug (the registered user bounced to login because `me` 404'd). Read it from env (`import.meta.env.VITE_API_URL`
@@ -984,7 +984,7 @@ const rules = {
       },
       messages: {
         hardcoded:
-          "AFFE020: don't hardcode the API base URL (`{{url}}`) in the client's construction — it can't follow dev/prod or a different port and silently 404s when the backend runs elsewhere. Read it from env (`import.meta.env.VITE_API_URL` / `process.env.EXPO_PUBLIC_API_URL`) with a relative or env fallback; the backend pins its dev port in launchSettings.",
+          "SKYFE020: don't hardcode the API base URL (`{{url}}`) in the client's construction — it can't follow dev/prod or a different port and silently 404s when the backend runs elsewhere. Read it from env (`import.meta.env.VITE_API_URL` / `process.env.EXPO_PUBLIC_API_URL`) with a relative or env fallback; the backend pins its dev port in launchSettings.",
       },
     },
     create(context) {
@@ -1006,10 +1006,10 @@ const rules = {
     },
   },
 
-  // AFFE021 — no dangerouslySetInnerHTML outside one audited seam. React's JSX escapes text by construction;
+  // SKYFE021 — no dangerouslySetInnerHTML outside one audited seam. React's JSX escapes text by construction;
   // dangerouslySetInnerHTML is the single opt-out, and server/user-influenced HTML through it is XSS. If the app
   // truly renders rich HTML (a CMS body), that rendering lives in ONE seam (lib/html) where the sanitizer is
-  // wired and reviewable — the same one-door shape as AFFE002/AFFE016. Everywhere else the prop is flagged.
+  // wired and reviewable — the same one-door shape as SKYFE002/SKYFE016. Everywhere else the prop is flagged.
   "no-raw-html": {
     meta: {
       type: "problem",
@@ -1019,7 +1019,7 @@ const rules = {
       },
       messages: {
         rawHtml:
-          "AFFE021: no dangerouslySetInnerHTML here — JSX already escapes; raw HTML is the XSS door. If the app renders rich HTML, do it in ONE seam (lib/html) with the sanitizer wired, and use that component.",
+          "SKYFE021: no dangerouslySetInnerHTML here — JSX already escapes; raw HTML is the XSS door. If the app renders rich HTML, do it in ONE seam (lib/html) with the sanitizer wired, and use that component.",
       },
     },
     create(context) {
@@ -1034,7 +1034,7 @@ const rules = {
     },
   },
 
-  // AFFE022 — never navigate to a value that arrived in the URL. `router.replace(returnTo)` /
+  // SKYFE022 — never navigate to a value that arrived in the URL. `router.replace(returnTo)` /
   // `window.location.href = next` where the target derives from a route/search param is an open redirect: a
   // crafted link sends the user (and their session-carrying browser) anywhere the attacker chose — the phishing
   // primitive. The fix is an allowlist: map the param to a KNOWN in-app route (`const to = routes[returnTo] ??
@@ -1049,7 +1049,7 @@ const rules = {
       },
       messages: {
         openRedirect:
-          "AFFE022: `{{call}}` navigates to a value that arrived in the URL (`{{name}}`) — an open redirect: a crafted link sends the user anywhere. Map it through an allowlist of known routes (`routes[{{name}}] ?? \"/home\"`) and navigate to the mapped value.",
+          "SKYFE022: `{{call}}` navigates to a value that arrived in the URL (`{{name}}`) — an open redirect: a crafted link sends the user anywhere. Map it through an allowlist of known routes (`routes[{{name}}] ?? \"/home\"`) and navigate to the mapped value.",
       },
     },
     create(context) {
@@ -1119,7 +1119,7 @@ const rules = {
     },
   },
 
-  // AFFE024 — the ui-door: a View renders no host element and carries no style/className. The AFFE002 one-door
+  // SKYFE024 — the ui-door: a View renders no host element and carries no style/className. The SKYFE002 one-door
   // pattern applied to paint: everything visual reaches a screen through the app's `@/ui` kit, whose props are
   // token unions — so a `<div>` or a free-form class in a View is a visual decision escaping the design system.
   // The sample's pre-kit ui.tsx leaked exactly this (a className passthrough) and one hatch reopened every
@@ -1131,8 +1131,8 @@ const rules = {
         description: "A View renders no host element and no style/className — everything visual comes from @/ui.",
       },
       messages: {
-        host: "AFFE024: a View renders no host element (`<{{tag}}>`) — compose `@/ui` primitives; if one is missing, extend the kit (ui/ is yours), never inline the paint.",
-        attr: "AFFE024: no `{{attr}}` in a View — visual decisions live in `@/ui` props (token unions), not free-form styling.",
+        host: "SKYFE024: a View renders no host element (`<{{tag}}>`) — compose `@/ui` primitives; if one is missing, extend the kit (ui/ is yours), never inline the paint.",
+        attr: "SKYFE024: no `{{attr}}` in a View — visual decisions live in `@/ui` props (token unions), not free-form styling.",
       },
     },
     create(context) {
@@ -1153,7 +1153,7 @@ const rules = {
     },
   },
 
-  // AFFE025 — spacing/typography only from the scale. An off-scale literal (`padding: 13`, `p-[13px]`) is how
+  // SKYFE025 — spacing/typography only from the scale. An off-scale literal (`padding: 13`, `p-[13px]`) is how
   // rhythm dies one screen at a time: the eighth spacing step is a design decision, not a pixel. Scoped to style
   // contexts (a JSX `style` bag, `StyleSheet.create`) and Tailwind arbitrary values in `className`; the kit (ui/)
   // and the token files are the two places that legitimately speak pixels.
@@ -1165,9 +1165,9 @@ const rules = {
       },
       messages: {
         offscale:
-          "AFFE025: `{{key}}: {{value}}` is off-scale — spacing/typography come from the tokens (`space`/`text` in design/tokens.ts), reached through `@/ui` props.",
+          "SKYFE025: `{{key}}: {{value}}` is off-scale — spacing/typography come from the tokens (`space`/`text` in design/tokens.ts), reached through `@/ui` props.",
         arbitrary:
-          "AFFE025: Tailwind arbitrary value in `{{value}}` — spacing/typography come from the token scale mapped into the Tailwind theme, never `[Npx]`.",
+          "SKYFE025: Tailwind arbitrary value in `{{value}}` — spacing/typography come from the token scale mapped into the Tailwind theme, never `[Npx]`.",
       },
     },
     create(context) {
@@ -1233,7 +1233,7 @@ const rules = {
     },
   },
 
-  // AFFE026 — color is a semantic role, or it does not ship. AFFE012 catches the hex spelling; this closes the
+  // SKYFE026 — color is a semantic role, or it does not ship. SKYFE012 catches the hex spelling; this closes the
   // rest of the leak: rgb()/hsl()/oklch() literals, CSS named colors in color-ish style keys, and a value-import
   // of the raw palette outside the kit. A raw color in a screen forks the palette and defeats theming silently —
   // hex was only one spelling of it.
@@ -1244,11 +1244,11 @@ const rules = {
         description: "No raw color outside the token files — rgb()/hsl()/named colors and the raw palette stay behind the color.* roles.",
       },
       messages: {
-        fn: "AFFE026: raw color (`{{value}}`) — color is a semantic role (`color.*` in design/tokens.ts); raw values live only in the token file. (Hex is AFFE012's half of this pair.)",
-        named: "AFFE026: named color (`{{value}}`) in `{{key}}` — use a semantic role (`color.*`), not a CSS color name.",
-        palette: "AFFE026: the raw palette is private to the token file — components touch `color.*` roles; only ui/ reaches deeper.",
+        fn: "SKYFE026: raw color (`{{value}}`) — color is a semantic role (`color.*` in design/tokens.ts); raw values live only in the token file. (Hex is SKYFE012's half of this pair.)",
+        named: "SKYFE026: named color (`{{value}}`) in `{{key}}` — use a semantic role (`color.*`), not a CSS color name.",
+        palette: "SKYFE026: the raw palette is private to the token file — components touch `color.*` roles; only ui/ reaches deeper.",
         paletteClass:
-          "AFFE026: palette utility (`{{value}}`) — color is a semantic role; map the palette into a theme role and use `bg-primary`/`text-danger`/`border-muted`, never a raw `bg-red-500` outside ui/.",
+          "SKYFE026: palette utility (`{{value}}`) — color is a semantic role; map the palette into a theme role and use `bg-primary`/`text-danger`/`border-muted`, never a raw `bg-red-500` outside ui/.",
       },
     },
     create(context) {
@@ -1317,13 +1317,13 @@ const rules = {
     },
   },
 
-  // AFFE027 — a QueryClient carries the app's mutation defaults. The write-side of the state discipline: a bare
+  // SKYFE027 — a QueryClient carries the app's mutation defaults. The write-side of the state discipline: a bare
   // `new QueryClient()` leaves every mutation to hand-roll its own cache invalidation and its own error surface —
   // and the screen that forgets ships the pilot bug ("created a category, it only appeared after F5, with no
   // toast"; 13 of 43 ViewModels had no invalidation at all). The convention pins ONE construction shape:
   // `mutationCache: new MutationCache({ onSuccess, onError })` — success marks every query stale (active ones
   // refetch immediately; the safe, slightly-wasteful default that is always correct) and posts the success note;
-  // failure routes through the feedback seam (the global half of AFFE013). Scaffolded by tools/client-scaffold.mjs
+  // failure routes through the feedback seam (the global half of SKYFE013). Scaffolded by tools/client-scaffold.mjs
   // as lib/query.ts. Tests and the shared test harness (a test/ or test-utils/ path) construct bare clients freely
   // — isolation is their job, defaults are the app's.
   "query-client-defaults": {
@@ -1335,9 +1335,9 @@ const rules = {
       },
       messages: {
         missing:
-          "AFFE027: this QueryClient carries no mutation defaults — every mutation is left to hand-roll invalidation and error feedback, and the screen that forgets ships stale lists (the F5-to-see-your-write bug) and silent failures. Construct it with `mutationCache: new MutationCache({ onSuccess: <invalidateQueries + success note>, onError: <feedback seam> })` — scaffold lib/query.ts (tools/client-scaffold.mjs).",
+          "SKYFE027: this QueryClient carries no mutation defaults — every mutation is left to hand-roll invalidation and error feedback, and the screen that forgets ships stale lists (the F5-to-see-your-write bug) and silent failures. Construct it with `mutationCache: new MutationCache({ onSuccess: <invalidateQueries + success note>, onError: <feedback seam> })` — scaffold lib/query.ts (tools/client-scaffold.mjs).",
         incomplete:
-          "AFFE027: the MutationCache defaults are missing `{{missing}}` — `onSuccess` invalidates every active query (no list is one F5 behind its server) and `onError` routes the failure through the feedback seam (no silent failure). Wire both.",
+          "SKYFE027: the MutationCache defaults are missing `{{missing}}` — `onSuccess` invalidates every active query (no list is one F5 behind its server) and `onError` routes the failure through the feedback seam (no silent failure). Wire both.",
       },
     },
     create(context) {
@@ -1395,7 +1395,7 @@ const rules = {
     },
   },
 
-  // AFFE028 — no manual refetch ritual. With the AFFE027 defaults wired, a successful mutation already invalidates
+  // SKYFE028 — no manual refetch ritual. With the SKYFE027 defaults wired, a successful mutation already invalidates
   // every active query — so an `onSuccess` whose entire body is refetch/invalidate calls is the convention's
   // pre-history surviving as cargo cult (the pilot hand-rolled it in 30 of 43 ViewModels; the 13 that forgot were
   // the bug). Deleting it is the point: less ceremony per mutation, one fewer thing the next screen can forget.
@@ -1406,11 +1406,11 @@ const rules = {
       type: "problem",
       docs: {
         description:
-          "No onSuccess whose body only refetches/invalidates — the AFFE027 mutation defaults already invalidate every active query on success; keep handlers only when they do more.",
+          "No onSuccess whose body only refetches/invalidates — the SKYFE027 mutation defaults already invalidate every active query on success; keep handlers only when they do more.",
       },
       messages: {
         ritual:
-          "AFFE028: redundant manual refetch — the app's mutation defaults (AFFE027, lib/query.ts) already invalidate every active query on mutation success. Delete this `onSuccess`; keep a handler only when it does more than refetch.",
+          "SKYFE028: redundant manual refetch — the app's mutation defaults (SKYFE027, lib/query.ts) already invalidate every active query on mutation success. Delete this `onSuccess`; keep a handler only when it does more than refetch.",
       },
     },
     create(context) {
@@ -1479,7 +1479,7 @@ const rules = {
     },
   },
 
-  // AFFE029 — refresh-one-door. The session-rotation credential (the httpOnly cookie on web, the stored
+  // SKYFE029 — refresh-one-door. The session-rotation credential (the httpOnly cookie on web, the stored
   // refresh token on native) is BURNED by parallel rotation: the backend's theft detection sees a spent token
   // replayed and revokes the whole session family. So the Refresh slice has exactly ONE consumer surface — the
   // session seam's single-flight bootstrapSession (lib/session), which the client seam's 401 interceptor calls
@@ -1496,18 +1496,18 @@ const rules = {
       },
       messages: {
         offdoor:
-          "AFFE029: don't consume the refresh operation (`{{name}}`) here — rotation has ONE door (the session seam's single-flight bootstrapSession, which the client's 401 interceptor calls via setTokenRefresher). A second rotation path eventually runs in parallel with the first, replays a spent token, and the backend's theft detection burns the whole session family.",
+          "SKYFE029: don't consume the refresh operation (`{{name}}`) here — rotation has ONE door (the session seam's single-flight bootstrapSession, which the client's 401 interceptor calls via setTokenRefresher). A second rotation path eventually runs in parallel with the first, replays a spent token, and the backend's theft detection burns the whole session family.",
         raw:
-          "AFFE029: don't hand-roll a refresh call (`{{call}}`) here — rotation has ONE door (the session seam's single-flight bootstrapSession, which the client's 401 interceptor calls via setTokenRefresher). A parallel rotation replays a spent token and the backend's theft detection burns the whole session family.",
+          "SKYFE029: don't hand-roll a refresh call (`{{call}}`) here — rotation has ONE door (the session seam's single-flight bootstrapSession, which the client's 401 interceptor calls via setTokenRefresher). A parallel rotation replays a spent token and the backend's theft detection burns the whole session family.",
       },
     },
     create(context) {
       const f = context.filename.replace(/\\/g, "/");
       // The doors: the session/guards infra seams, the client seam itself, the generated client, and tests.
-      const isClientSeam = /(^|\/)lib\/(aerofortress-)?client(\.|\/)/.test(f);
+      const isClientSeam = /(^|\/)lib\/(skies-)?client(\.|\/)/.test(f);
       if (isInfraDataDoor(f) || isClientSeam || isGenerated(f) || isTest(f)) return {};
       const REFRESH_NAMES = /^(use)?refresh(accesstoken|token|session)?$/i;
-      const REFRESH_SOURCE = new RegExp(`${GENERATED_OPERATIONS.source}|(^|/)lib/(aerofortress-)?client`);
+      const REFRESH_SOURCE = new RegExp(`${GENERATED_OPERATIONS.source}|(^|/)lib/(skies-)?client`);
       return {
         ImportDeclaration(node) {
           if (isTypeOnly(node) || !REFRESH_SOURCE.test(node.source.value.replace(/\\/g, "/"))) return;
@@ -1528,7 +1528,7 @@ const rules = {
     },
   },
 
-  // AFFE030 — no `as never`/`as any`/`as unknown` on a navigation target. The cast exists for one reason: to
+  // SKYFE030 — no `as never`/`as any`/`as unknown` on a navigation target. The cast exists for one reason: to
   // silence the router's typed routes — and with them silenced, a drifted route literal compiles clean and 404s
   // in prod (the pilot incident: server-minted route strings navigated via `router.push(x as never)`; two of the
   // routes didn't exist in the app). The fix is never the cast: with typed routes on (expo-router
@@ -1546,9 +1546,9 @@ const rules = {
       },
       messages: {
         castNav:
-          "AFFE030: don't cast a navigation target (`as {{type}}` in `{{call}}`) — the cast silences typed routes, so a drifted/invalid route compiles clean and 404s in prod. Pass a typed route literal or the `{ pathname, params }` object (typed routes on: expo-router `experiments.typedRoutes` / TanStack's route tree); never a cast.",
+          "SKYFE030: don't cast a navigation target (`as {{type}}` in `{{call}}`) — the cast silences typed routes, so a drifted/invalid route compiles clean and 404s in prod. Pass a typed route literal or the `{ pathname, params }` object (typed routes on: expo-router `experiments.typedRoutes` / TanStack's route tree); never a cast.",
         castHref:
-          "AFFE030: don't cast `{{attr}}` on <{{component}}> (`as {{type}}`) — the cast silences typed routes, so a drifted/invalid route compiles clean and 404s in prod. Pass a typed route literal or the `{ pathname, params }` object; never a cast.",
+          "SKYFE030: don't cast `{{attr}}` on <{{component}}> (`as {{type}}`) — the cast silences typed routes, so a drifted/invalid route compiles clean and 404s in prod. Pass a typed route literal or the `{ pathname, params }` object; never a cast.",
       },
     },
     create(context) {
@@ -1619,10 +1619,10 @@ const rules = {
     },
   },
 
-  // AFFE031 — handleSubmit always carries its invalid path. RHF's `handleSubmit(onValid)` without the second
+  // SKYFE031 — handleSubmit always carries its invalid path. RHF's `handleSubmit(onValid)` without the second
   // argument swallows a validation failure SILENTLY — and when the failing field sits off-screen (another
   // tab/step of a big editor), the submit button goes completely mute: no mutation, no toast, no visible error
-  // (the pilot's "save isn't saving" prod bug — cep/lat/long failing on a hidden tab). AFFE013/AFFE027 surface a
+  // (the pilot's "save isn't saving" prod bug — cep/lat/long failing on a hidden tab). SKYFE013/SKYFE027 surface a
   // FAILED MUTATION; this failure happens BEFORE the mutation, so it was the family's real hole. The blessed fix
   // is the spine's `submitOrReveal(form.handleSubmit, onValid, { onInvalid })` — it forces the surface and
   // resolves the first invalid field so the shell can navigate to it; a hand-passed `onInvalid` also passes.
@@ -1637,7 +1637,7 @@ const rules = {
       },
       messages: {
         silent:
-          "AFFE031: `handleSubmit` with only the valid path — a validation failure is swallowed silently, and with the failing field off-screen (another tab/step) the submit button goes mute: no mutation, no toast, nothing. Use the spine's `submitOrReveal(form.handleSubmit, onValid, { onInvalid })` (it forces the surface and resolves the first invalid field to navigate to), or pass the second argument: `handleSubmit(onValid, onInvalid)`.",
+          "SKYFE031: `handleSubmit` with only the valid path — a validation failure is swallowed silently, and with the failing field off-screen (another tab/step) the submit button goes mute: no mutation, no toast, nothing. Use the spine's `submitOrReveal(form.handleSubmit, onValid, { onInvalid })` (it forces the surface and resolves the first invalid field to navigate to), or pass the second argument: `handleSubmit(onValid, onInvalid)`.",
       },
     },
     create(context) {
@@ -1659,13 +1659,13 @@ const rules = {
     },
   },
 
-  // AFFE032 — a <Controller> render that never reads `fieldState` gives a validated error NO surface on its
+  // SKYFE032 — a <Controller> render that never reads `fieldState` gives a validated error NO surface on its
   // field (the pilot's Description input: `render={({ field }) => …}` — its validation failure showed nowhere,
-  // not inline, not as a toast). The sibling of AFFE031: that one guarantees the FORM-level surface, this one the
+  // not inline, not as a toast). The sibling of SKYFE031: that one guarantees the FORM-level surface, this one the
   // FIELD-level one; together "a validation error always shows" holds by construction. Near-zero false positives:
   // passing `error={fieldState.error?.message}` on a field without validation is inert. A deliberately non-inline
   // surface must still expose the same error state explicitly. Warn-tier on entry, promoted alongside
-  // AFFE031. Only an inline render function is analyzed — a referenced render component is visible in review.
+  // SKYFE031. Only an inline render function is analyzed — a referenced render component is visible in review.
   "controller-field-state": {
     meta: {
       type: "problem",
@@ -1675,7 +1675,7 @@ const rules = {
       },
       messages: {
         blind:
-          "AFFE032: this <Controller{{name}}> render never reads `fieldState` — a validation error on the field has NO surface (no inline error under the control). Read it and pass the error through: `render={({ field, fieldState }) => <… error={fieldState.error?.message} />}`.",
+          "SKYFE032: this <Controller{{name}}> render never reads `fieldState` — a validation error on the field has NO surface (no inline error under the control). Read it and pass the error through: `render={({ field, fieldState }) => <… error={fieldState.error?.message} />}`.",
       },
     },
     create(context) {
@@ -1705,16 +1705,16 @@ const rules = {
     },
   },
 
-  // AFFE033 — every `@verify` obligation has its `@avp` proof, and every proof belongs to an obligation. The
-  // front-side of the backend's AF0030 (the
-  // manifest↔AVP bridge), and the closing leg of AeroFortress Clockwork on the frontend: a View/ViewModel that
+  // SKYFE033 — every `@verify` obligation has its `@avp` proof, and every proof belongs to an obligation. The
+  // front-side of the backend's SKY0030 (the
+  // manifest↔AVP bridge), and the closing leg of Skies Clockwork on the frontend: a View/ViewModel that
   // declares `@verify <criterion-id>` (the AVP acceptance obligation — the JSDoc twin of the backend
   // manifest criterion) must have a co-located `*.assay.test.tsx` carrying `@avp <criterion-id>` and registering a
   // `defineVerification(...)`: the assay JS verification that the behaviour actually holds, not just that it was
-  // claimed. Markers are JSDoc tags, erased at runtime — doctor-removable like every AFFE rule. Co-location binds
+  // claimed. Markers are JSDoc tags, erased at runtime — doctor-removable like every SKYFE rule. Co-location binds
   // the proof to its subject: Foo.view.tsx / Foo.viewModel.ts is proven only by Foo.assay.test.tsx, never by a marker in
   // an ordinary component test or another feature's assay. (Whether the proof PASSES is the test runner's job —
-  // Doctor 2; this rule, like AF0030, enforces the pairing exists — Doctor 1.)
+  // Doctor 2; this rule, like SKY0030, enforces the pairing exists — Doctor 1.)
   "verify-has-avp-proof": {
     meta: {
       type: "problem",
@@ -1724,17 +1724,17 @@ const rules = {
       },
       messages: {
         undeclared:
-          "AFFE033: this ViewModel declares no `@verify <criterion-id>` acceptance obligation — every feature needs at least one AVP criterion.",
+          "SKYFE033: this ViewModel declares no `@verify <criterion-id>` acceptance obligation — every feature needs at least one AVP criterion.",
         missing:
-          "AFFE033: `@verify {{id}}` declares an AVP obligation with no co-located proof — create {{test}} with an `@avp {{id}}` assay verification that proves the behaviour.",
+          "SKYFE033: `@verify {{id}}` declares an AVP obligation with no co-located proof — create {{test}} with an `@avp {{id}}` assay verification that proves the behaviour.",
         unproven:
-          "AFFE033: `@verify {{id}}` is declared but {{test}} carries no `@avp {{id}}` proof — add the assay JS verification tagged `@avp {{id}}` so the obligation is proven, not just claimed.",
+          "SKYFE033: `@verify {{id}}` is declared but {{test}} carries no `@avp {{id}}` proof — add the assay JS verification tagged `@avp {{id}}` so the obligation is proven, not just claimed.",
         inert:
-          "AFFE033: {{test}} carries `@avp {{id}}` but registers no `defineVerification(...)` for that exact criterion — one Assay case cannot lend execution to unrelated markers.",
+          "SKYFE033: {{test}} carries `@avp {{id}}` but registers no `defineVerification(...)` for that exact criterion — one Assay case cannot lend execution to unrelated markers.",
         orphan:
-          "AFFE033: {{test}} carries `@avp {{id}}` but its co-located View/ViewModel declares no matching `@verify {{id}}` obligation — declare the criterion on the subject so E2E coverage cannot ignore this proof.",
+          "SKYFE033: {{test}} carries `@avp {{id}}` but its co-located View/ViewModel declares no matching `@verify {{id}}` obligation — declare the criterion on the subject so E2E coverage cannot ignore this proof.",
         noOracle:
-          "AFFE033: `productVerification(...)` has no executable assertion — an AVP callback must contain an `expect`/assert oracle (or the scaffold's deliberate throw), not merely run code and return green.",
+          "SKYFE033: `productVerification(...)` has no executable assertion — an AVP callback must contain an `expect`/assert oracle (or the scaffold's deliberate throw), not merely run code and return green.",
       },
     },
     create(context) {
@@ -1846,7 +1846,7 @@ const rules = {
           const testPath = path.join(path.dirname(context.filename), `${base}.assay.test.tsx`);
           const testExists = fs.existsSync(testPath);
           // The proof side is read as TEXT (the file isn't parsed here) — the same plain scan the backend's
-          // AF0030 runs over its AdditionalFiles test files.
+          // SKY0030 runs over its AdditionalFiles test files.
           const proofText = testExists ? fs.readFileSync(testPath, "utf8") : "";
           const proven = idsInComments(proofText, "avp");
           const executableSource = proofText.replace(/\/\*[\s\S]*?\*\/|^\s*\/\/.*$/gm, "");
@@ -1878,7 +1878,7 @@ const rules = {
     },
   },
 
-  // AFFE034 — omitted tests are not evidence. Unit/integration runners commonly exit zero when tests are skipped,
+  // SKYFE034 — omitted tests are not evidence. Unit/integration runners commonly exit zero when tests are skipped,
   // conditional, or excluded by a focused test, so the static doctor rejects those forms before the false green.
   "no-disabled-tests": {
     meta: {
@@ -1886,9 +1886,9 @@ const rules = {
       docs: { description: "Test/spec files contain no skipped, conditional, or focused test declarations." },
       messages: {
         disabled:
-          "AFFE034: `{{call}}` disables a required test — implement or repair it; a test that did not run is not proof.",
+          "SKYFE034: `{{call}}` disables a required test — implement or repair it; a test that did not run is not proof.",
         focused:
-          "AFFE034: `{{call}}` focuses the runner on part of the suite — remove it so every required test executes.",
+          "SKYFE034: `{{call}}` focuses the runner on part of the suite — remove it so every required test executes.",
       },
     },
     create(context) {
@@ -1921,18 +1921,18 @@ const rules = {
     },
   },
 
-  // AFFE035 — every ViewModel is a user-visible feature boundary and therefore names at least two executable
+  // SKYFE035 — every ViewModel is a user-visible feature boundary and therefore names at least two executable
   // journeys: happy and sad. Resolution, path polarity and exact subject binding are workspace-level and belong
-  // to affe-feature-e2e; this local floor makes an incomplete feature red at authoring time.
+  // to skyfe-feature-e2e; this local floor makes an incomplete feature red at authoring time.
   "feature-has-e2e-flow": {
     meta: {
       type: "problem",
       docs: { description: "Every ViewModel declares stable happy and sad `@e2e <flow-id>` obligations." },
       messages: {
         missing:
-          "AFFE035: this ViewModel declares no `@e2e <flow-id>` — link every visible feature to happy and sad executable journeys.",
+          "SKYFE035: this ViewModel declares no `@e2e <flow-id>` — link every visible feature to happy and sad executable journeys.",
         incomplete:
-          "AFFE035: this ViewModel declares only one `@e2e <flow-id>` — complete depth requires distinct happy and sad surface flows.",
+          "SKYFE035: this ViewModel declares only one `@e2e <flow-id>` — complete depth requires distinct happy and sad surface flows.",
       },
     },
     create(context) {
@@ -1955,15 +1955,15 @@ const rules = {
 };
 
 const plugin = {
-  meta: { name: "eslint-plugin-aerofortress", version },
+  meta: { name: "eslint-plugin-skies", version },
   rules,
   configs: {},
 };
 
 plugin.configs["flat/recommended"] = {
-  name: "aerofortress/recommended",
-  plugins: { aerofortress: plugin },
-  rules: Object.fromEntries(Object.keys(rules).map((rule) => [`aerofortress/${rule}`, "warn"])),
+  name: "skies/recommended",
+  plugins: { skies: plugin },
+  rules: Object.fromEntries(Object.keys(rules).map((rule) => [`skies/${rule}`, "warn"])),
 };
 
 module.exports = plugin;

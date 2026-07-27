@@ -1,34 +1,13 @@
-# Git hooks via lefthook — one config across the framework (.NET via AeroFortress.Framework.slnx + the frontend-sdk workspace). The
-# doctor runs locally before code is shared. pre-commit runs the AFFE plugin self-test when SDK files change;
-# pre-push runs the backend doctor (the AF*/AFSELF* analyzers in the build) and the SDK typecheck. Glob-gated so a
+# Git hooks via lefthook — one config across the framework (.NET via Skies.Framework.slnx + the frontend-sdk workspace). The
+# doctor runs locally before code is shared. pre-commit runs the SKYFE plugin self-test when SDK files change;
+# pre-push runs the backend doctor (the SKY*/SKYSELF* analyzers in the build) and the SDK typecheck. Glob-gated so a
 # backend-only change skips the SDK checks and vice versa. Wired by `npx lefthook install` via the `prepare` script.
 pre-commit:
   commands:
-    sdk-doctor: # the AFFE rule self-test — every rule must fire on its violation and pass on what it allows
-      glob: "frontend-sdk/**/*.{cjs,mjs,ts,tsx}"
-      run: npm --prefix frontend-sdk run lint
-    governing-context:
-      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- wtw guard --task "pre-commit governance review"
-    known-recurrences:
-      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- nya check --task "pre-commit recurrence review"
-    proven-patterns:
-      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- rtw check --task "pre-commit pattern review"
-    due-deferments:
-      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- nwc check
+    foundation-check:
+      run: dotnet run --project src/Skies.Framework.Cli/Skies.Framework.Cli.csproj -c Release -- check --task "pre-commit review" --staged --fast
 
 pre-push:
   commands:
-    backend-doctor: # AF* (doctor) + AFSELF* (self-harness) analyzers run inside the build
-      glob: "**/*.cs"
-      run: dotnet build AeroFortress.Framework.slnx -v q -nologo
-    sdk-typecheck:
-      glob: "frontend-sdk/**/*.{ts,tsx}"
-      run: npm --prefix frontend-sdk run typecheck
-    governing-context:
-      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- wtw guard --base origin/main --task "pre-push governance review"
-    known-recurrences:
-      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- nya check --base origin/main --task "pre-push recurrence review"
-    proven-patterns:
-      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- rtw check --base origin/main --task "pre-push pattern review"
-    due-deferments:
-      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- nwc check
+    foundation-check:
+      run: dotnet run --project src/Skies.Framework.Cli/Skies.Framework.Cli.csproj -c Release -- check --task "pre-push review" --base origin/main --fast

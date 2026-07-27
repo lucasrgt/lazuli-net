@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// AFFE011 (cross-package) — locale parity for *.i18n.ts catalogs, as a TOOL. The eslint rule
-// (`aerofortress/i18n-completeness`) is the in-scope mechanism: when the catalogs sit inside the linted source, it pins
+// SKYFE011 (cross-package) — locale parity for *.i18n.ts catalogs, as a TOOL. The eslint rule
+// (`skies/i18n-completeness`) is the in-scope mechanism: when the catalogs sit inside the linted source, it pins
 // parity per file at lint time. But in a core-split layout the catalogs live in a SEPARATE package, outside the
 // app's eslint scope, so the rule can never see them — this tool does, by reading the files directly. Same
 // invariant (every locale object in a catalog declares the same keys; a key in one but not its siblings is a
@@ -53,7 +53,7 @@ export function checkI18nParity(files, requiredLocales = []) {
     const names = new Set(cats.map((catalog) => catalog.name));
     const missingLocales = requiredLocales.filter((locale) => !names.has(locale));
     if (missingLocales.length)
-      messages.push(`AFFE011 ${file.path}: missing locale export(s): ${missingLocales.join(", ")}`);
+      messages.push(`SKYFE011 ${file.path}: missing locale export(s): ${missingLocales.join(", ")}`);
     if (cats.length < 2) continue;
     checked++;
     const union = new Set();
@@ -62,7 +62,7 @@ export function checkI18nParity(files, requiredLocales = []) {
       const missing = [...union].filter((key) => !catalog.keys.has(key));
       if (missing.length)
         messages.push(
-          `AFFE011 ${file.path}: locale \`${catalog.name}\` missing ${missing.length} key(s): ${missing.sort().join(", ")}`,
+          `SKYFE011 ${file.path}: locale \`${catalog.name}\` missing ${missing.length} key(s): ${missing.sort().join(", ")}`,
         );
     }
   }
@@ -75,7 +75,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const requiredLocales =
     localesFlag >= 0 ? String(args.splice(localesFlag, 2)[1] ?? "").split(",").filter(Boolean) : [];
   if (args.length === 0) {
-    console.error("usage: affe-i18n-parity <catalogsDir> [...moreDirs] [--require-locales ptBR,esES,enUS]");
+    console.error("usage: skyfe-i18n-parity <catalogsDir> [...moreDirs] [--require-locales ptBR,esES,enUS]");
     process.exit(2);
   }
   const paths = args.flatMap(findCatalogs);
@@ -88,6 +88,6 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     requiredLocales,
   );
   for (const message of result.messages) console.error(message);
-  console.log(`AFFE011 i18n-parity: ${result.checked} multi-locale catalog(s) checked.`);
+  console.log(`SKYFE011 i18n-parity: ${result.checked} multi-locale catalog(s) checked.`);
   process.exit(result.ok ? 0 : 1);
 }

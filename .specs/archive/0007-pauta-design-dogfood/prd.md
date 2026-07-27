@@ -17,18 +17,18 @@ makes it the highest-signal pilot. Hostpoint is NOT the pilot: its UI is finishe
 an aesthetic it must keep.
 
 ## Why now (or why ever)
-A design layer proven only on its own sample is unproven. The doctor's history (AF0022–26, AFFE020)
+A design layer proven only on its own sample is unproven. The doctor's history (SKY0022–26, SKYFE020)
 shows rules get real on pilot contact — the fallout IS the feature. Pauta gives maximal fallout
 density; without this stage the wave ships theory.
 
 ## Outcome — done means
 - Pauta frontend carries the rebased `eslint-plugin-lazuli` mirror (0.5.0) with the design band
-  (AFFE012, 024–026) wired warn-first, per the package-first law.
+  (SKYFE012, 024–026) wired warn-first, per the package-first law.
 - Tokens scaffolded (`core … src/design/tokens.ts` equivalent path) with pauta's actual palette as
   values; mapped into `tailwind.config.ts` (the documented manual mapping, proven here).
 - The web kit scaffolded as pauta-owned `ui/`; the gross modal rebuilt as pauta's `ui/Dialog`
   following the constitution; ONE exemplar screen relifted by instantiating the 0005 recipes, blessed
-  shape included (`*.view.tsx` naming, so AFFE024 bites).
+  shape included (`*.view.tsx` naming, so SKYFE024 bites).
 - Exemplar + `ui/` lint clean with the band at ERROR (scoped); rest of the app at warn = the counted backlog.
 - Harvest report: per-rule violation counts, false positives, missing primitives/tokens/recipes →
   appended to `docs/PORTBACK-CHECKLIST.md` in lazuli-net + the relift worklist for the fan-out wave.
@@ -36,7 +36,7 @@ density; without this stage the wave ships theory.
 ## Non-goals
 - **No full-app relift here** — "todas as telas" happens as the NEXT wave: per-feature cells
   dispatched from this stage's worklist, after the pattern is proven on one screen + the modal.
-- **No full AFFE harness adoption** (MVVM restructure, data-door, i18n parity across pauta) — a
+- **No full SKYFE harness adoption** (MVVM restructure, data-door, i18n parity across pauta) — a
   separate, bigger wave; only the design band lands now.
 - **No hostpoint contact** — deferred, conditional (see index: zero-visual-delta aliasing only,
   after this harvest is digested).

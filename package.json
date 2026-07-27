@@ -1,7 +1,7 @@
 {
-  "name": "aerofortress-framework",
+  "name": "skies-workspace",
   "private": true,
-  "description": "Repo-level dev tooling (git hooks) for aerofortress-framework. The framework itself is .NET (AeroFortress.Framework.slnx); the frontend lives in the frontend-sdk workspace. This manifest exists only so lefthook can manage the hooks.",
+  "description": "Repository-level development tooling for Skies. The framework is .NET and the frontend packages live in the frontend-sdk workspace.",
   "scripts": {
     "prepare": "lefthook install"
   },

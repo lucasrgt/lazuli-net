@@ -2,7 +2,7 @@ namespace Sample.Api.Modules.Wallets;
 
 /// <summary>The Wallets module's error codes — the stable, namespaced, language-neutral keys the frontend
 /// localizes from. One registry per module: it <em>is</em> the catalog of what can go wrong here. The doctor
-/// (<c>AF0018</c>) requires every <c>Error.*</c> / <c>Validation.Check</c> to use a code from a registry like
+/// (<c>SKY0018</c>) requires every <c>Error.*</c> / <c>Validation.Check</c> to use a code from a registry like
 /// this rather than an inline literal, so the full set stays discoverable — the OpenAPI document enumerates it
 /// into the typed client, and the frontend's i18n is checked exhaustively against it.</summary>
 public static class WalletsErrorCodes

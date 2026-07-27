@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\Skies.Framework.Library.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Shipped framework package (the real-database test leg), not a test project — see Skies.Framework.Testing. -->
+    <IsPackable>true</IsPackable>
+    <IsTestProject>false</IsTestProject>
+    <Description>Skies's real-database test leg: one Postgres Testcontainer, one migrated template database, an isolated clone per test. Pairs with Skies.Framework.Testing; the in-memory fast path is Skies.Framework.Testing.InMemory.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.12.0" />
+    <PackageReference Include="Npgsql" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Skies.Framework.Testing.Postgres.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\analyzers\Skies.Framework.SelfHarness\Skies.Framework.SelfHarness.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

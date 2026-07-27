@@ -1,7 +1,7 @@
 # Monorepo architecture
 
-AeroFortress treats a monorepo as explicit product topology plus independent, ordinary .NET and npm packages.
-`AeroFortress.toml` names what exists; it does not define tasks, proof modes, dependencies, generators, or runner
+Skies treats a monorepo as explicit product topology plus independent, ordinary .NET and npm packages.
+`Skies.toml` names what exists; it does not define tasks, proof modes, dependencies, generators, or runner
 filters. Build behavior stays visible in project files, package scripts, and runner configuration.
 
 ## The closed workspace manifest
@@ -29,7 +29,7 @@ backend = "src/Hostpoint.Api"
 website = "clients/website"
 
 [framework]
-repo = "../aerofortress-framework"
+repo = "../skies"
 ```
 
 Only `[workspace]`, `[products.*]`, and the optional `[framework]` section exist. Product topology uses these path
@@ -83,8 +83,8 @@ behind base classes.
 
 ## One obligation, two execution scopes
 
-Every gate inventories the complete proof surface. `af gate --affected` executes the transitive closure rooted in
-the Git delta; `af gate --full` is the exhaustive release audit. Together they enforce:
+Every gate inventories the complete proof surface. `skies gate --affected` executes the transitive closure rooted in
+the Git delta; `skies gate --full` is the exhaustive release audit. Together they enforce:
 
 1. manifest validation, package synchronization, backend analyzers, frontend lint, and typecheck;
 2. affected backend tests and subject-bound AVP/Journey proofs, reached transitively through the C# dependency

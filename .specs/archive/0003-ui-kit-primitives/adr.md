@@ -23,9 +23,9 @@ your `ui/`, following DESIGN-CONVENTIONS.md — never reopening the shipped ones
 
 ## Alternatives considered
 - **`className` escape hatch "for flexibility"** — rejected: one escape hatch re-opens 100% of the
-  decision space; the door must actually close or AFFE024 polices a fiction.
+  decision space; the door must actually close or SKYFE024 polices a fiction.
 - **Tailwind/NativeWind in the kit** — rejected: prescribes the mechanism (explicitly the app's),
-  adds a build dependency to the sample, and arbitrary-value syntax is the exact leak AFFE025 hunts.
+  adds a build dependency to the sample, and arbitrary-value syntax is the exact leak SKYFE025 hunts.
 - **CSS modules / stylesheet file** — rejected for the canonical kit: a second styling source beside
   tokens.ts; inline lookup keeps token → pixel one greppable hop. (An app may refactor its own kit
   to its mechanism — the API contract is what's conventional.)

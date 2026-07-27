@@ -1,10 +1,10 @@
-import { toAsyncState, type AsyncState } from "@aerofortress/react";
+import { toAsyncState, type AsyncState } from "skies-react";
 // Illustrative: the orval-generated typed hook for the `list_items` slice — the ONLY data the door touches.
 import { useListItems } from "@/client.gen/sample";
 import i18n from "@/i18n";
 
 // CANONICAL FEATURE UNIT — the ViewModel (the "data door", the front-side of a backend [Slice]). It is the only
-// place that touches the generated client (AFFE002), it is platform-agnostic so it tests in jsdom (AFFE009), and
+// place that touches the generated client (SKYFE002), it is platform-agnostic so it tests in jsdom (SKYFE009), and
 // it exposes its resource as an AsyncState<T> (the spine) so the View handles every state by construction.
 
 export interface Item {

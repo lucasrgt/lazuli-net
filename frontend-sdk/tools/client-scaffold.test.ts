@@ -4,15 +4,15 @@ import { describe, expect, it } from "vitest";
 // @ts-expect-error - plain .mjs tool module, typed by its JSDoc
 import { renderFeedback, renderMutator, renderOrvalConfig, renderQueryClient } from "./client-scaffold.mjs";
 // @ts-expect-error - the CommonJS plugin, loaded for the conformance proof below
-import aerofortress from "../packages/eslint-plugin/index.cjs";
+import skies from "../packages/eslint-plugin/index.cjs";
 
 // The mutator/config pair every pilot re-derived by hand — rendered conformant by construction. What is
-// pinned: the seams the harness depends on, and the AFFE020-blessed base-URL shape.
+// pinned: the seams the harness depends on, and the SKYFE020-blessed base-URL shape.
 describe("client-scaffold", () => {
   it("the mutator injects the base URL at boot, never baking a host into the construction", () => {
     const mutator = renderMutator();
 
-    // AFFE020's blessed shape: an injectable default on instance.defaults, no baseURL: in axios.create.
+    // SKYFE020's blessed shape: an injectable default on instance.defaults, no baseURL: in axios.create.
     expect(mutator).toContain("instance.defaults.baseURL =");
     expect(mutator).not.toMatch(/axios\.create\(\{[^}]*baseURL/s);
     expect(mutator).toContain("export function configureClient");
@@ -36,8 +36,8 @@ describe("client-scaffold", () => {
     const config = renderOrvalConfig("shop", "./contract/Shop.Api.json");
 
     expect(config).toContain('target: "./contract/Shop.Api.json"');
-    expect(config).toContain('tags: ["aerofortress:asset", "aerofortress:webhook", "aerofortress:internal"]');
-    expect(config).toContain('mutator: { path: "./src/lib/aerofortress-client.ts", name: "aerofortressClient" }');
+    expect(config).toContain('tags: ["skies:asset", "skies:webhook", "skies:internal"]');
+    expect(config).toContain('mutator: { path: "./src/lib/skies-client.ts", name: "skiesClient" }');
     expect(config).toContain('target: "./src/client.gen/shop.ts"');
   });
 
@@ -90,7 +90,7 @@ describe("client-scaffold", () => {
     expect(feedback).toContain("console.error");
   });
 
-  it("the rendered lib/query.ts passes AFFE027 — conformant by construction, proved with the real rule", () => {
+  it("the rendered lib/query.ts passes SKYFE027 — conformant by construction, proved with the real rule", () => {
     const linter = new Linter();
     const lint = (code: string, filename: string) =>
       linter.verify(
@@ -98,8 +98,8 @@ describe("client-scaffold", () => {
         {
           files: ["**/*.ts"],
           languageOptions: { parser: tsParser, ecmaVersion: 2022, sourceType: "module" },
-          plugins: { aerofortress },
-          rules: { "aerofortress/query-client-defaults": "error" },
+          plugins: { skies },
+          rules: { "skies/query-client-defaults": "error" },
         },
         { filename },
       );

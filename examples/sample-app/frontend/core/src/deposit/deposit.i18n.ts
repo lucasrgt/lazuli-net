@@ -1,4 +1,4 @@
-// Feature-scoped copy for the Deposit form recipe. Three locales with identical keys (AFFE011).
+// Feature-scoped copy for the Deposit form recipe. Three locales with identical keys (SKYFE011).
 export const ptBR = {
   title: "Depositar",
   submit: "Depositar",

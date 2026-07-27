@@ -11,14 +11,14 @@ import vitest from "@vitest/eslint-plugin";
 // `npm run lint`. The root location keeps the example inside ESLint's base path while dependencies remain owned
 // by frontend-sdk; the rule self-tests run as a separate leg.
 //
-// Curated community kit alongside the AFFE rules (prior art:
-// pleiades-os / corbanx both standardize on the same kit). Two of those compose cleanly with the AFFE rules:
+// Curated community kit alongside the SKYFE rules (prior art:
+// pleiades-os / corbanx both standardize on the same kit). Two of those compose cleanly with the SKYFE rules:
 //   - @tanstack/eslint-plugin-query — react-query correctness (exhaustive deps, stable keys, no rest-destructure);
-//     the AFFE rules cover architecture, this covers RQ usage — complementary, not overlapping.
+//     the SKYFE rules cover architecture, this covers RQ usage — complementary, not overlapping.
 //   - eslint-plugin-no-secrets — entropy-based hardcoded-secret detection (the .env discipline, enforced in code).
-// The AFFE plugin is CommonJS; load it via createRequire.
+// The SKYFE plugin is CommonJS; load it via createRequire.
 const require = createRequire(import.meta.url);
-const aerofortress = require("./packages/eslint-plugin/index.cjs");
+const skies = require("./packages/eslint-plugin/index.cjs");
 // Accessibility — web (DOM) uses jsx-a11y (alt / aria / href). The mobile RN counterpart (react-native-a11y)
 // is dropped until it publishes an eslint-9 peer: its latest release still caps eslint at 8, and we keep the
 // install ERESOLVE-clean rather than pin a peer-dependency escape hatch. Restore the mobile block (and a
@@ -38,58 +38,58 @@ export default [
       // type-aware lint (projectService) — required by @typescript-eslint/no-floating-promises.
       parserOptions: { ecmaFeatures: { jsx: true }, projectService: true, tsconfigRootDir: fileURLToPath(new URL("..", import.meta.url)) },
     },
-    plugins: { aerofortress, "no-secrets": noSecrets, sonarjs, "@typescript-eslint": tsPlugin },
+    plugins: { skies, "no-secrets": noSecrets, sonarjs, "@typescript-eslint": tsPlugin },
     rules: {
       // promise safety (type-aware) — an unhandled promise is a silent failure; `void p` opts out explicitly.
       "@typescript-eslint/no-floating-promises": "error",
-      "aerofortress/view-purity": "error",
-      "aerofortress/data-door": "error",
-      "aerofortress/viewmodel-platform-agnostic": "error",
-      "aerofortress/test-colocated": "error",
-      "aerofortress/view-integration-test": "error",
-      "aerofortress/no-mock": "error",
-      "aerofortress/state-completeness": "error",
-      "aerofortress/i18n-completeness": "error",
-      "aerofortress/design-tokens": "error",
-      "aerofortress/mutation-error-handled": "error",
-      "aerofortress/no-hardcoded-copy": "error",
-      // The routing harness (AFFE015–019 + 030) — declarative redirects, one session seam, a tri-state guard,
+      "skies/view-purity": "error",
+      "skies/data-door": "error",
+      "skies/viewmodel-platform-agnostic": "error",
+      "skies/test-colocated": "error",
+      "skies/view-integration-test": "error",
+      "skies/no-mock": "error",
+      "skies/state-completeness": "error",
+      "skies/i18n-completeness": "error",
+      "skies/design-tokens": "error",
+      "skies/mutation-error-handled": "error",
+      "skies/no-hardcoded-copy": "error",
+      // The routing harness (SKYFE015–019 + 030) — declarative redirects, one session seam, a tri-state guard,
       // guarded params + Back, and no cast on a navigation target (the typed-routes mute button). Error-tier
       // (correctness), router-agnostic (expo + TanStack). The default a generated app gets.
-      "aerofortress/no-router-replace-in-effect": "error",
-      "aerofortress/session-one-door": "error",
-      "aerofortress/guard-tristate": "error",
-      "aerofortress/route-param-guard": "error",
-      "aerofortress/safe-back": "error",
-      "aerofortress/no-cast-navigation": "error",
-      // The form-validation pair (AFFE031–032) — every validation failure has a surface: the submit carries its
+      "skies/no-router-replace-in-effect": "error",
+      "skies/session-one-door": "error",
+      "skies/guard-tristate": "error",
+      "skies/route-param-guard": "error",
+      "skies/safe-back": "error",
+      "skies/no-cast-navigation": "error",
+      // The form-validation pair (SKYFE031–032) — every validation failure has a surface: the submit carries its
       // invalid path (the spine's submitOrReveal), and a <Controller> surfaces its field's error. Warn-tier on
       // entry (a single-screen form with all errors visible inline is legitimate); promote together once the
       // primitive absorbs the common case.
-      "aerofortress/submit-handles-invalid": "warn",
-      "aerofortress/controller-field-state": "warn",
-      "aerofortress/no-hardcoded-base-url": "error",
-      // The security pair (AFFE021–022) — the XSS door stays behind one sanitizing seam; a URL-supplied value
+      "skies/submit-handles-invalid": "warn",
+      "skies/controller-field-state": "warn",
+      "skies/no-hardcoded-base-url": "error",
+      // The security pair (SKYFE021–022) — the XSS door stays behind one sanitizing seam; a URL-supplied value
       // never becomes a navigation target without an allowlist. Error-tier (correctness, same bar as routing).
-      "aerofortress/no-raw-html": "error",
-      "aerofortress/no-open-redirect": "error",
-      // The design band (AFFE024–026, DESIGN-CONVENTIONS.md) — views render @/ui only, spacing/typography from the
+      "skies/no-raw-html": "error",
+      "skies/no-open-redirect": "error",
+      // The design band (SKYFE024–026, DESIGN-CONVENTIONS.md) — views render @/ui only, spacing/typography from the
       // scale, color by semantic role. Error-tier since the canonical screens landed (the recipes prove the bar).
-      "aerofortress/ui-door": "error",
-      "aerofortress/scale-only": "error",
-      "aerofortress/semantic-colors": "error",
-      // The mutation band (AFFE027–028) — the QueryClient carries the write-side defaults (invalidate on success,
+      "skies/ui-door": "error",
+      "skies/scale-only": "error",
+      "skies/semantic-colors": "error",
+      // The mutation band (SKYFE027–028) — the QueryClient carries the write-side defaults (invalidate on success,
       // feedback on error), and the hand-rolled `onSuccess: refetch` ritual those defaults obsolete is revealed.
-      "aerofortress/query-client-defaults": "error",
-      "aerofortress/no-manual-refetch-ritual": "warn",
-      // The session-rotation door (AFFE029) — refresh is consumed by ONE seam (the client's single-flight
+      "skies/query-client-defaults": "error",
+      "skies/no-manual-refetch-ritual": "warn",
+      // The session-rotation door (SKYFE029) — refresh is consumed by ONE seam (the client's single-flight
       // interceptor / the session seam); a second rotation path trips the backend's theft detection.
-      "aerofortress/refresh-one-door": "error",
-      // The AVP bridge (AFFE033) — the front-side of the backend's AF0030 and the closing leg of Clockwork: a
+      "skies/refresh-one-door": "error",
+      // The AVP bridge (SKYFE033) — the front-side of the backend's SKY0030 and the closing leg of Clockwork: a
       // `@verify <id>` obligation on a View/ViewModel must have a co-located executable Assay proof. Error-tier.
-      "aerofortress/verify-has-avp-proof": "error",
-      "aerofortress/no-disabled-tests": "error",
-      "aerofortress/feature-has-e2e-flow": "error",
+      "skies/verify-has-avp-proof": "error",
+      "skies/no-disabled-tests": "error",
+      "skies/feature-has-e2e-flow": "error",
       // curated community kit (mirrors pleiades/corbanx)
       "no-secrets/no-secrets": ["error", { tolerance: 4.5 }],
       "sonarjs/no-identical-functions": "warn",

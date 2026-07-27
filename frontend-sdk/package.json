@@ -1,19 +1,19 @@
 {
-  "name": "@aerofortress/frontend-sdk",
-  "version": "4.0.23",
+  "name": "skies-frontend-sdk",
+  "version": "4.0.0",
   "type": "module",
-  "description": "Canonical AeroFortress frontend doctor and scaffolding tools.",
+  "description": "Canonical Skies frontend doctor and scaffolding tools.",
   "license": "MIT",
   "author": "Lucas Tinoco",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lucasrgt/aerofortress-framework.git",
+    "url": "git+https://github.com/lucasrgt/skies.git",
     "directory": "frontend-sdk"
   },
-  "homepage": "https://github.com/lucasrgt/aerofortress-framework#readme",
-  "bugs": "https://github.com/lucasrgt/aerofortress-framework/issues",
+  "homepage": "https://skies.build",
+  "bugs": "https://github.com/lucasrgt/skies/issues",
   "keywords": [
-    "aerofortress",
+    "skies",
     "frontend",
     "doctor",
     "eslint",
@@ -52,15 +52,15 @@
     }
   },
   "bin": {
-    "affe-contract-freshness": "tools/contract-freshness.mjs",
-    "affe-e2e-doctor": "tools/e2e-doctor.mjs",
-    "affe-endpoint-coverage": "tools/endpoint-coverage.mjs",
-    "affe-error-code-coverage": "tools/error-code-coverage.mjs",
-    "affe-eslint-gate": "tools/eslint-gate.mjs",
-    "affe-feature-e2e": "tools/feature-e2e-coverage.mjs",
-    "affe-framework-sync": "tools/framework-sync.mjs",
-    "affe-i18n-parity": "tools/i18n-parity.mjs",
-    "affe-journey-parity": "tools/journey-parity.mjs"
+    "skyfe-contract-freshness": "tools/contract-freshness.mjs",
+    "skyfe-e2e-doctor": "tools/e2e-doctor.mjs",
+    "skyfe-endpoint-coverage": "tools/endpoint-coverage.mjs",
+    "skyfe-error-code-coverage": "tools/error-code-coverage.mjs",
+    "skyfe-eslint-gate": "tools/eslint-gate.mjs",
+    "skyfe-feature-e2e": "tools/feature-e2e-coverage.mjs",
+    "skyfe-framework-sync": "tools/framework-sync.mjs",
+    "skyfe-i18n-parity": "tools/i18n-parity.mjs",
+    "skyfe-journey-parity": "tools/journey-parity.mjs"
   },
   "publishConfig": {
     "access": "public"
@@ -70,7 +70,7 @@
   ],
   "scripts": {
     "typecheck": "npm run typecheck:spine && npm run typecheck:sample",
-    "typecheck:spine": "tsc --noEmit -p packages/aerofortress-react/tsconfig.json",
+    "typecheck:spine": "tsc --noEmit -p packages/skies-react/tsconfig.json",
     "typecheck:sample": "tsc --noEmit -p ../examples/sample-app/frontend/tsconfig.json",
     "lint": "npm run lint:source && npm run lint:rules",
     "lint:source": "cd .. && node frontend-sdk/node_modules/eslint/bin/eslint.js examples/sample-app/frontend",
@@ -83,13 +83,13 @@
     "check": "npm run typecheck && npm run lint && npm run test && npm run test:avp"
   },
   "peerDependencies": {
-    "@aerofortress/assay": "^0.4.0",
     "@playwright/test": ">=1.50.0",
+    "avp-assay": "^0.4.0",
     "eslint": ">=9",
-    "eslint-plugin-aerofortress": "^1.0.10"
+    "eslint-plugin-skies": "^4.0.0"
   },
   "peerDependenciesMeta": {
-    "@aerofortress/assay": {
+    "avp-assay": {
       "optional": true
     },
     "@playwright/test": {
@@ -97,9 +97,8 @@
     }
   },
   "devDependencies": {
-    "@aerofortress/assay": "0.4.0",
-    "@playwright/test": "1.61.1",
     "@hookform/resolvers": "^5.4.0",
+    "@playwright/test": "1.61.1",
     "@tanstack/eslint-plugin-query": "^5.62.16",
     "@tanstack/react-query": "^5.62.7",
     "@testing-library/dom": "^10.4.0",
@@ -110,11 +109,12 @@
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "@vitest/eslint-plugin": "^1.1.43",
+    "avp-assay": "^0.4.0",
+    "esbuild": "^0.28.1",
     "eslint": "^9.17.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-no-secrets": "^1.1.2",
     "eslint-plugin-sonarjs": "^4.2.0",
-    "esbuild": "^0.28.1",
     "i18next": "^24.2.0",
     "jsdom": "^25.0.1",
     "msw": "^2.15.0",

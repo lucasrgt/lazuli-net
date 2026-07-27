@@ -3,8 +3,8 @@ id = "NYA-01KYBQNER97P75Z8AMVYYJTBPG"
 title = "Gate help incorrectly entered workspace discovery"
 lesson = "Handle command-specific help before workspace discovery, argument execution, or other operational setup so help remains safe and available outside a valid workspace."
 scope = [
-    "src/AeroFortress.Framework.Cli/GateCommand.cs",
-    "tests/AeroFortress.Framework.Cli.Tests/GateOptionsTests.cs",
+    "src/Skies.Framework.Cli/GateCommand.cs",
+    "tests/Skies.Framework.Cli.Tests/GateOptionsTests.cs",
 ]
 tags = [
     "cli",

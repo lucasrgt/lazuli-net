@@ -3,7 +3,7 @@ import {
   archetype,
   criterion,
   mechanical,
-} from "@aerofortress/assay";
+} from "avp-assay";
 
 function productBehaviorProbe(subject) {
   let failure;

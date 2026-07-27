@@ -13,7 +13,7 @@ export default defineConfig({
     root: r(".."),
     environment: "jsdom",
     setupFiles: [r("./vitest.setup.ts")],
-    // __fixtures__ holds textual ESLint RuleTester fixtures (including AFFE033's fake Assay calls),
+    // __fixtures__ holds textual ESLint RuleTester fixtures (including SKYFE033's fake Assay calls),
     // not runnable suites — keep them out of the run (+ Vitest's own defaults).
     exclude: [...configDefaults.exclude, "**/__fixtures__/**"],
     include: [
@@ -25,10 +25,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@aerofortress/react": r("./packages/aerofortress-react/src/index.ts"),
-      "@aerofortress/assay/react/vitest": r("./node_modules/@aerofortress/assay/dist/react/vitest.js"),
-      "@aerofortress/assay/react": r("./node_modules/@aerofortress/assay/dist/react.js"),
-      "@aerofortress/assay": r("./node_modules/@aerofortress/assay/dist/index.js"),
+      "skies-react": r("./packages/skies-react/src/index.ts"),
+      "avp-assay/react/vitest": r("./node_modules/avp-assay/dist/react/vitest.js"),
+      "avp-assay/react": r("./node_modules/avp-assay/dist/react.js"),
+      "avp-assay": r("./node_modules/avp-assay/dist/index.js"),
       "@/client.gen/sample": r("../examples/sample-app/frontend/core/src/client.gen/sample.ts"),
       "@/i18n": r("../examples/sample-app/frontend/core/src/i18n.ts"),
       "@/design/tokens": r("../examples/sample-app/frontend/core/src/design/tokens.ts"),

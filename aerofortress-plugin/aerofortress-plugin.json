@@ -1,6 +1,0 @@
-{
-  "name": "aerofortress-framework",
-  "version": "0.6.0",
-  "description": "The AeroFortress .NET framework kit: scaffolding, domain conventions, frontend MVVM harness, the doctor, and the AVP, NYA, WTW, RTW, and NWC foundation stack.",
-  "knowledgeHome": "aerofortress-framework"
-}

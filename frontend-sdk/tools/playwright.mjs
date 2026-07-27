@@ -58,7 +58,7 @@ export function watchPageQuality(page) {
 
 /** Playwright's test fixture with fail-closed browser error and warning collection enabled for every case. */
 export const test = base.extend({
-  __aerofortressPageQuality: [async ({ page }, use) => {
+  __skiesPageQuality: [async ({ page }, use) => {
     const assertPageQuality = watchPageQuality(page);
     try {
       await use();

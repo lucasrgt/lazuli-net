@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\Skies.Framework.Library.props" />
+
+  <!--
+    The meta-package — the Rails-omakase front door. `dotnet add package Skies.Framework` brings the whole runtime
+    framework: the spine, the ASP.NET wiring, the auth/identity/mail/sms/storage ports, and the doctor analyzer.
+    It carries no code of its own (IncludeBuildOutput=false) — it is purely the dependency graph, so the focused
+    Skies.Framework.* packages stay available a la carte. Test helpers (Skies.Framework.Testing*) are intentionally NOT here: they
+    belong in a test project, not an app's runtime. Skies.Framework.EntityFrameworkCore is intentionally not here either:
+    it is the one runtime package that references EF Core, and the meta must not impose a persistence stack —
+    an app that queries through EF opts into the satellite à la carte.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- No source: this project is the graph, not an assembly. Don't emit/require docs or a symbol package. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <IncludeSymbols>false</IncludeSymbols>
+    <!-- NU5128: a deps-only package has no lib/ assembly to match its net10.0 dependency group — expected here. -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <Description>Skies — the opinionated .NET convention bundle (meta-package). Installs the whole framework: the spine (Result, [Slice], value objects), the ASP.NET wiring, the auth/identity/mail/sms/storage ports, and the doctor analyzer. Reference the individual Skies.Framework.* packages instead to pick à la carte.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Skies.Framework.Abstractions\Skies.Framework.Abstractions.csproj" />
+    <ProjectReference Include="..\Skies.Framework.AspNetCore\Skies.Framework.AspNetCore.csproj" />
+    <ProjectReference Include="..\Skies.Framework.Auth\Skies.Framework.Auth.csproj" />
+    <ProjectReference Include="..\Skies.Framework.Identity\Skies.Framework.Identity.csproj" />
+    <ProjectReference Include="..\Skies.Framework.Mail\Skies.Framework.Mail.csproj" />
+    <ProjectReference Include="..\Skies.Framework.Sms\Skies.Framework.Sms.csproj" />
+    <ProjectReference Include="..\Skies.Framework.Storage\Skies.Framework.Storage.csproj" />
+    <!-- The doctor rides along as an analyzer so installing the meta enforces the conventions out of the box.
+         PrivateAssets="none" + IncludeAssets="all" so the Analyzers asset is NOT excluded from the packed
+         dependency — otherwise the analyzer wouldn't flow transitively to the meta's consumer. -->
+    <ProjectReference Include="..\..\analyzers\Skies.Framework.Doctor\Skies.Framework.Doctor.csproj"
+                      PrivateAssets="none" IncludeAssets="all" />
+  </ItemGroup>
+
+</Project>

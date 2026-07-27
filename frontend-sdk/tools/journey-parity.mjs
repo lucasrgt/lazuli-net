@@ -7,7 +7,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const IGNORED_DIRECTORIES = new Set([".git", ".aerofortress", "bin", "node_modules", "obj", "output", "tmp"]);
+const IGNORED_DIRECTORIES = new Set([".git", ".skies", "bin", "node_modules", "obj", "output", "tmp"]);
 
 /** Derive write slices and their executable journey paths from ordinary C# sources. */
 export function extractBackendJourneyInventory(sources) {
@@ -102,12 +102,12 @@ function walk(root) {
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const [, , backendRoot, ...flowsFiles] = process.argv;
   if (!backendRoot || flowsFiles.length === 0) {
-    console.error("usage: affe-journey-parity <backend-root> <flows.json> [...more-flows.json]");
+    console.error("usage: skyfe-journey-parity <backend-root> <flows.json> [...more-flows.json]");
     process.exit(2);
   }
   const missingFiles = flowsFiles.filter((flowsFile) => !existsSync(flowsFile));
   if (missingFiles.length > 0) {
-    console.log(`AFFE-JOURNEY: frontend flows manifest not found: ${missingFiles.join(", ")} — parity cannot be proven.`);
+    console.log(`SKYFE-JOURNEY: frontend flows manifest not found: ${missingFiles.join(", ")} — parity cannot be proven.`);
     process.exit(1);
   }
 
@@ -117,19 +117,19 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
       flowsFiles.map((flowsFile) => ({ path: flowsFile, content: readFileSync(flowsFile, "utf8") })),
     );
   } catch (error) {
-    console.log(`AFFE-JOURNEY: flows manifest invalid — ${error.message}`);
+    console.log(`SKYFE-JOURNEY: flows manifest invalid — ${error.message}`);
     process.exit(1);
   }
 
   const inventory = extractBackendJourneyInventory(walk(backendRoot).map((file) => readFileSync(file, "utf8")));
   const inventoryError = backendInventoryError(inventory);
   if (inventoryError) {
-    console.log(`AFFE-JOURNEY: ${inventoryError}.`);
+    console.log(`SKYFE-JOURNEY: ${inventoryError}.`);
     process.exit(1);
   }
   const result = checkJourneyParity(inventory, frontendFlows);
   console.log(
-    `AFFE-JOURNEY: ${inventory.writes.length} backend write slice(s), ${result.uiBound.length} UI-bound, `
+    `SKYFE-JOURNEY: ${inventory.writes.length} backend write slice(s), ${result.uiBound.length} UI-bound, `
       + `${result.backendOnly.length} backend-only, ${result.gaps} parity gap(s).`,
   );
   for (const message of result.messages) console.log(`  - ${message}`);
