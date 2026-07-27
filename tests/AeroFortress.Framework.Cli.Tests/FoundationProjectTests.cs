@@ -106,6 +106,15 @@ public class FoundationProjectTests
         Assert.DoesNotContain("MapPost", ping);
     }
 
+    [Fact]
+    public void Framework_source_hooks_serialize_cli_builds()
+    {
+        var hooks = File.ReadAllText(Path.Combine(RepoRoot(), "lefthook.yml"));
+
+        Assert.Contains("dotnet run --project src/AeroFortress.Framework.Cli", hooks);
+        Assert.DoesNotContain("parallel: true", hooks);
+    }
+
     private static string NewDir()
     {
         var path = Path.Combine(

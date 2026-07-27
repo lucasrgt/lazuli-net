@@ -3,7 +3,6 @@
 # pre-push runs the backend doctor (the AF*/AFSELF* analyzers in the build) and the SDK typecheck. Glob-gated so a
 # backend-only change skips the SDK checks and vice versa. Wired by `npx lefthook install` via the `prepare` script.
 pre-commit:
-  parallel: true
   commands:
     sdk-doctor: # the AFFE rule self-test — every rule must fire on its violation and pass on what it allows
       glob: "frontend-sdk/**/*.{cjs,mjs,ts,tsx}"
@@ -16,7 +15,6 @@ pre-commit:
       run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- wmw check
 
 pre-push:
-  parallel: true
   commands:
     backend-doctor: # AF* (doctor) + AFSELF* (self-harness) analyzers run inside the build
       glob: "**/*.cs"
