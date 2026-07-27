@@ -3,8 +3,8 @@ name: publish
 # Publishes the Skies framework — both engines off ONE version tag (e.g. `v1.0.0`): the .NET backend to
 # nuget.org and the React frontend to npm. Bump the version first (back: <Version> in
 # build/Skies.Framework.Library.props; front: each publishable packages/* package.json), then tag.
-# Auth: nuget uses Trusted Publishing (OIDC — no stored key; a policy on nuget.org binds owner/repo/workflow and
-# issues a short-lived key per run); npm uses the NPM_TOKEN secret. The two jobs are independent — one
+# Auth: NuGet prefers Trusted Publishing and falls back to the repository's scoped NUGET_API_KEY when an
+# external trust policy is unavailable; npm uses NPM_TOKEN. The two jobs are independent — one
 # ecosystem failing does not block the other. The nuget set below is
 # the public framework surface: SelfHarness (framework-dev only), Geocoding (not yet on the library standard),
 # and the sample/tests are deliberately excluded.
@@ -70,16 +70,23 @@ jobs:
             analyzers/Skies.Framework.Doctor/Skies.Framework.Doctor.csproj ; do
             dotnet pack "$proj" -c Release -o nupkgs
           done
-      # Trusted Publishing: exchange the GitHub OIDC token for a short-lived (1h) nuget.org key — no stored secret.
-      # `user` is the public nuget.org profile name; the bound policy (owner lucasrgt, repo skies,
-      # workflow publish.yml) lives on nuget.org. Requested right before push so the 1h key stays fresh.
+      # Prefer a short-lived NuGet key obtained through OIDC. A repository rename can temporarily invalidate
+      # the external trust policy, so the push step falls back to the existing scoped repository secret.
       - name: nuget login (OIDC → temp key)
         uses: NuGet/login@v1
         id: login
+        continue-on-error: true
         with:
           user: lucasrgt
       - name: push
-        run: dotnet nuget push "nupkgs/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY || secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "Neither NuGet Trusted Publishing nor NUGET_API_KEY is available."
+            exit 1
+          fi
+          dotnet nuget push "nupkgs/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
 
   npm:
     name: publish frontend packages to npm
