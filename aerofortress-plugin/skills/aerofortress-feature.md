@@ -7,7 +7,7 @@ description: End-to-end AeroFortress feature workflow — new slice from backend
 The full path from idea to doctor-clean, wired feature. Delegate each phase to the kit's
 specialist; keep the order.
 
-1. **Orient**: run `af wmw wake`, then `af rtw guide` and `af nya recall` with the feature goal
+1. **Orient**: run `af nwc wake`, then `af rtw guide` and `af nya recall` with the feature goal
    and expected paths. Treat due deferments, proven ways, and relevant scars as implementation constraints.
 2. **Scaffold** (aerofortress-scaffolder): choose acceptance criteria with
    `af criteria suggest <Name>`, then run `af g slice <Module> <Name> --verify <id,id>` (create
@@ -33,7 +33,7 @@ specialist; keep the order.
    probes `PW_API_URL` with the same package. Put mocked smoke coverage in another spec and never call the API
    directly from a backend-bound case.
 7. **Gate**: run `af gate --affected`, `af rtw check --task "<completed task>"`,
-   `af nya check --task "<completed task>"`, and `af wmw check`. Rerun the applicable checks after
+   `af nya check --task "<completed task>"`, and `af nwc check`. Rerun the applicable checks after
    every correction. Run `af gate --full` for a release. Any AF*/AFFE* finding goes to
    aerofortress-doctor. Fix the shape; never suppress, skip, focus, or weaken the manifest.
 

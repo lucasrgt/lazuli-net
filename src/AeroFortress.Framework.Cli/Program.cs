@@ -17,7 +17,7 @@ return args switch
     ["foundations", .. var rest] => FoundationStackCommand.Run(rest),
     ["nya", .. var rest] => NyaCommand.Run(rest),
     ["rtw", .. var rest] => RtwCommand.Run(rest),
-    ["wmw", .. var rest] => WmwCommand.Run(rest),
+    ["nwc", .. var rest] => NwcCommand.Run(rest),
     ["doctor", .. var rest] => DoctorCommand.Run(rest),
     ["gate", .. var rest] => GateCommand.Run(rest),
     ["mutate", .. var rest] => Tooling.Dotnet("stryker", rest),
@@ -53,7 +53,7 @@ static int Usage()
                                         initialize every repository-local agent foundation
           af nya <args...>              run the pinned Not You Again CLI; downloads one verified binary on first use
           af rtw <args...>              run the pinned Right This Way CLI; downloads one verified binary on first use
-          af wmw <args...>              run the pinned Wake Me When CLI; downloads one verified binary on first use
+          af nwc <args...>              run the pinned Now We Can CLI; downloads one verified binary on first use
           af g entity <Module> <Name>   generate a rich [Entity] — encapsulated, with an EnsureValid invariant funnel
           af g vo <Name>                generate an always-valid [ValueObject] in BuildingBlocks
           af g crud <Module> <Entity>   generate CRUD slices (list/lookup/create/update/delete +me) for a data-bag entity

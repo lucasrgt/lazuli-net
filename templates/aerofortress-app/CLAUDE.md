@@ -230,27 +230,27 @@ This repository uses Right This Way (`rtw`) to preserve proven implementation pa
 
 Tests and linters do not replace `dotnet tool run af rtw check`. Do not report work ready until the applicable check exits with code 0.
 <!-- rtw:instructions:end -->
-<!-- wmw:instructions:start -->
-## Wake Me When
+<!-- nwc:instructions:start -->
+## Now We Can
 
-This repository uses Wake Me When (`wmw`) to turn evidence-backed conditional
+This repository uses Now We Can (`nwc`) to turn evidence-backed conditional
 deferments into obligations that reappear when their machine-checkable cue is
-observed. AeroFortress provides the pinned command through `dotnet tool run af wmw`.
+observed. AeroFortress provides the pinned command through `dotnet tool run af nwc`.
 
-1. At task start and after context changes, run `dotnet tool run af wmw wake` with every event
+1. At task start and after context changes, run `dotnet tool run af nwc wake` with every event
    supplied by the host. Treat returned deferments as due work, not suggestions.
-2. Resolve a completed deferment with `dotnet tool run af wmw resolve --id <id> --evidence "<proof>"`.
-3. At task completion, the host must run `dotnet tool run af wmw collect` over the task, plan,
+2. Resolve a completed deferment with `dotnet tool run af nwc resolve --id <id> --evidence "<proof>"`.
+3. At task completion, the host must run `dotnet tool run af nwc collect` over the task, plan,
    final response, and diff. Agents must not add deferments manually.
 4. Collection may preserve only a concrete action intentionally blocked by a
    currently false prerequisite and bound to an event, path, or file-content
    cue evidenced in the supplied task artifacts.
 5. Aspirations, optional improvements, unfinished current scope, permanent
    behavior, vague future work, and invented cues are not deferments.
-6. Run `dotnet tool run af wmw check` before completion with the same observed events. Exit code
+6. Run `dotnet tool run af nwc check` before completion with the same observed events. Exit code
    1 means a due deferment remains unresolved. Exit code 2 means the check did
    not complete and must never be reported as a pass.
 
-Tests and roadmaps do not replace Wake Me When. The host owns collection and
+Tests and roadmaps do not replace Now We Can. The host owns collection and
 delivery; neither may depend on an agent voluntarily remembering the tool.
-<!-- wmw:instructions:end -->
+<!-- nwc:instructions:end -->

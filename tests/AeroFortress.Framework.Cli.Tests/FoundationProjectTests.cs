@@ -32,30 +32,30 @@ public class FoundationProjectTests
     }
 
     [Fact]
-    public void Wake_me_when_requires_its_versioned_store_skill_and_agent_protocol()
+    public void Now_we_can_requires_its_versioned_store_skill_and_agent_protocol()
     {
         var root = NewDir();
-        var missing = WmwProject.Check(root);
+        var missing = NwcProject.Check(root);
 
         Assert.False(missing.Valid);
-        Assert.Contains(missing.Messages, message => message.Contains(".wmw/SKILL.md"));
-        Assert.Contains(missing.Messages, message => message.Contains(".wmw/deferments"));
+        Assert.Contains(missing.Messages, message => message.Contains(".nwc/SKILL.md"));
+        Assert.Contains(missing.Messages, message => message.Contains(".nwc/deferments"));
 
-        Directory.CreateDirectory(Path.Combine(root, ".wmw", "deferments"));
+        Directory.CreateDirectory(Path.Combine(root, ".nwc", "deferments"));
         File.WriteAllText(
-            Path.Combine(root, ".wmw", "SKILL.md"),
+            Path.Combine(root, ".nwc", "SKILL.md"),
             """
-            Run `dotnet tool run af wmw wake`.
-            Run `dotnet tool run af wmw resolve`.
-            Run `dotnet tool run af wmw collect`.
-            Run `dotnet tool run af wmw check`.
+            Run `dotnet tool run af nwc wake`.
+            Run `dotnet tool run af nwc resolve`.
+            Run `dotnet tool run af nwc collect`.
+            Run `dotnet tool run af nwc check`.
             """);
         File.WriteAllText(
             Path.Combine(root, "CLAUDE.md"),
-            "<!-- wmw:instructions:start -->\nRun `dotnet tool run af wmw wake`.\n"
-            + "<!-- wmw:instructions:end -->");
+            "<!-- nwc:instructions:start -->\nRun `dotnet tool run af nwc wake`.\n"
+            + "<!-- nwc:instructions:end -->");
 
-        Assert.True(WmwProject.Check(root).Valid);
+        Assert.True(NwcProject.Check(root).Valid);
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class FoundationProjectTests
 
         Assert.True(NyaProject.Check(template).Valid);
         Assert.True(RtwProject.Check(template).Valid);
-        Assert.True(WmwProject.Check(template).Valid);
+        Assert.True(NwcProject.Check(template).Valid);
     }
 
     [Fact]

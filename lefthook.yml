@@ -12,7 +12,7 @@ pre-commit:
     proven-patterns:
       run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- rtw check --task "pre-commit pattern review"
     due-deferments:
-      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- wmw check
+      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- nwc check
 
 pre-push:
   commands:
@@ -27,4 +27,4 @@ pre-push:
     proven-patterns:
       run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- rtw check --base origin/main --task "pre-push pattern review"
     due-deferments:
-      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- wmw check
+      run: dotnet run --project src/AeroFortress.Framework.Cli/AeroFortress.Framework.Cli.csproj -c Release -- nwc check

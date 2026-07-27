@@ -10,7 +10,7 @@ stranger-maintainable code, and a "doctor" of Roslyn analyzers that enforce the 
   freshness, write-ownership, shape-derived write journeys, registry error codes…) at build time. Full catalog in
   [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
 - **Agent foundations** — every scaffold carries the four repository-local protocols: AVP proves declared
-  behavior, NYA prevents known failures, RTW preserves proven implementation patterns, and WMW makes
+  behavior, NYA prevents known failures, RTW preserves proven implementation patterns, and NWC makes
   evidence-backed future obligations reappear when their cue becomes true.
 - **Generators** — `af new`, `af g module / slice / entity / vo / crud / auth` scaffold exactly the convention.
 
@@ -55,7 +55,7 @@ responsibilities:
 | **AVP** | What behavior must this change prove? | `*.spec.toml` and co-located executable proofs | `af criteria`, `af gate` |
 | **Not You Again** | Which corrected failure must never recur? | `.nya/scars/`, policy, and skill | `af nya` |
 | **Right This Way** | How does this repository already implement this kind of work? | `.rtw/ways/` and skill | `af rtw` |
-| **Wake Me When** | Which blocked future action is due now? | `.wmw/deferments/` and skill | `af wmw` |
+| **Now We Can** | Which previously blocked action can proceed now? | `.nwc/deferments/` and skill | `af nwc` |
 
 Every scaffold includes the three versioned stores, portable skills, managed
 agent instructions, and pre-commit and pre-push checks. AVP ships as the native
@@ -80,17 +80,17 @@ team protocol.
 Use the foundations throughout a task:
 
 ```bash
-dotnet tool run af wmw wake
+dotnet tool run af nwc wake
 dotnet tool run af rtw guide --task "Add invoice approval" --path "src/Billing/**"
 dotnet tool run af nya recall --task "Add invoice approval" --path "src/Billing/**"
 dotnet tool run af nya spec --file "specs/invoice-approval.md" --task "Design invoice approval" --path "src/Billing/**"
 dotnet tool run af rtw check --task "Add invoice approval"
 dotnet tool run af nya check --task "Add invoice approval"
-dotnet tool run af wmw check
+dotnet tool run af nwc check
 dotnet tool run af nya replay --limit 20
 ```
 
-`af` pins NYA `1.1.0`, RTW `0.1.3`, and WMW `0.2.3` for Windows x64, Linux
+`af` pins NYA `1.1.0`, RTW `0.1.3`, and NWC `0.3.0` for Windows x64, Linux
 x64 and ARM64, and macOS x64 and ARM64. Judge commands, credentials,
 disposable SQLite indexes, and local configuration remain unversioned.
 `af doctor` validates that every shared store, skill, and managed instruction

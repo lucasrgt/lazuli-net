@@ -10,7 +10,7 @@ pre-commit:
     proven-patterns:
       run: dotnet tool run af rtw check --task "pre-commit pattern review"
     due-deferments:
-      run: dotnet tool run af wmw check
+      run: dotnet tool run af nwc check
 
 pre-push:
   commands:
@@ -21,4 +21,4 @@ pre-push:
     proven-patterns:
       run: dotnet tool run af rtw check --base origin/main --task "pre-push pattern review"
     due-deferments:
-      run: dotnet tool run af wmw check
+      run: dotnet tool run af nwc check

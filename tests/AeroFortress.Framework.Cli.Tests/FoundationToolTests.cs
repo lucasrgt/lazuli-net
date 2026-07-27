@@ -10,7 +10,7 @@ public class FoundationToolTests
     {
         Assert.Equal("1.1.0", NyaCommand.Version);
         Assert.Equal("0.1.3", RtwCommand.Version);
-        Assert.Equal("0.2.3", WmwCommand.Version);
+        Assert.Equal("0.3.0", NwcCommand.Version);
     }
 
     [Theory]
@@ -26,7 +26,7 @@ public class FoundationToolTests
     {
         Assert.Equal(expected, NyaCommand.Target(platform, architecture));
         Assert.Equal(expected, RtwCommand.Target(platform, architecture));
-        Assert.Equal(expected, WmwCommand.Target(platform, architecture));
+        Assert.Equal(expected, NwcCommand.Target(platform, architecture));
     }
 
     [Fact]
@@ -35,11 +35,11 @@ public class FoundationToolTests
         Assert.Throws<PlatformNotSupportedException>(
             () => RtwCommand.Target("windows", Architecture.Arm64));
         Assert.Throws<PlatformNotSupportedException>(
-            () => WmwCommand.Target("freebsd", Architecture.X64));
+            () => NwcCommand.Target("freebsd", Architecture.X64));
 
         var archive = "not a published archive"u8.ToArray();
         Assert.False(RtwCommand.ChecksumMatches(archive, "x86_64-pc-windows-msvc"));
-        Assert.False(WmwCommand.ChecksumMatches(archive, "unknown-target"));
+        Assert.False(NwcCommand.ChecksumMatches(archive, "unknown-target"));
     }
 
     [Fact]
@@ -47,21 +47,21 @@ public class FoundationToolTests
     {
         var root = NewDir();
         Directory.CreateDirectory(Path.Combine(root, ".rtw"));
-        Directory.CreateDirectory(Path.Combine(root, ".wmw"));
+        Directory.CreateDirectory(Path.Combine(root, ".nwc"));
         Directory.CreateDirectory(Path.Combine(root, ".rtw", "ways"));
-        Directory.CreateDirectory(Path.Combine(root, ".wmw", "deferments"));
+        Directory.CreateDirectory(Path.Combine(root, ".nwc", "deferments"));
         File.WriteAllText(
             Path.Combine(root, ".rtw", "SKILL.md"),
             "Run `rtw guide`, `rtw add`, and `rtw check`.");
         File.WriteAllText(
-            Path.Combine(root, ".wmw", "SKILL.md"),
-            "Run `wmw wake`, `wmw resolve`, `wmw collect`, and `wmw check`.");
+            Path.Combine(root, ".nwc", "SKILL.md"),
+            "Run `nwc wake`, `nwc resolve`, `nwc collect`, and `nwc check`.");
         File.WriteAllText(
             Path.Combine(root, "AGENTS.md"),
-            "Run `rtw guide` and `wmw wake`.");
+            "Run `rtw guide` and `nwc wake`.");
 
         RtwCommand.AdaptProjectInstructions(root);
-        WmwCommand.AdaptProjectInstructions(root);
+        NwcCommand.AdaptProjectInstructions(root);
 
         Assert.Contains(
             "`dotnet tool run af rtw guide`",
@@ -70,13 +70,13 @@ public class FoundationToolTests
             "`dotnet tool run af rtw guide`",
             File.ReadAllText(Path.Combine(root, "AGENTS.md")));
         Assert.Contains(
-            "`dotnet tool run af wmw collect`",
-            File.ReadAllText(Path.Combine(root, ".wmw", "SKILL.md")));
+            "`dotnet tool run af nwc collect`",
+            File.ReadAllText(Path.Combine(root, ".nwc", "SKILL.md")));
         Assert.Contains(
-            "`dotnet tool run af wmw wake`",
+            "`dotnet tool run af nwc wake`",
             File.ReadAllText(Path.Combine(root, "AGENTS.md")));
         Assert.True(File.Exists(Path.Combine(root, ".rtw", "ways", ".gitkeep")));
-        Assert.True(File.Exists(Path.Combine(root, ".wmw", "deferments", ".gitkeep")));
+        Assert.True(File.Exists(Path.Combine(root, ".nwc", "deferments", ".gitkeep")));
     }
 
     private static string NewDir()

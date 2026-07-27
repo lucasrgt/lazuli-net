@@ -49,5 +49,5 @@ Thumbs.db
 .rtw/index.sqlite
 .rtw/index.sqlite-shm
 .rtw/index.sqlite-wal
-# Wake Me When local configuration and disposable state
-.wmw/config.local.toml
+# Now We Can local configuration and disposable state
+.nwc/config.local.toml

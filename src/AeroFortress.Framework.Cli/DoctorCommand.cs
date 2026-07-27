@@ -31,7 +31,7 @@ internal static class DoctorCommand
         {
             (Name: "Not You Again", Outcome: NyaProject.Check(root)),
             (Name: "Right This Way", Outcome: RtwProject.Check(root)),
-            (Name: "Wake Me When", Outcome: WmwProject.Check(root)),
+            (Name: "Now We Can", Outcome: NwcProject.Check(root)),
         };
         foreach (var foundation in foundations)
         {
