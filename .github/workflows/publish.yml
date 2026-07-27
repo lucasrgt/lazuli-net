@@ -32,6 +32,11 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend-sdk/package-lock.json
+      - name: install release-guard dependencies
+        working-directory: frontend-sdk
+        run: npm ci
       - run: node frontend-sdk/tools/release-guard.mjs
 
   nuget:
