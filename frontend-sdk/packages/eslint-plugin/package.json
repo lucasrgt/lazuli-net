@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-skies",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "The Skies Framework frontend harness — SKYFE* rules that keep React Native + web screens wired, not mocked.",
   "license": "MIT",
   "author": "Lucas Tinoco",
