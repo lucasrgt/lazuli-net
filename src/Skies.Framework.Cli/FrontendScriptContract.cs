@@ -39,6 +39,22 @@ internal static class FrontendScriptContract
         return Tooling.Run("npm", ["run", script, .. arguments], packageRoot);
     }
 
+    /// <summary>
+    /// Prefer a dedicated unit-test script when a package composes unit and E2E execution under <c>test</c>.
+    /// Gate-owned Vitest filters must reach the unit runner instead of being appended to a nested script chain.
+    /// </summary>
+    internal static string ResolveUnitTestScript(string packageRoot)
+    {
+        var path = Path.Combine(packageRoot, "package.json");
+        using var document = JsonDocument.Parse(File.ReadAllText(path));
+        var scripts = document.RootElement.GetProperty("scripts");
+        return scripts.TryGetProperty("test:unit", out var unit)
+            && unit.ValueKind == JsonValueKind.String
+            && !string.IsNullOrWhiteSpace(unit.GetString())
+            ? "test:unit"
+            : "test";
+    }
+
     /// <summary>Return a precise contract error, or <see langword="null"/> when the script is executable.</summary>
     public static string? Validate(string packageRoot, string script)
     {

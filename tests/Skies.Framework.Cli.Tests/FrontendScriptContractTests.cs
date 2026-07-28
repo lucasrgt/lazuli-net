@@ -56,6 +56,40 @@ public class FrontendScriptContractTests
         }
     }
 
+    [Fact]
+    public void A_composed_test_script_uses_its_dedicated_unit_runner()
+    {
+        var root = Package("""
+            { "scripts": {
+              "test": "npm run test:unit && npm run test:e2e",
+              "test:unit": "vitest run",
+              "test:e2e": "playwright test"
+            } }
+            """);
+        try
+        {
+            Assert.Equal("test:unit", FrontendScriptContract.ResolveUnitTestScript(root));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void A_simple_package_keeps_its_test_runner()
+    {
+        var root = Package("""{ "scripts": { "test": "vitest run" } }""");
+        try
+        {
+            Assert.Equal("test", FrontendScriptContract.ResolveUnitTestScript(root));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     [Theory]
     [InlineData("playwright test")]
     [InlineData("tsc --noEmit -p e2e/tsconfig.json && playwright test")]
