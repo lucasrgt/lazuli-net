@@ -12,7 +12,7 @@ namespace Skies.Framework.Doctor;
 /// <summary>
 /// SKY0003 — every <c>[Slice]</c> must have a co-located test. The framework's thesis is that the
 /// doctor obliges tests, not the author's discipline: a slice in <c>Foo.cs</c> with no
-/// <c>Foo.Tests.cs</c> beside it fails the build. The test files are excluded from the app's own
+/// <c>Foo.Tests.cs</c> or an isolated <c>FooJourney.Tests.cs</c> beside it fails the build. The test files are excluded from the app's own
 /// compilation (no test dependencies ship), so the analyzer reads them as <c>AdditionalFiles</c> —
 /// the app project opts in with <c>&lt;AdditionalFiles Include="**\*.Tests.cs" /&gt;</c>.
 ///
@@ -33,7 +33,7 @@ public sealed class RequireSliceTestAnalyzer : DiagnosticAnalyzer
         category: "Skies.Framework.Convention",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "Every [Slice] must have a co-located <Slice>.Tests.cs. The doctor obliges the "
+        description: "Every [Slice] must have a co-located <Slice>.Tests.cs or <Slice>Journey.Tests.cs. The doctor obliges the "
                    + "test to exist; a slice without one fails the build.");
 
     /// <inheritdoc />
@@ -58,9 +58,15 @@ public sealed class RequireSliceTestAnalyzer : DiagnosticAnalyzer
             return;
 
         var expected = Path.GetFileNameWithoutExtension(slicePath) + ".Tests.cs";
+        var journey = Path.GetFileNameWithoutExtension(slicePath) + "Journey.Tests.cs";
 
         var hasTest = context.Options.AdditionalFiles
-            .Any(file => string.Equals(Path.GetFileName(file.Path), expected, StringComparison.OrdinalIgnoreCase));
+            .Any(file =>
+            {
+                var name = Path.GetFileName(file.Path);
+                return string.Equals(name, expected, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(name, journey, StringComparison.OrdinalIgnoreCase);
+            });
 
         if (!hasTest)
             context.ReportDiagnostic(Diagnostic.Create(Rule, cls.Identifier.GetLocation(), cls.Identifier.Text, expected));

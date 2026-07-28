@@ -23,6 +23,22 @@ public class RequireSliceTestAnalyzerTests
     }
 
     [Fact]
+    public Task Slice_with_an_isolated_journey_test_reports_nothing()
+    {
+        var test = new CSharpAnalyzerTest<RequireSliceTestAnalyzer, DefaultVerifier>
+        {
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+            CompilerDiagnostics = CompilerDiagnostics.Errors,
+            TestState =
+            {
+                Sources = { ("Deposit.cs", Slice) },
+                AdditionalFiles = { ("DepositJourney.Tests.cs", "// covered by an isolated executable journey") },
+            },
+        };
+        return test.RunAsync();
+    }
+
+    [Fact]
     public Task Slice_without_a_colocated_test_is_flagged()
     {
         var test = new CSharpAnalyzerTest<RequireSliceTestAnalyzer, DefaultVerifier>

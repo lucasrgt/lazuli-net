@@ -59,7 +59,10 @@ internal static class FrontendGate
                 var arguments = new List<string> { "--" };
                 arguments.AddRange(filters);
                 arguments.Add($"--exclude={AssaySuiteGlob}");
-                tests = FrontendScriptContract.Run(client, "test", [.. arguments]);
+                tests = FrontendScriptContract.Run(
+                    client,
+                    FrontendScriptContract.ResolveUnitTestScript(client),
+                    [.. arguments]);
             }
 
             if (impact.Full || impact.Assays.Count > 0)

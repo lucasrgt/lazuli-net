@@ -39,12 +39,12 @@ identifiers, and template identities follow the same mapping.
 ## Upgrade an existing repository
 
 1. Replace every `AeroFortress.Framework.*` package reference with the matching
-   `Skies.Framework.*` package at version `4.0.0`.
+   `Skies.Framework.*` package at version `4.0.1`.
 2. Replace the tool package and command:
 
    ```bash
    dotnet tool uninstall -g aerofortress-framework-cli
-   dotnet tool install -g skies-framework-cli --version 4.0.0
+   dotnet tool install -g skies-framework-cli --version 4.0.1
    ```
 
 3. Rename `AeroFortress.toml` to `Skies.toml` and `.aerofortress/` to
