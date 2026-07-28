@@ -51,7 +51,7 @@ function sliceDeclarations(sources) {
   for (const source of sources) {
     let ownsSlice = false;
     const classes = source.matchAll(
-      /((?:^\s*\[[^\]\r\n]+\]\s*(?:\/\/[^\r\n]*)?\r?\n)+)\s*public\s+static\s+class\s+([A-Za-z_]\w*)/gm,
+      /(?:^|;)[\t ]*((?:\[[^\]\r\n]+\](?:(?:[\t ]*\/\/[^\r\n]*)?\r?\n|[\t ]+))+)[\t ]*public\s+static\s+class\s+([A-Za-z_]\w*)/gm,
     );
     for (const match of classes) {
       const attributes = match[1];

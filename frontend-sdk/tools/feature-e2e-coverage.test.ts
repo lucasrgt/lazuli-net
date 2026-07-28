@@ -127,6 +127,14 @@ describe("feature E2E coverage", () => {
     expect(extractSlices(sources)).toEqual(["Login", "Profile"]);
   });
 
+  it("discovers compact slices whose marker and class share a line", () => {
+    expect(extractSlices([
+      "[Slice] public static class GetProfile {}",
+      "namespace Sample; [Slice] public static class ListProfiles {}",
+      "[Authorize]\n[Slice] public static class SaveProfile {}",
+    ])).toEqual(["GetProfile", "ListProfiles", "SaveProfile"]);
+  });
+
   it("discovers every explicitly named operation owned by a slice mapping", () => {
     const sources = [
       [
