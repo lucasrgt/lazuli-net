@@ -5,7 +5,7 @@ namespace Skies.Framework.Cli;
 /// <summary>Runs the framework-pinned Why This Way binary.</summary>
 internal static class WtwCommand
 {
-    internal const string Version = "0.1.4";
+    internal const string Version = "0.1.5";
     internal static readonly FoundationTool Tool = new(
         "wtw",
         "Why This Way",
@@ -14,13 +14,13 @@ internal static class WtwCommand
         "records/decisions",
         new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["aarch64-apple-darwin"] = "708999912b303acec915f048615a96d6ec678bb3d782a1e939e462959de7c2e5",
-            ["aarch64-unknown-linux-gnu"] = "a4e431bfb35d5a301b311c81a486c8ea465e8862da03cb91da01f610c88b05ee",
-            ["x86_64-apple-darwin"] = "e9686344654123f0ca44d62a6bdf9b3c9471d65d2cc22cce4c71acedd5484ba5",
-            ["x86_64-pc-windows-msvc"] = "c9b826c6a8ca38b79a5a32d1ab572a24b62d9a2fb4a6630fd3c142f03a60b6af",
-            ["x86_64-unknown-linux-gnu"] = "170f9fbfbf39105bc2123d17dc2636e308c9ab78d91955ffe138c8d0fa0f2720",
+            ["aarch64-apple-darwin"] = "580b2771238d926d9430a7ebf58bd696644551392724e5c7c8e63519d710f937",
+            ["aarch64-unknown-linux-gnu"] = "a8482f663a7fcb9e9d40391838a33bd501adfb91ad7a950adeec143a09f38cb3",
+            ["x86_64-apple-darwin"] = "931c023aca4031163db31b36a468c7da26fa7789907f3e7a688c1b16ac7e7f48",
+            ["x86_64-pc-windows-msvc"] = "b3134e9f09e83127ea3e5fa09313ff0027b183dd6402ba76a67c0757efdc83fd",
+            ["x86_64-unknown-linux-gnu"] = "e7f901aab8acad7e3679734524e28a3278771d12b4567028a2c02b989b287763",
         },
-        projectDirectory: ".agent-first/wtw",
+        projectDirectory: ".wtw",
         additionalDurableDirectories: ["records/invariants"]);
 
     /// <summary>Resolve, install, and execute WTW with every argument passed after <c>skies wtw</c>.</summary>

@@ -6,7 +6,7 @@ title = "Bundle Why This Way as an independent foundation"
 statement = "Skies scaffolds and operates Why This Way as a default, independent fifth foundation alongside AVP, NYA, RTW, and NWC."
 rationale = "WTW preserves governing decisions and invariants without merging its data or responsibilities with the other foundation protocols."
 scopes = [
-    "**/.agent-first/wtw/**",
+    "**/.wtw/**",
     "**/AGENTS.md",
     "**/CLAUDE.md",
     "**/GEMINI.md",

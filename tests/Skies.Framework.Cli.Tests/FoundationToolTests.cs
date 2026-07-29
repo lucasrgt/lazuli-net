@@ -9,7 +9,7 @@ public class FoundationToolTests
     public void The_framework_pins_every_native_foundation_release()
     {
         Assert.Equal("1.1.5", NyaCommand.Version);
-        Assert.Equal("0.1.4", WtwCommand.Version);
+        Assert.Equal("0.1.5", WtwCommand.Version);
         Assert.Equal("0.1.3", RtwCommand.Version);
         Assert.Equal("0.3.0", NwcCommand.Version);
     }
@@ -53,11 +53,11 @@ public class FoundationToolTests
         var root = NewDir();
         Directory.CreateDirectory(Path.Combine(root, ".rtw"));
         Directory.CreateDirectory(Path.Combine(root, ".nwc"));
-        Directory.CreateDirectory(Path.Combine(root, ".agent-first", "wtw"));
+        Directory.CreateDirectory(Path.Combine(root, ".wtw"));
         Directory.CreateDirectory(Path.Combine(root, ".rtw", "ways"));
         Directory.CreateDirectory(Path.Combine(root, ".nwc", "deferments"));
-        Directory.CreateDirectory(Path.Combine(root, ".agent-first", "wtw", "records", "decisions"));
-        Directory.CreateDirectory(Path.Combine(root, ".agent-first", "wtw", "records", "invariants"));
+        Directory.CreateDirectory(Path.Combine(root, ".wtw", "records", "decisions"));
+        Directory.CreateDirectory(Path.Combine(root, ".wtw", "records", "invariants"));
         File.WriteAllText(
             Path.Combine(root, ".rtw", "SKILL.md"),
             "Run `rtw guide`, `rtw add`, and `rtw check`.");
@@ -65,7 +65,7 @@ public class FoundationToolTests
             Path.Combine(root, ".nwc", "SKILL.md"),
             "Run `nwc wake`, `nwc resolve`, `nwc collect`, and `nwc check`.");
         File.WriteAllText(
-            Path.Combine(root, ".agent-first", "wtw", "SKILL.md"),
+            Path.Combine(root, ".wtw", "SKILL.md"),
             "Run `wtw explain`, `wtw collect`, and `wtw guard`.");
         File.WriteAllText(
             Path.Combine(root, "AGENTS.md"),
@@ -77,7 +77,7 @@ public class FoundationToolTests
 
         Assert.Contains(
             "`dotnet tool run skies wtw explain`",
-            File.ReadAllText(Path.Combine(root, ".agent-first", "wtw", "SKILL.md")));
+            File.ReadAllText(Path.Combine(root, ".wtw", "SKILL.md")));
         Assert.Contains(
             "`dotnet tool run skies wtw explain`",
             File.ReadAllText(Path.Combine(root, "AGENTS.md")));
@@ -96,9 +96,10 @@ public class FoundationToolTests
         Assert.True(File.Exists(Path.Combine(root, ".rtw", "ways", ".gitkeep")));
         Assert.True(File.Exists(Path.Combine(root, ".nwc", "deferments", ".gitkeep")));
         Assert.True(File.Exists(Path.Combine(
-            root, ".agent-first", "wtw", "records", "decisions", ".gitkeep")));
+            root, ".wtw", "records", "decisions", ".gitkeep")));
         Assert.True(File.Exists(Path.Combine(
-            root, ".agent-first", "wtw", "records", "invariants", ".gitkeep")));
+            root, ".wtw", "records", "invariants", ".gitkeep")));
+        Assert.False(Directory.Exists(Path.Combine(root, ".agent-first")));
     }
 
     private static string NewDir()

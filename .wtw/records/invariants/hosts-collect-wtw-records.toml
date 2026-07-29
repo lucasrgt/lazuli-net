@@ -6,7 +6,7 @@ title = "Hosts collect WTW records"
 statement = "Only the host invokes WTW collection after authoritative accepted plans, ADRs, explicit decisions, or completed work; agents never add records manually."
 violation = "An agent manually adds a WTW record, or collection is invoked without an authoritative durable decision or falsifiable invariant source."
 scopes = [
-    "**/.agent-first/wtw/**",
+    "**/.wtw/**",
     "**/AGENTS.md",
     "**/CLAUDE.md",
     "**/GEMINI.md",

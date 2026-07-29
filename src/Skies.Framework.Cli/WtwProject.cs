@@ -8,10 +8,10 @@ internal static class WtwProject
         FoundationProject.Check(
             root,
             WtwCommand.Tool,
-            [".agent-first/wtw/SKILL.md"],
+            [".wtw/SKILL.md"],
             [
-                ".agent-first/wtw/records/decisions",
-                ".agent-first/wtw/records/invariants",
+                ".wtw/records/decisions",
+                ".wtw/records/invariants",
             ],
             ["explain", "collect", "guard"]);
 }

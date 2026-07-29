@@ -67,7 +67,7 @@ responsibilities:
 |---|---|---|---|
 | **AVP** | What behavior must this change prove? | `*.spec.toml` and co-located executable proofs | `skies criteria`, `skies gate` |
 | **Not You Again** | Which corrected failure must never recur? | `.nya/scars/`, policy, and skill | `skies nya` |
-| **Why This Way** | Which decision or invariant governs this change, and why? | `.agent-first/wtw/records/` and skill | `skies wtw` |
+| **Why This Way** | Which decision or invariant governs this change, and why? | `.wtw/records/` and skill | `skies wtw` |
 | **Right This Way** | How does this repository already implement this kind of work? | `.rtw/ways/` and skill | `skies rtw` |
 | **Now We Can** | Which previously blocked action can proceed now? | `.nwc/deferments/` and skill | `skies nwc` |
 

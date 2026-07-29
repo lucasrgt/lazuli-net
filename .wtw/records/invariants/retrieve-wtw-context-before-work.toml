@@ -6,7 +6,7 @@ title = "Retrieve WTW context before work"
 statement = "At task start, agents run `dotnet tool run skies wtw explain` with the goal and expected path, treat returned active invariants as constraints and decisions as governing context, and rerun it when scope changes or context is compacted."
 violation = "Work begins, continues after a scope change, or resumes after context compaction without retrieving the applicable WTW decisions and invariants."
 scopes = [
-    "**/.agent-first/wtw/**",
+    "**/.wtw/**",
     "**/AGENTS.md",
     "**/CLAUDE.md",
     "**/GEMINI.md",

@@ -35,6 +35,7 @@ public sealed class ProjectTemplateTests
         Assert.DoesNotContain("skies wtw guard", hooks, StringComparison.Ordinal);
         Assert.DoesNotContain("skies rtw check", hooks, StringComparison.Ordinal);
         Assert.DoesNotContain("skies nwc check", hooks, StringComparison.Ordinal);
+        Assert.False(Directory.Exists(Path.Combine(template, ".agent-first")));
     }
 
     [Fact]
@@ -43,7 +44,7 @@ public sealed class ProjectTemplateTests
         var template = SourceTemplate();
         var skills = new[]
         {
-            Path.Combine(".agent-first", "wtw", "SKILL.md"),
+            Path.Combine(".wtw", "SKILL.md"),
             Path.Combine(".nwc", "SKILL.md"),
             Path.Combine(".nya", "SKILL.md"),
             Path.Combine(".rtw", "SKILL.md"),

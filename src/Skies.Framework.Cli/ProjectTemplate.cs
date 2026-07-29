@@ -10,7 +10,7 @@ internal static class ProjectTemplate
         Path.Combine(".config", "dotnet-tools.json"),
         Path.Combine(".nya", "SKILL.md"),
         Path.Combine(".rtw", "SKILL.md"),
-        Path.Combine(".agent-first", "wtw", "SKILL.md"),
+        Path.Combine(".wtw", "SKILL.md"),
         Path.Combine(".nwc", "SKILL.md"),
         Path.Combine(".github", "workflows", "ci.yml"),
         Path.Combine("src", "Skies.Framework.Starter.Api", "Modules", "Health", "Slices", "Ping.Tests.cs"),

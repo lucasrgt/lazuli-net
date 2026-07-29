@@ -63,16 +63,16 @@ public class FoundationProjectTests
         var missing = WtwProject.Check(root);
 
         Assert.False(missing.Valid);
-        Assert.Contains(missing.Messages, message => message.Contains(".agent-first/wtw/SKILL.md"));
+        Assert.Contains(missing.Messages, message => message.Contains(".wtw/SKILL.md"));
         Assert.Contains(missing.Messages, message => message.Contains("records/decisions"));
         Assert.Contains(missing.Messages, message => message.Contains("records/invariants"));
 
         Directory.CreateDirectory(Path.Combine(
-            root, ".agent-first", "wtw", "records", "decisions"));
+            root, ".wtw", "records", "decisions"));
         Directory.CreateDirectory(Path.Combine(
-            root, ".agent-first", "wtw", "records", "invariants"));
+            root, ".wtw", "records", "invariants"));
         File.WriteAllText(
-            Path.Combine(root, ".agent-first", "wtw", "SKILL.md"),
+            Path.Combine(root, ".wtw", "SKILL.md"),
             """
             Run `dotnet tool run skies wtw explain`.
             Run `dotnet tool run skies wtw collect`.
