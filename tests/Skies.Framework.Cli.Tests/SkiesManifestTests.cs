@@ -313,12 +313,66 @@ public class SkiesManifestTests
         var workflows = Path.Combine(root, ".github", "workflows");
         Directory.CreateDirectory(workflows);
         File.WriteAllText(Path.Combine(workflows, "ci.yml"),
-            "on: [pull_request]\njobs:\n  gate:\n    steps:\n      - run: dotnet tool run skies gate --affected --base origin/main\n");
+            "on: [pull_request, workflow_dispatch]\njobs:\n  gate:\n    steps:\n"
+          + "      - run: dotnet tool run skies gate --affected --base origin/main\n"
+          + "      - run: dotnet tool run skies check --task \"release\" --full\n");
         File.WriteAllText(Path.Combine(root, "Skies.toml"), "[workspace]\nname=\"MyApp\"\n");
 
         var outcome = SkiesManifest.Validate(root);
 
         Assert.True(outcome.Valid);
+    }
+
+    [Fact]
+    public void A_fast_pull_request_gate_is_not_the_authoritative_verdict()
+    {
+        var root = NewDir(withGateWorkflow: false);
+        var workflows = Path.Combine(root, ".github", "workflows");
+        Directory.CreateDirectory(workflows);
+        File.WriteAllText(Path.Combine(workflows, "ci.yml"),
+            "on: [pull_request, workflow_dispatch]\njobs:\n  gate:\n    steps:\n"
+          + "      - run: dotnet tool run skies gate --affected --fast\n"
+          + "      - run: dotnet tool run skies gate --full\n");
+        File.WriteAllText(Path.Combine(root, "Skies.toml"), "[workspace]\nname=\"MyApp\"\n");
+
+        var outcome = SkiesManifest.Validate(root);
+
+        Assert.False(outcome.Valid);
+        Assert.Contains(outcome.Messages, message => message.Contains("without `--fast`"));
+    }
+
+    [Fact]
+    public void A_full_only_pull_request_gate_does_not_replace_affected_verification()
+    {
+        var root = NewDir(withGateWorkflow: false);
+        var workflows = Path.Combine(root, ".github", "workflows");
+        Directory.CreateDirectory(workflows);
+        File.WriteAllText(Path.Combine(workflows, "ci.yml"),
+            "on: [pull_request, workflow_dispatch]\njobs:\n  gate:\n    steps:\n"
+          + "      - run: dotnet tool run skies gate --full\n");
+        File.WriteAllText(Path.Combine(root, "Skies.toml"), "[workspace]\nname=\"MyApp\"\n");
+
+        var outcome = SkiesManifest.Validate(root);
+
+        Assert.False(outcome.Valid);
+        Assert.Contains(outcome.Messages, message => message.Contains("affected") && message.Contains("without `--fast`"));
+    }
+
+    [Fact]
+    public void A_repository_without_a_full_release_workflow_is_reported()
+    {
+        var root = NewDir(withGateWorkflow: false);
+        var workflows = Path.Combine(root, ".github", "workflows");
+        Directory.CreateDirectory(workflows);
+        File.WriteAllText(
+            Path.Combine(workflows, "ci.yml"),
+            "on: [pull_request]\njobs:\n  gate:\n    steps:\n      - run: skies gate --affected\n");
+        File.WriteAllText(Path.Combine(root, "Skies.toml"), "[workspace]\nname=\"MyApp\"\n");
+
+        var outcome = SkiesManifest.Validate(root);
+
+        Assert.False(outcome.Valid);
+        Assert.Contains(outcome.Messages, message => message.Contains("release") && message.Contains("--full"));
     }
 
     [Fact]
@@ -408,7 +462,11 @@ public class SkiesManifestTests
         {
             var workflows = Path.Combine(dir, ".github", "workflows");
             Directory.CreateDirectory(workflows);
-            File.WriteAllText(Path.Combine(workflows, "ci.yml"), "on: [pull_request]\njobs:\n  gate:\n    steps:\n      - run: skies gate\n");
+            File.WriteAllText(
+                Path.Combine(workflows, "ci.yml"),
+                "on: [pull_request, workflow_dispatch]\njobs:\n  gate:\n    steps:\n"
+              + "      - run: skies gate --affected\n"
+              + "      - run: skies gate --full\n");
         }
         return dir;
     }

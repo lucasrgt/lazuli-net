@@ -402,35 +402,67 @@ internal static class SkiesManifest
         var files = Directory.Exists(workflows)
             ? Directory.EnumerateFiles(workflows, "*.yml").Concat(Directory.EnumerateFiles(workflows, "*.yaml"))
             : [];
-        var wired = files.Any(file => WorkflowRunsGate(File.ReadAllText(file)));
-        if (!wired)
+        var definitions = files.Select(File.ReadAllText).ToList();
+        if (!definitions.Any(WorkflowRunsAuthoritativeGate))
         {
             messages.Add(
-                $"{FileName}: no .github/workflows/*.yml job directly runs `skies gate` — CI must publish the "
-              + "release verdict so branch protection can require it.");
+                $"{FileName}: no pull-request workflow directly runs an authoritative `skies gate`/`skies check` "
+              + "without `--fast` — branch protection needs the complete affected verdict.");
+        }
+        if (!definitions.Any(WorkflowRunsFullGate))
+        {
+            messages.Add(
+                $"{FileName}: no release, reusable, or manual workflow directly runs `skies gate --full` or "
+              + "`skies check --full` — exhaustive release verification cannot depend on agent recall.");
         }
     }
 
-    private static bool WorkflowRunsGate(string yaml)
+    private static bool WorkflowRunsAuthoritativeGate(string yaml)
     {
-        var withoutComments = string.Join(
-            "\n",
-            yaml.Split('\n').Where(line => !line.TrimStart().StartsWith('#')));
+        var withoutComments = WithoutComments(yaml);
         var pullRequest = Regex.IsMatch(withoutComments, @"(?im)^\s*pull_request\s*:")
             || Regex.IsMatch(withoutComments, @"(?im)^\s*on\s*:\s*\[[^\]]*\bpull_request\b");
-        if (!pullRequest
-            || Regex.IsMatch(withoutComments, @"(?im)^\s*(?:-\s*)?continue-on-error\s*:\s*true\b")
-            || Regex.IsMatch(withoutComments, @"(?im)^\s*(?:-\s*)?if\s*:\s*(?:\$\{\{\s*)?false\b"))
-        {
+        if (!pullRequest || VerdictCanBeIgnored(withoutComments))
             return false;
-        }
 
-        var invocation = Regex.Match(
-            withoutComments,
-            @"(?im)^\s*-?\s*run\s*:\s*(?<command>(?:skies(?:\.exe)?\s+gate\b|dotnet\s+tool\s+run\s+skies\s+gate\b|dotnet\s+run\b[^\r\n]*--\s+gate\b)[^\r\n]*)");
-        return invocation.Success
-            && !Regex.IsMatch(invocation.Groups["command"].Value, @"(?:&&|\|\||;|\s\|\s)");
+        return GateInvocations(withoutComments).Any(command =>
+            !command.Contains("--fast", StringComparison.Ordinal)
+            && !command.Contains("--staged", StringComparison.Ordinal)
+            && !command.Contains("--full", StringComparison.Ordinal)
+            && (!command.Contains(" check", StringComparison.Ordinal)
+                || command.Contains("--affected", StringComparison.Ordinal)
+                || command.Contains("--base", StringComparison.Ordinal)));
     }
+
+    private static bool WorkflowRunsFullGate(string yaml)
+    {
+        var withoutComments = WithoutComments(yaml);
+        var releaseBoundary = Regex.IsMatch(
+                withoutComments,
+                @"(?im)^\s*(?:workflow_dispatch|workflow_call|release)\s*:")
+            || Regex.IsMatch(withoutComments, @"(?im)^\s*tags\s*:")
+            || Regex.IsMatch(
+                withoutComments,
+                @"(?im)^\s*on\s*:\s*\[[^\]]*\b(?:workflow_dispatch|workflow_call|release)\b");
+        return releaseBoundary
+            && !VerdictCanBeIgnored(withoutComments)
+            && GateInvocations(withoutComments).Any(command =>
+                command.Contains("--full", StringComparison.Ordinal));
+    }
+
+    private static IEnumerable<string> GateInvocations(string yaml) =>
+        Regex.Matches(
+                yaml,
+                @"(?im)^\s*-?\s*run\s*:\s*(?<command>(?:skies(?:\.exe)?\s+(?:gate|check)\b|dotnet\s+tool\s+run\s+skies\s+(?:gate|check)\b|dotnet\s+run\b[^\r\n]*--\s+(?:gate|check)\b)[^\r\n]*)")
+            .Select(match => match.Groups["command"].Value)
+            .Where(command => !Regex.IsMatch(command, @"(?:&&|\|\||;|\s\|\s)"));
+
+    private static string WithoutComments(string yaml) =>
+        string.Join("\n", yaml.Split('\n').Where(line => !line.TrimStart().StartsWith('#')));
+
+    private static bool VerdictCanBeIgnored(string yaml) =>
+        Regex.IsMatch(yaml, @"(?im)^\s*(?:-\s*)?continue-on-error\s*:\s*true\b")
+        || Regex.IsMatch(yaml, @"(?im)^\s*(?:-\s*)?if\s*:\s*(?:\$\{\{\s*)?false\b");
 
     /// <summary>
     /// A declared <c>backend</c> (the .NET API) must pin its dev environment in

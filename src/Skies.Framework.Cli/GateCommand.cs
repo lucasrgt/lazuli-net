@@ -186,10 +186,19 @@ internal static class GateCommand
                 oversized ? new HashSet<string>() : impact.Backend.Filters,
                 oversized ? new HashSet<string>() : impact.Backend.AffectedSlices),
             Frontends = impact.Frontends
-                .Select(frontend => frontend.Full ? new FrontendImpact(frontend.Package) : frontend)
+                .Select(frontend => frontend.Full ? BoundedFrontend(frontend) : frontend)
                 .ToList(),
             Reasons = reasons,
         };
+    }
+
+    private static FrontendImpact BoundedFrontend(FrontendImpact source)
+    {
+        var bounded = new FrontendImpact(source.Package);
+        bounded.Tests.UnionWith(source.Tests);
+        bounded.Assays.UnionWith(source.Assays);
+        bounded.Flows.AddRange(source.Flows);
+        return bounded;
     }
 
     /// <summary>Build the proof-run arguments, reusing a doctor build only when it actually passed.</summary>

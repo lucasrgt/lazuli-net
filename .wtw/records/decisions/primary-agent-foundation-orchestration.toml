@@ -1,7 +1,7 @@
 schema = 1
 id = "primary-agent-foundation-orchestration"
 kind = "decision"
-status = "active"
+status = "superseded"
 title = "Primary agent owns foundation orchestration"
 statement = "The primary coding agent must own the complete Skies foundation lifecycle by running one bounded context command before implementation and one comprehensive fail-closed check before completion, while foundation tools remain independent, versioned engines."
 rationale = "A single orchestration surface bounds context, preserves each foundation's independent semantics, reduces duplicated coordination and token costs, and ensures every required final check runs deterministically and fails closed."

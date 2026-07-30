@@ -81,6 +81,35 @@ public sealed class GateImpactTests
     }
 
     [Fact]
+    public void A_generated_client_fallback_keeps_directly_changed_frontend_proofs_mapped()
+    {
+        var root = Workspace();
+        try
+        {
+            var generated = Path.Combine(root, "clients/web/src/client.gen");
+            Directory.CreateDirectory(generated);
+            File.WriteAllText(Path.Combine(generated, "hostpoint.ts"), "export {};");
+            var package = new FrontendPackage(Path.Combine(root, "clients/web"), FrontendPackageRole.Surface);
+
+            var plan = GateImpact.Build(
+                root,
+                [
+                    "clients/web/src/client.gen/hostpoint.ts",
+                    "clients/web/src/features/login/Login.assay.test.ts",
+                ],
+                [], [], [], [], [package]);
+
+            var frontend = Assert.Single(plan.Frontends);
+            Assert.True(frontend.Full);
+            Assert.Contains("src/features/login/Login.assay.test.ts", frontend.Assays);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void An_unmapped_backend_dependency_widens_instead_of_silently_skipping()
     {
         var root = Workspace();

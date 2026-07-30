@@ -1,7 +1,7 @@
 schema = 1
 id = "fail-closed-skies-check-before-completion"
 kind = "invariant"
-status = "active"
+status = "superseded"
 title = "Run the complete fail-closed check before completion"
 statement = 'Before commit, pull request creation, push, or any completion claim, the primary agent runs `skies check --task "<task>"`, and the check fails closed when any foundation blocks.'
 violation = 'The primary agent commits, creates a pull request, pushes, or claims completion without first running the complete `skies check --task "<task>"`, or completion proceeds despite a blocking foundation result.'

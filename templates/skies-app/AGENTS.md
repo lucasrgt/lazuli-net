@@ -208,10 +208,17 @@ delegate one agent per foundation.
 3. Use the repository-local foundation skills only when a real lifecycle event occurs: accepted
    decisions for WTW, proven patterns for RTW, corrected failures for NYA, or evidence-backed
    conditional deferments for NWC. Never record hypothetical guidance.
-4. Run the repository's ordinary tests and linters during implementation.
-5. Before commit or completion, run `dotnet tool run skies check --task "<completed work>"`.
-   For committed review or pre-push review, add `--base <target-revision>`. For a release, use `--full`.
-6. Rerun the same check after every fix. Exit code 1 means findings remain. Exit code 2 or greater
+4. Run focused repository tests and linters during implementation.
+5. Before commit, stage the exact intended paths and run
+   `dotnet tool run skies check --task "<completed work>" --staged`. Staged checks are always bounded:
+   mapped proofs run, while exhaustive fallbacks and browser/device execution wait for authoritative CI.
+6. Before push, run `dotnet tool run skies check --task "<review>" --base <target-revision> --fast`.
+   The pre-push hook repeats this bounded committed-diff review.
+7. Never replace the automation-owned depth gates: pull-request CI runs affected without `--fast`, and
+   release automation runs `--full`. Do not report an external delivery complete until its required status
+   is green. Bare `skies check --task ...` is intentionally invalid so an ambiguous scope cannot start a
+   surprise exhaustive run.
+8. Rerun the same check after every fix. Exit code 1 means findings remain. Exit code 2 or greater
    means validation was incomplete. Neither is a pass.
 
 Tests, linters, review, and individual foundation commands do not replace `skies check`.

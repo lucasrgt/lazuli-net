@@ -39,8 +39,10 @@ Hard rules the orchestrator must respect:
   browser flow naming backend slices runs against the real API without request interception.
 - Error codes are registry constants, copy lives in i18n — never literals.
 - Start work with `skies context --task "<goal>" --path <expected-path>`.
-- A feature is done only when `skies check --task "<completed work>"` is green; `skies doctor`
-  or a caller-filtered test command alone is diagnostic. A release requires
+- Before commit, stage the intended paths and require
+  `skies check --task "<completed work>" --staged` to be green; `skies doctor` or a
+  caller-filtered test command alone is diagnostic. Pull-request CI owns the authoritative
+  affected check without `--fast`; release automation requires
   `skies check --task "<release>" --full`.
 
 Deep reference (annotations, CLI, all doctor rules, conventions, decisions) lives in this

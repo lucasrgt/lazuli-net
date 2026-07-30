@@ -33,9 +33,12 @@ phase and uses the foundation tools directly. Do not create one agent per founda
    operations with `expectBackendSlices()` from `skies-frontend-sdk/playwright-backend`; global setup
    probes `PW_API_URL` with the same package. Put mocked smoke coverage in another spec and never call the API
    directly from a backend-bound case.
-7. **Gate**: run `skies check --task "<completed task>"`. Rerun it after every correction.
-   Run `skies check --task "<release>" --full` for a release. Any SKY*/SKYFE* finding goes to
-   skies-doctor. Fix the shape; never suppress, skip, focus, or weaken the manifest.
+7. **Gate**: stage the intended paths and run `skies check --task "<completed task>" --staged`.
+   Before push, run `skies check --task "<review>" --base <target-revision> --fast`. Pull-request CI
+   owns the authoritative affected check without `--fast`, and release automation owns
+   `skies check --task "<release>" --full`. Rerun the applicable check after every correction.
+   Any SKY*/SKYFE* finding goes to skies-doctor. Fix the shape; never suppress, skip, focus, or
+   weaken the manifest.
 
 Report at the end: slice path, endpoints, error codes, AVP proofs, backend journeys, frontend
 happy/sad flows, and all five foundation verdicts.

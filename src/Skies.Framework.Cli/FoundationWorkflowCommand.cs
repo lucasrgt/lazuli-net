@@ -87,7 +87,7 @@ internal static class FoundationWorkflowCommand
             gate.Add("--staged");
         else
             gate.Add("--affected");
-        if (request.Fast)
+        if (request.Fast || request.Staged)
             gate.Add("--fast");
         if (request.Base is not null)
         {
@@ -128,7 +128,8 @@ internal static class FoundationWorkflowCommand
         int Limit,
         bool Fast,
         bool Full,
-        bool Staged);
+        bool Staged,
+        bool Affected);
 
     internal static bool TryParse(
         IReadOnlyList<string> arguments,
@@ -144,6 +145,7 @@ internal static class FoundationWorkflowCommand
         var fast = false;
         var full = false;
         var staged = false;
+        var affected = false;
 
         for (var index = 0; index < arguments.Count; index++)
         {
@@ -168,11 +170,12 @@ internal static class FoundationWorkflowCommand
                 continue;
             }
 
-            if (allowGateMode && argument is "--fast" or "--full" or "--staged")
+            if (allowGateMode && argument is "--fast" or "--full" or "--staged" or "--affected")
             {
                 fast |= argument == "--fast";
                 full |= argument == "--full";
                 staged |= argument == "--staged";
+                affected |= argument == "--affected";
                 continue;
             }
 
@@ -183,12 +186,20 @@ internal static class FoundationWorkflowCommand
             return Invalid(out request, out error, "--task is required");
         if (!allowGateMode && baseRevision is not null)
             return Invalid(out request, out error, "--base is only valid for skies check");
-        if (full && (fast || staged || baseRevision is not null))
-            return Invalid(out request, out error, "--full cannot be combined with --fast, --staged, or --base");
-        if (staged && baseRevision is not null)
-            return Invalid(out request, out error, "--staged cannot be combined with --base");
+        var scopes = (full ? 1 : 0) + (staged ? 1 : 0) + (affected ? 1 : 0) + (baseRevision is null ? 0 : 1);
+        if (allowGateMode && scopes == 0)
+        {
+            return Invalid(
+                out request,
+                out error,
+                "choose an explicit scope: --staged, --affected, --base <revision>, or --full");
+        }
+        if (scopes > 1)
+            return Invalid(out request, out error, "check scopes are mutually exclusive");
+        if (full && fast)
+            return Invalid(out request, out error, "--full cannot be combined with --fast");
 
-        request = new Request(task, paths, events, baseRevision, limit, fast, full, staged);
+        request = new Request(task, paths, events, baseRevision, limit, fast, full, staged, affected);
         error = null;
         return true;
     }
@@ -427,13 +438,14 @@ internal static class FoundationWorkflowCommand
         writer.WriteLine(
             """
             usage:
-              skies check --task <completed-work> [--path <changed-path>]... [--event <observed-event>]...
+              skies check --task <staged-work> --staged
+              skies check --task <working-tree> --affected [--fast]
               skies check --task <review> --base <revision> [--fast]
-              skies check --task <staged-work> --staged [--fast]
               skies check --task <release> --full
 
             Runs the AVP gate plus WTW, RTW, NYA, and NWC checks as one fail-closed
-            receipt. Exit 1 means findings; exit 2 or greater means incomplete validation.
+            receipt. Staged checks are always bounded and defer exhaustive/browser fallbacks
+            to authoritative CI. Exit 1 means findings; exit 2 or greater means incomplete validation.
             """);
         return error ? 2 : 0;
     }

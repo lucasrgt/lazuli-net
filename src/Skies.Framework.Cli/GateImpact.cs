@@ -204,7 +204,6 @@ internal static class GateImpact
                 impact.Full = true;
             if (impacts.Count > 0)
                 reasons.Add("frontend: shared workspace/gate dependency changed; selecting every frontend proof");
-            return;
         }
 
         if (changes.Any(change => change.Contains("client.gen/", StringComparison.OrdinalIgnoreCase)
@@ -214,7 +213,6 @@ internal static class GateImpact
                 impact.Full = true;
             if (impacts.Count > 0)
                 reasons.Add("frontend: generated client changed; selecting every consumer surface");
-            return;
         }
 
         var affectedFeatures = new HashSet<string>(StringComparer.Ordinal);
@@ -230,7 +228,6 @@ internal static class GateImpact
             foreach (var impact in impacts)
                 impact.Full = true;
             reasons.Add("frontend: an unmapped shared core/library change can reach every surface; selecting all packages");
-            return;
         }
 
         var backendSubjects = backend.AffectedSlices

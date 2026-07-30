@@ -53,10 +53,43 @@ public class FoundationWorkflowCommandTests
         });
     }
 
+    [Fact]
+    public void Staged_check_is_always_bounded_even_when_the_caller_omits_fast()
+    {
+        Assert.True(FoundationWorkflowCommand.TryParse(
+            ["--task", "Review staged work", "--staged"],
+            allowGateMode: true,
+            out var request,
+            out var error), error);
+
+        var gate = FoundationWorkflowCommand.CheckPlan(request!)[0];
+
+        Assert.Equal(["--staged", "--fast"], gate.Arguments);
+    }
+
+    [Fact]
+    public void An_ambiguous_check_fails_before_any_expensive_gate_starts()
+    {
+        var calls = 0;
+        var code = FoundationWorkflowCommand.Check(
+            ["--task", "finish work"],
+            (_, _) =>
+            {
+                calls++;
+                return 0;
+            },
+            TextWriter.Null,
+            TextWriter.Null);
+
+        Assert.Equal(2, code);
+        Assert.Equal(0, calls);
+    }
+
     [Theory]
     [InlineData("--full", "--fast")]
     [InlineData("--full", "--staged")]
     [InlineData("--staged", "--base")]
+    [InlineData("--affected", "--base")]
     public void Contradictory_review_scopes_fail_closed(string first, string second)
     {
         var arguments = second == "--base"
@@ -98,7 +131,7 @@ public class FoundationWorkflowCommandTests
     {
         var calls = new List<string>();
         var code = FoundationWorkflowCommand.Check(
-            ["--task", "finish work"],
+            ["--task", "finish work", "--staged"],
             (id, _) =>
             {
                 calls.Add(id);

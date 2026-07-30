@@ -103,6 +103,35 @@ public class GateCommandTests
     }
 
     [Fact]
+    public void Fast_feedback_preserves_mapped_frontend_proofs_inside_an_exhaustive_fallback()
+    {
+        var frontend = new FrontendImpact(new FrontendPackage("clients/web", FrontendPackageRole.Surface))
+        {
+            Full = true,
+        };
+        frontend.Tests.Add("src/features/login/Login.test.ts");
+        frontend.Assays.Add("src/features/login/Login.assay.test.ts");
+        frontend.Flows.Add(new FrontendFlow(
+            "login-happy",
+            "web",
+            "e2e/login.spec.ts",
+            ["Login"],
+            ["Login"]));
+        var impact = new GateImpactPlan(
+            new BackendImpact(false, new HashSet<string>(), new HashSet<string>()),
+            [frontend],
+            ["generated client changed"]);
+
+        var bounded = GateCommand.ApplyFastFeedback(impact, fast: true);
+
+        var selected = Assert.Single(bounded.Frontends);
+        Assert.False(selected.Full);
+        Assert.Contains("src/features/login/Login.test.ts", selected.Tests);
+        Assert.Contains("src/features/login/Login.assay.test.ts", selected.Assays);
+        Assert.Equal("login-happy", Assert.Single(selected.Flows).Id);
+    }
+
+    [Fact]
     public void Fast_feedback_keeps_every_mapped_backend_proof_selected()
     {
         var impact = new GateImpactPlan(

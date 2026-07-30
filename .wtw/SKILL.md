@@ -6,9 +6,11 @@ description: Preserve and retrieve repository decisions and invariants.
 # Why This Way
 
 The primary agent retrieves WTW together with every other foundation by running
-`dotnet tool run skies context --task "<goal>"` before implementation. It runs
-`dotnet tool run skies check --task "<completed task>"` before completion. Do
-not assign a separate permanent agent to WTW.
+`dotnet tool run skies context --task "<goal>"` before implementation. Before
+commit it stages the intended paths and runs
+`dotnet tool run skies check --task "<completed task>" --staged`; PR CI owns the
+authoritative affected gate and release automation owns `--full`. Do not assign
+a separate permanent agent to WTW.
 
 Use `dotnet tool run skies wtw explain` only when deeper decision inspection is
 needed. Read the returned authority, rationale, alternatives, violation

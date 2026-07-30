@@ -574,14 +574,16 @@ a whole module landed on `main` with every one of its tests red, silently, becau
 the push. So the wiring is part of the supply, not an exercise for each app:
 
 - **`skies new` scaffolds the enforcement**: `.github/workflows/ci.yml` runs the affected gate on every push and PR
-  and exposes a manual full audit. `lefthook.yml` runs the staged-fast gate before commit and the complete affected
-  closure before push. `.config/dotnet-tools.json` pins the CLI version used by hooks and CI.
+  and runs the full audit on version tags or manual dispatch. `lefthook.yml` runs the staged-fast gate before commit
+  and bounded base-relative feedback before push. `.config/dotnet-tools.json` pins the CLI version used by hooks
+  and CI.
 - An app is **born gated** exactly as it is born with slices, modules and the doctor: red work
   cannot reach `main` unnoticed. Retrofitting an existing app is the same three files.
-- Manifest validation requires a checked workflow that directly invokes `skies gate`. Configure the repository's
-  branch rules once to require the stable `skies gate (doctor + proofs + matrix)` status and disallow bypasses. That
-  external rule is the authority an implementing LLM cannot edit in the same code change; local hooks and prompts
-  are only feedback.
+- Manifest validation requires a checked pull-request workflow that directly invokes authoritative affected
+  `skies gate`/`skies check` without `--fast`, plus a release/reusable/manual workflow that directly invokes
+  `--full`. Configure branch rules once to require the stable gate status and disallow bypasses. That external rule
+  is the authority an implementing LLM cannot edit in the same code change; local hooks and prompts are only
+  feedback.
 
 ### The scar protocol travels with the scaffold
 

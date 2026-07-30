@@ -58,7 +58,7 @@ static int Usage()
                                         consolidate agent instructions into one managed workflow
           skies context --task <goal> [--path <path>]...
                                         recall bounded decisions, ways, scars, and due work once
-          skies check --task <work> [--base <revision>|--staged|--full] [--fast]
+          skies check --task <work> (--staged|--affected|--base <revision>|--full) [--fast]
                                         run AVP + WTW + RTW + NYA + NWC as one fail-closed receipt
           skies nya <args...>              run the pinned Not You Again CLI; downloads one verified binary on first use
           skies wtw <args...>              run the pinned Why This Way CLI; downloads one verified binary on first use

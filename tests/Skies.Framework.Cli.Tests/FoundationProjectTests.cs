@@ -105,6 +105,33 @@ public class FoundationProjectTests
     }
 
     [Fact]
+    public void An_ambiguous_legacy_check_protocol_is_rejected()
+    {
+        var root = NewDir();
+        Directory.CreateDirectory(Path.Combine(root, ".rtw", "ways"));
+        File.WriteAllText(
+            Path.Combine(root, ".rtw", "SKILL.md"),
+            """
+            Run `dotnet tool run skies rtw guide`.
+            Run `dotnet tool run skies rtw add`.
+            Run `dotnet tool run skies rtw check`.
+            """);
+        File.WriteAllText(
+            Path.Combine(root, "AGENTS.md"),
+            """
+            <!-- skies:foundations:start -->
+            Run `dotnet tool run skies context --task "<goal>"`.
+            Run `dotnet tool run skies check --task "<completed work>"`.
+            <!-- skies:foundations:end -->
+            """);
+
+        var outcome = RtwProject.Check(root);
+
+        Assert.False(outcome.Valid);
+        Assert.Contains(outcome.Messages, message => message.Contains("foundations sync"));
+    }
+
+    [Fact]
     public void The_application_template_carries_every_versioned_foundation_protocol()
     {
         var template = Path.Combine(RepoRoot(), "templates", "skies-app");

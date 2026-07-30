@@ -31,6 +31,10 @@ public class FoundationInstructionsTests
         Assert.Equal(1, Count(result, FoundationInstructions.StartMarker));
         Assert.Contains("dotnet tool run skies context", result);
         Assert.Contains("dotnet tool run skies check", result);
+        Assert.Contains("--staged", result);
+        Assert.Contains("--base <target-revision> --fast", result);
+        Assert.Contains("release automation runs `--full`", result);
+        Assert.Contains("intentionally invalid", result);
         Assert.Contains("Never create or", result);
     }
 

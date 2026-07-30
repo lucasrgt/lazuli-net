@@ -27,10 +27,16 @@ public sealed class ProjectTemplateTests
         var proof = File.ReadAllText(Path.Combine(
             template, "src", "Skies.Framework.Starter.Api", "Modules", "Health", "Slices", "Ping.Tests.cs"));
         var hooks = File.ReadAllText(Path.Combine(template, "lefthook.yml"));
+        var workflow = File.ReadAllText(Path.Combine(template, ".github", "workflows", "ci.yml"));
 
         Assert.Contains("Assay.Net", testsProject, StringComparison.Ordinal);
         Assert.Contains("[AVP(", proof, StringComparison.Ordinal);
-        Assert.Contains("skies check --task", hooks, StringComparison.Ordinal);
+        Assert.Contains("skies check --task 'pre-commit review' --staged --fast", hooks, StringComparison.Ordinal);
+        Assert.Contains("skies check --task 'pre-push review' --base origin/main --fast", hooks, StringComparison.Ordinal);
+        Assert.Contains("skies gate --affected", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("skies gate --affected --fast", workflow, StringComparison.Ordinal);
+        Assert.Contains("skies gate --full", workflow, StringComparison.Ordinal);
+        Assert.Contains("tags: [\"v*\"]", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("skies nya check", hooks, StringComparison.Ordinal);
         Assert.DoesNotContain("skies wtw guard", hooks, StringComparison.Ordinal);
         Assert.DoesNotContain("skies rtw check", hooks, StringComparison.Ordinal);
@@ -54,6 +60,8 @@ public sealed class ProjectTemplateTests
         {
             Assert.Contains("skies context --task", skill, StringComparison.Ordinal);
             Assert.Contains("skies check --task", skill, StringComparison.Ordinal);
+            Assert.Contains("--staged", skill, StringComparison.Ordinal);
+            Assert.Contains("--full", skill, StringComparison.Ordinal);
             Assert.Contains("permanent", skill, StringComparison.Ordinal);
         }
     }

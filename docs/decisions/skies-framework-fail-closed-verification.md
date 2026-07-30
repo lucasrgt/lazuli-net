@@ -75,8 +75,10 @@ pre-push uses `--affected --base <revision> --fast`, pull requests use authorita
 use `--full`. Fast local feedback still executes every mapped backend filter, unit test, and Assay, but explicitly
 defers an exhaustive fallback and browser/device execution to CI. Shared runtime infrastructure and ambiguous
 dependencies widen rather than guess in authoritative gates; control-plane edits are validated without
-impersonating runtime impact. Sharding remains available for the exhaustive audit, but is not required to pay the
-cost of unrelated tests on every small change.
+impersonating runtime impact. `skies check --staged` forces the bounded behavior, and an unscoped `skies check`
+is rejected before execution. Managed agent instructions are doctor-validated for the complete staged → affected
+→ full protocol, while checked PR and release workflows own the authoritative depths. Sharding remains available
+for the exhaustive audit, but is not required to pay the cost of unrelated tests on every small change.
 
 Static rules can enforce proof identity, shape, execution, and a structural assertion floor. They cannot prove that
 an assertion is semantically strong. Review and occasional mutation testing remain depth audits, but neither can

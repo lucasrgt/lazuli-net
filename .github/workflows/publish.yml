@@ -17,6 +17,8 @@ jobs:
   quality:
     name: exact CI quality gate
     uses: ./.github/workflows/ci.yml
+    with:
+      full: true
 
   # Release guard: no publishable unit may ship new content under a version that is already out — fail the whole
   # release so the fix is a version bump, not a silent skip (the "0.x published != 0.x canonical" drift). Both

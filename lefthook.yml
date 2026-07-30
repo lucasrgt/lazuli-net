@@ -5,9 +5,9 @@
 pre-commit:
   commands:
     foundation-check:
-      run: dotnet run --project src/Skies.Framework.Cli/Skies.Framework.Cli.csproj -c Release -- check --task "pre-commit review" --staged --fast
+      run: dotnet run --project src/Skies.Framework.Cli/Skies.Framework.Cli.csproj -c Release -- check --task 'pre-commit review' --staged --fast
 
 pre-push:
   commands:
     foundation-check:
-      run: dotnet run --project src/Skies.Framework.Cli/Skies.Framework.Cli.csproj -c Release -- check --task "pre-push review" --base origin/main --fast
+      run: dotnet run --project src/Skies.Framework.Cli/Skies.Framework.Cli.csproj -c Release -- check --task 'pre-push review' --base origin/main --fast

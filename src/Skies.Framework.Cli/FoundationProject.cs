@@ -39,16 +39,10 @@ internal static class FoundationProject
             .Select(name => Path.Combine(root, name))
             .Where(File.Exists)
             .ToList();
-        if (agentFiles.Count == 0 || !agentFiles.Any(path =>
-        {
-            var content = File.ReadAllText(path);
-            return content.Contains(FoundationInstructions.StartMarker, StringComparison.Ordinal)
-                && content.Contains("dotnet tool run skies context", StringComparison.Ordinal)
-                && content.Contains("dotnet tool run skies check", StringComparison.Ordinal);
-        }))
+        if (agentFiles.Count == 0 || !agentFiles.Any(path => HasCurrentAgentProtocol(File.ReadAllText(path))))
             messages.Add(
                 $"{tool.DisplayName}: root agent instructions must include the unified "
-                + "Skies foundation workflow using `skies context` and `skies check`.");
+                + "Skies staged/affected/full workflow; run `dotnet tool run skies foundations sync`.");
 
         return new Outcome(messages.Count == 0, messages);
     }
@@ -66,4 +60,19 @@ internal static class FoundationProject
 
     private static string ProjectPath(string root, string relative) =>
         Path.Combine(root, relative.Replace('/', Path.DirectorySeparatorChar));
+
+    private static bool HasCurrentAgentProtocol(string content)
+    {
+        var start = content.IndexOf(FoundationInstructions.StartMarker, StringComparison.Ordinal);
+        var end = content.IndexOf(FoundationInstructions.EndMarker, StringComparison.Ordinal);
+        if (start < 0 || end <= start)
+            return false;
+
+        var block = content[start..(end + FoundationInstructions.EndMarker.Length)];
+        return block.Contains("dotnet tool run skies context", StringComparison.Ordinal)
+            && block.Contains("dotnet tool run skies check", StringComparison.Ordinal)
+            && block.Contains("--staged", StringComparison.Ordinal)
+            && block.Contains("--base <target-revision> --fast", StringComparison.Ordinal)
+            && block.Contains("release automation runs `--full`", StringComparison.Ordinal);
+    }
 }
