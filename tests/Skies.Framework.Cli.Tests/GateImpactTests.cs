@@ -24,6 +24,9 @@ public sealed class GateImpactTests
             Assert.Contains("Account/Login", plan.Backend.AffectedSlices);
             Assert.Contains("LoginProof", plan.Backend.Filters);
             Assert.Contains("AuthJourney", plan.Backend.Filters);
+            Assert.Contains("Account/Login", plan.Backend.DirectAffectedSlices);
+            Assert.Contains("LoginProof", plan.Backend.DirectFilters);
+            Assert.Contains("AuthJourney", plan.Backend.DirectFilters);
             Assert.Equal("login-happy", Assert.Single(plan.Frontends[0].Flows).Id);
         }
         finally

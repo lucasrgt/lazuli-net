@@ -9,8 +9,18 @@ namespace Skies.Framework.Cli;
 internal sealed record BackendImpact(
     bool Full,
     IReadOnlySet<string> Filters,
-    IReadOnlySet<string> AffectedSlices)
+    IReadOnlySet<string> AffectedSlices,
+    IReadOnlySet<string> DirectFilters,
+    IReadOnlySet<string> DirectAffectedSlices)
 {
+    internal BackendImpact(
+        bool full,
+        IReadOnlySet<string> filters,
+        IReadOnlySet<string> affectedSlices)
+        : this(full, filters, affectedSlices, filters, affectedSlices)
+    {
+    }
+
     /// <summary>Whether this change requires any backend test process.</summary>
     public bool RunsTests => Full || Filters.Count > 0;
 }
@@ -112,6 +122,8 @@ internal static class GateImpact
             .Select(path => Normalize(Path.GetRelativePath(root, path))).ToList();
         var filters = new HashSet<string>(StringComparer.Ordinal);
         var affected = new HashSet<string>(StringComparer.Ordinal);
+        var directFilters = new HashSet<string>(StringComparer.Ordinal);
+        var directAffected = new HashSet<string>(StringComparer.Ordinal);
         var full = false;
         CSharpImpactGraph? csharpGraph = null;
 
@@ -129,6 +141,12 @@ internal static class GateImpact
                 || change.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase);
             if (backendContract)
             {
+                if (change.EndsWith(".spec.toml", StringComparison.OrdinalIgnoreCase))
+                {
+                    var module = Path.GetFileName(change)[..^".spec.toml".Length];
+                    foreach (var slice in slices.Where(slice => slice.Module == module))
+                        SelectSlice(slice, directFilters, directAffected, proofs, journeys);
+                }
                 full = true;
                 reasons.Add($"backend: {change} changes the proof/build contract; selecting all tests");
                 continue;
@@ -136,6 +154,26 @@ internal static class GateImpact
 
             if (!change.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
                 continue;
+
+            foreach (var slice in slices.Where(slice => Normalize(slice.File) == change))
+                SelectSlice(slice, directFilters, directAffected, proofs, journeys);
+            foreach (var proof in proofs.Where(proof => Normalize(proof.File) == change))
+            {
+                directFilters.Add(proof.ClassName);
+                foreach (var slice in slices.Where(slice =>
+                    slice.Module == proof.Module && slice.Name == proof.Subject))
+                {
+                    SelectSlice(slice, directFilters, directAffected, proofs, journeys);
+                }
+            }
+            foreach (var journey in journeys.Where(journey => Normalize(journey.File) == change))
+            {
+                directFilters.Add(journey.ClassName);
+                foreach (var slice in slices.Where(slice => slice.Name == journey.Subject))
+                    SelectSlice(slice, directFilters, directAffected, proofs, journeys);
+            }
+            foreach (var site in testClasses.Where(site => Normalize(site.File) == change))
+                directFilters.Add(site.ClassName);
 
             csharpGraph ??= CSharpImpactGraph.Build(root);
             var impactedFiles = csharpGraph.Expand(change);
@@ -184,10 +222,10 @@ internal static class GateImpact
         }
 
         if (full)
-            return new BackendImpact(true, filters, affected);
+            return new BackendImpact(true, filters, affected, directFilters, directAffected);
         if (filters.Count > 0)
             reasons.Add($"backend: selected {affected.Count} slice(s) through {filters.Count} test filter term(s)");
-        return new BackendImpact(false, filters, affected);
+        return new BackendImpact(false, filters, affected, directFilters, directAffected);
     }
 
     private static void SelectFrontends(

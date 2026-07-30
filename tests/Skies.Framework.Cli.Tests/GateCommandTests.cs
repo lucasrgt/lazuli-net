@@ -149,21 +149,27 @@ public class GateCommandTests
     }
 
     [Fact]
-    public void Fast_feedback_defers_an_oversized_mapped_backend_closure()
+    public void Fast_feedback_preserves_direct_backend_proofs_when_the_transitive_closure_is_oversized()
     {
         var filters = Enumerable.Range(0, 200)
             .Select(index => $"App.Tests.Modules.Feature{index:D3}.A_very_descriptive_proof_class")
             .ToHashSet();
         var impact = new GateImpactPlan(
-            new BackendImpact(false, filters, new HashSet<string> { "Feature/Change" }),
+            new BackendImpact(
+                false,
+                filters,
+                new HashSet<string> { "Feature/Change", "Unrelated/Change" },
+                new HashSet<string> { "DirectProof" },
+                new HashSet<string> { "Feature/Change" }),
             [],
             []);
 
         var bounded = GateCommand.ApplyFastFeedback(impact, fast: true);
 
-        Assert.False(bounded.Backend.RunsTests);
-        Assert.Empty(bounded.Backend.AffectedSlices);
-        Assert.Contains(bounded.Reasons, reason => reason.Contains("oversized mapped proof closure"));
+        Assert.True(bounded.Backend.RunsTests);
+        Assert.Equal(["DirectProof"], bounded.Backend.Filters);
+        Assert.Equal(["Feature/Change"], bounded.Backend.AffectedSlices);
+        Assert.Contains(bounded.Reasons, reason => reason.Contains("oversized transitive proof closure"));
     }
 
     [Fact]

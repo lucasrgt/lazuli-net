@@ -157,8 +157,8 @@ internal static class GateCommand
     }
 
     /// <summary>
-    /// Keep local feedback bounded: mapped proof filters still execute, while an exhaustive fallback waits for
-    /// the authoritative affected CI or an explicit full audit. The reason remains visible in the plan.
+    /// Keep local feedback bounded: directly mapped proof filters still execute, while an exhaustive or oversized
+    /// transitive closure waits for authoritative affected CI or an explicit full audit. The reason remains visible.
     /// </summary>
     internal static GateImpactPlan ApplyFastFeedback(GateImpactPlan impact, bool fast)
     {
@@ -175,7 +175,7 @@ internal static class GateCommand
         if (impact.Backend.Full)
             reasons.Add("backend: exhaustive fallback deferred by --fast; affected CI or an explicit --full audit executes it");
         if (oversized)
-            reasons.Add("backend: oversized mapped proof closure deferred by --fast; affected CI executes it without a local command-line fan-out");
+            reasons.Add("backend: oversized transitive proof closure deferred by --fast; direct mappings still execute and affected CI executes the complete closure");
         if (exhaustiveFrontend)
             reasons.Add("frontend: exhaustive runtime closure deferred by --fast; affected CI executes every test and Assay");
 
@@ -183,8 +183,8 @@ internal static class GateCommand
         {
             Backend = new BackendImpact(
                 false,
-                oversized ? new HashSet<string>() : impact.Backend.Filters,
-                oversized ? new HashSet<string>() : impact.Backend.AffectedSlices),
+                oversized ? impact.Backend.DirectFilters : impact.Backend.Filters,
+                oversized ? impact.Backend.DirectAffectedSlices : impact.Backend.AffectedSlices),
             Frontends = impact.Frontends
                 .Select(frontend => frontend.Full ? BoundedFrontend(frontend) : frontend)
                 .ToList(),
