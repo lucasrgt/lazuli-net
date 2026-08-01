@@ -90,6 +90,10 @@ commands run through one pinned CSM release. CSM verifies, caches, and locks the
 four native tools outside the repository. No Rust toolchain or global installation
 is required.
 
+`.skies/csm` is the Skies scaffold default, not a hard-coded tool path. The
+shared `[storage].root` in `csm.toml` may override it for a repository, and every
+Skies foundation command and doctor check follows that configured root.
+
 After creating or cloning a Skies project, each developer only selects their
 personal judge configuration:
 
