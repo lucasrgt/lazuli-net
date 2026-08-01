@@ -1,0 +1,13 @@
+schema = 1
+
+[storage]
+root = ".skies/csm"
+
+[tools]
+enabled = ["nya", "rtw", "wtw", "nwc"]
+
+[instructions]
+files = []
+
+[workflow]
+proof = []

@@ -287,10 +287,10 @@ internal static class FoundationWorkflowCommand
 
     private static FoundationTool.Execution CaptureStep(string id, string[] arguments) => id switch
     {
-        "wtw" => WtwCommand.Tool.Capture(arguments),
-        "rtw" => RtwCommand.Tool.Capture(arguments),
-        "nya" => NyaCommand.Tool.Capture(arguments),
-        "nwc" => NwcCommand.Tool.Capture(arguments),
+        "wtw" => WtwCommand.Capture(arguments),
+        "rtw" => RtwCommand.Capture(arguments),
+        "nya" => NyaCommand.Capture(arguments),
+        "nwc" => NwcCommand.Capture(arguments),
         _ => new FoundationTool.Execution(2, "", $"skies context: unknown foundation {id}."),
     };
 

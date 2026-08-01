@@ -28,41 +28,27 @@ internal static class FoundationStackCommand
             if (!File.Exists(path))
                 File.WriteAllText(path, "");
         }
-        var results = operation == "init"
-            ? Initialize(agentFiles)
-            : Synchronize();
-        if (results.All(code => code == 0))
-        {
-            FoundationInstructions.Write(Directory.GetCurrentDirectory(), agentFiles);
-            Console.WriteLine(operation == "init"
-                ? "skies foundations: NYA, WTW, RTW, and NWC are initialized behind one primary-agent workflow."
-                : "skies foundations: agent instructions now use one primary-agent workflow.");
-        }
-        return results.Max();
-    }
-
-    private static int[] Initialize(IReadOnlyList<string> agentFiles)
-    {
-        var agentArguments = agentFiles
-            .SelectMany(file => new[] { "--agent-file", file })
-            .ToArray();
-        return
-        [
-            NyaCommand.Run(["init"]),
-            WtwCommand.Run(["init", .. agentArguments]),
-            RtwCommand.Run(["init", .. agentArguments]),
-            NwcCommand.Run(["init", .. agentArguments]),
-        ];
-    }
-
-    private static int[] Synchronize()
-    {
         var root = Directory.GetCurrentDirectory();
-        NyaCommand.AdaptProjectInstructions(root);
-        WtwCommand.AdaptProjectInstructions(root);
-        RtwCommand.AdaptProjectInstructions(root);
-        NwcCommand.AdaptProjectInstructions(root);
-        return [0];
+        if (operation == "init")
+            CsmProject.EnsureConfiguration(root);
+        else if (!File.Exists(Path.Combine(root, CsmProject.ConfigFile)))
+        {
+            Console.Error.WriteLine(
+                "skies foundations: CSM is not initialized; run `dotnet tool run skies foundations init`.");
+            return 2;
+        }
+
+        var result = operation == "init"
+            ? CsmCommand.Initialize(CsmProject.HasStandaloneStores(root))
+            : CsmCommand.Synchronize();
+        if (result == 0)
+        {
+            FoundationInstructions.Write(root, agentFiles);
+            Console.WriteLine(operation == "init"
+                ? "skies foundations: CSM now manages NYA, WTW, RTW, and NWC behind one primary-agent workflow."
+                : "skies foundations: CSM tools and agent instructions are synchronized.");
+        }
+        return result;
     }
 
     internal static IReadOnlyList<string> ParseAgentFiles(string[] arguments, string root)
@@ -99,9 +85,9 @@ internal static class FoundationStackCommand
               skies foundations init [--agent-file <path>]...
               skies foundations sync [--agent-file <path>]...
 
-            Init installs the versioned NYA, WTW, RTW, and NWC repository protocols through
-            framework-pinned verified binaries. Sync consolidates existing agent instructions.
-            Both commands install one primary-agent workflow in the selected instruction files.
+            Init creates CSM storage under .skies/csm or safely adopts legacy standalone stores.
+            Sync installs the CSM-pinned NYA, WTW, RTW, and NWC versions. Both commands keep
+            one primary-agent workflow in the selected instruction files.
             """);
         return error ? 2 : 0;
     }

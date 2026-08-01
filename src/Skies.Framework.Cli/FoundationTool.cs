@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 namespace Skies.Framework.Cli;
 
 /// <summary>
-/// Resolves and runs one framework-pinned native foundation tool. Release assets are
+/// Resolves and runs one framework-pinned native foundation bundle. Release assets are
 /// verified before they enter the user cache, so consumers need neither a Rust toolchain
 /// nor a global installation.
 /// </summary>
@@ -16,27 +16,18 @@ internal sealed class FoundationTool
 
     private readonly IReadOnlyDictionary<string, string> checksums;
     private readonly bool versionInAssetName;
-    private readonly IReadOnlyList<string> durableDirectories;
-
     internal FoundationTool(
         string id,
         string displayName,
         string version,
         string repository,
-        string durableDirectory,
         IReadOnlyDictionary<string, string> checksums,
-        bool versionInAssetName = false,
-        string? projectDirectory = null,
-        IReadOnlyList<string>? additionalDurableDirectories = null)
+        bool versionInAssetName = false)
     {
         Id = id;
         DisplayName = displayName;
         Version = version;
         Repository = repository;
-        ProjectDirectory = projectDirectory ?? $".{id}";
-        durableDirectories = additionalDurableDirectories is null
-            ? [durableDirectory]
-            : [durableDirectory, .. additionalDurableDirectories];
         this.checksums = checksums;
         this.versionInAssetName = versionInAssetName;
     }
@@ -45,8 +36,6 @@ internal sealed class FoundationTool
     internal string DisplayName { get; }
     internal string Version { get; }
     internal string Repository { get; }
-    internal string ProjectDirectory { get; }
-    internal string FrameworkCommand => $"dotnet tool run skies {Id}";
 
     /// <summary>Resolve, install, and execute the tool with every forwarded argument.</summary>
     internal int Run(string[] arguments)
@@ -82,8 +71,6 @@ internal sealed class FoundationTool
             process.WaitForExit();
             if (capture)
                 Task.WaitAll(output!, error!);
-            if (process.ExitCode == 0 && arguments.Contains("init", StringComparer.Ordinal))
-                AdaptProjectInstructions(RepositoryArgument(arguments));
             return new Execution(
                 process.ExitCode,
                 output?.Result ?? "",
@@ -120,30 +107,6 @@ internal sealed class FoundationTool
     internal bool ChecksumMatches(byte[] archive, string target) =>
         checksums.TryGetValue(target, out var expected)
         && Convert.ToHexStringLower(SHA256.HashData(archive)) == expected;
-
-    internal void AdaptProjectInstructions(string root)
-    {
-        foreach (var relative in new[] { $"{ProjectDirectory}/SKILL.md", "AGENTS.md", "CLAUDE.md", "GEMINI.md" })
-        {
-            var path = Path.Combine(root, relative.Replace('/', Path.DirectorySeparatorChar));
-            if (!File.Exists(path))
-                continue;
-            var current = File.ReadAllText(path);
-            var adapted = current.Replace($"`{Id} ", $"`{FrameworkCommand} ", StringComparison.Ordinal);
-            if (adapted != current)
-                File.WriteAllText(path, adapted);
-        }
-
-        foreach (var relative in durableDirectories)
-        {
-            var durable = Path.Combine(
-                root,
-                ProjectDirectory.Replace('/', Path.DirectorySeparatorChar),
-                relative.Replace('/', Path.DirectorySeparatorChar));
-            if (Directory.Exists(durable) && !Directory.EnumerateFileSystemEntries(durable).Any())
-                File.WriteAllText(Path.Combine(durable, ".gitkeep"), "");
-        }
-    }
 
     private string EnsureInstalled()
     {
@@ -225,14 +188,6 @@ internal sealed class FoundationTool
         if (string.IsNullOrWhiteSpace(cache))
             cache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cache");
         return Path.Combine(cache, "skies", "tools", Id);
-    }
-
-    private static string RepositoryArgument(IReadOnlyList<string> arguments)
-    {
-        for (var index = 0; index + 1 < arguments.Count; index++)
-            if (arguments[index] == "--repository")
-                return Path.GetFullPath(arguments[index + 1]);
-        return Directory.GetCurrentDirectory();
     }
 
     private static void TryDelete(string path)

@@ -1,6 +1,6 @@
 ---
 name: not-you-again
-description: Recover and prevent repository-specific mistakes with the nya CLI. Use at task start, when scope or context changes, during task or code review, after correcting a real reusable failure, and before commit, pull request, push, or completion.
+description: Recover and prevent repository-specific mistakes with CSM-managed NYA. Use at task start, when scope or context changes, during task or code review, after correcting a real reusable failure, and before commit, pull request, push, or completion.
 ---
 
 # Not You Again
@@ -15,14 +15,15 @@ description: Recover and prevent repository-specific mistakes with the nya CLI. 
 8. Rerun the applicable check whenever the reviewed diff changes. Exit code 1 requires correction and another check. Exit code 2 is a failed audit and must never be reported as a pass.
 
 If the built-in judge reports a network-disabled agent sandbox, do not retry it
-from the same shell. Delegate `dotnet tool run skies nya check` to the host, MCP server, or CI.
+from the same shell. Delegate `dotnet tool run skies nya check` to the host, MCP
+server, or CI.
 
 Never treat collector output as a code review. It may persist only a real failure
 paired with an actual correction and verbatim evidence.
 
-Use `dotnet tool run skies nya replay` only for explicit corpus maintenance or evaluation. It tests
-historical correction patches against their scars and does not execute a coding
-agent or establish a prevention rate.
+Use `dotnet tool run skies nya replay` only for explicit corpus maintenance or
+evaluation. It tests historical correction patches against their scars and does
+not execute a coding agent or establish a prevention rate.
 
 Use standalone `dotnet tool run skies nya check` only for focused investigation
 or maintenance. Do not report a task, review, commit, pull request, or push as

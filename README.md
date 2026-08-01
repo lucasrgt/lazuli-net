@@ -60,16 +60,17 @@ skies doctor                           # run the conventions over back + front
 
 ## Agent foundation stack
 
-The framework composes five independent tools instead of merging their data or
-responsibilities:
+The framework combines its AVP proof gate with Codebase Semantic Memory (CSM).
+CSM installs and synchronizes four independent semantic tools while preserving
+each standalone contract:
 
 | Foundation | Repository question | Versioned surface | Framework entrypoint |
 |---|---|---|---|
 | **AVP** | What behavior must this change prove? | `*.spec.toml` and co-located executable proofs | `skies criteria`, `skies gate` |
-| **Not You Again** | Which corrected failure must never recur? | `.nya/scars/`, policy, and skill | `skies nya` |
-| **Why This Way** | Which decision or invariant governs this change, and why? | `.wtw/records/` and skill | `skies wtw` |
-| **Right This Way** | How does this repository already implement this kind of work? | `.rtw/ways/` and skill | `skies rtw` |
-| **Now We Can** | Which previously blocked action can proceed now? | `.nwc/deferments/` and skill | `skies nwc` |
+| **Not You Again** | Which corrected failure must never recur? | `.skies/csm/nya/scars/`, policy, and skill | `skies nya` |
+| **Why This Way** | Which decision or invariant governs this change, and why? | `.skies/csm/wtw/records/` and skill | `skies wtw` |
+| **Right This Way** | How does this repository already implement this kind of work? | `.skies/csm/rtw/ways/` and skill | `skies rtw` |
+| **Now We Can** | Which previously blocked action can proceed now? | `.skies/csm/nwc/deferments/` and skill | `skies nwc` |
 
 The primary coding agent orchestrates all five. Skies does not spawn or require
 one specialist agent per foundation:
@@ -77,17 +78,17 @@ one specialist agent per foundation:
 | Moment | One command | Result |
 |---|---|---|
 | Task start or scope change | `skies context --task "<goal>" --path <expected-path>` | Bounded decisions, ways, scars, and due work |
-| Before commit or completion | `skies check --task "<completed work>"` | AVP plus every semantic gate |
-| Committed review or pre-push | `skies check --task "<review>" --base <revision>` | One receipt over the committed delta |
+| Before commit | `skies check --task "<completed work>" --staged` | AVP plus every semantic gate |
+| Committed review or pre-push | `skies check --task "<review>" --base <revision> --fast` | One bounded receipt over the committed delta |
 | Release | `skies check --task "<release>" --full` | Exhaustive proof and semantic audit |
 
-Every `skies new` project includes the complete stack: all four versioned
-stores, all five protocols, portable skills, managed agent instructions, and
+Every `skies new` project includes the complete stack: `csm.toml`, the four
+stores under `.skies/csm/`, all five protocols, portable skills, managed agent instructions, and
 pre-commit and pre-push checks. There is no reduced scaffold and no
 per-foundation opt-out. AVP ships as the native proof protocol. The other four
-commands resolve pinned release binaries, verify their embedded SHA-256
-checksums, and cache them outside the repository. No Rust toolchain or global
-installation is required.
+commands run through one pinned CSM release. CSM verifies, caches, and locks the
+four native tools outside the repository. No Rust toolchain or global installation
+is required.
 
 After creating or cloning a Skies project, each developer only selects their
 personal judge configuration:
@@ -97,11 +98,12 @@ dotnet tool run skies nya setup --judge codex
 ```
 
 `skies foundations init` exists for migration, repair, and adoption in an
-existing repository. It always initializes NYA, WTW, RTW, and NWC together,
+existing repository. It creates `csm.toml`, safely adopts standalone `.nya/`,
+`.wtw/`, `.rtw/`, and `.nwc/` stores, and initializes all four tools together,
 auto-detects existing `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` files, and is
 idempotent. Pass repeated `--agent-file <path>` options to select other agent
-surfaces. `skies foundations sync` upgrades existing repositories from separate
-foundation blocks to the single primary-agent workflow. Each developer or harness can use a different judge without changing
+surfaces. `skies foundations sync` updates CSM's exact tool versions and the
+single primary-agent workflow. Each developer or harness can use a different judge without changing
 the versioned team protocol. The underlying tools remain independently usable
 outside Skies; selective installation belongs to those standalone adoption
 flows, not to the Skies project template.
@@ -110,7 +112,7 @@ The ordinary workflow stays small:
 
 ```bash
 dotnet tool run skies context --task "Add invoice approval" --path "src/Billing/**"
-dotnet tool run skies check --task "Add invoice approval"
+dotnet tool run skies check --task "Add invoice approval" --staged
 ```
 
 Use individual commands only for their explicit record lifecycle or deeper maintenance:
@@ -124,8 +126,9 @@ dotnet tool run skies nwc resolve --id <id> --evidence "<proof>"
 dotnet tool run skies nya replay --limit 20
 ```
 
-`skies` pins NYA `1.1.5`, WTW `0.1.4`, RTW `0.1.3`, and NWC `0.3.0` for Windows x64, Linux
-x64 and ARM64, and macOS x64 and ARM64. Judge commands, credentials,
+`skies` pins CSM `0.1.0`, whose lock currently selects NYA `1.1.6`, WTW `0.1.6`,
+RTW `0.1.4`, and NWC `0.3.1` for Windows x64, Linux x64 and ARM64, and macOS
+x64 and ARM64. Judge commands, credentials,
 disposable SQLite indexes, and local configuration remain unversioned.
 `skies doctor` validates that every shared store, skill, and managed instruction
 surface is present and still points through the pinned framework commands.

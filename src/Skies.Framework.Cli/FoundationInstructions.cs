@@ -71,6 +71,22 @@ internal static class FoundationInstructions
             : result + Environment.NewLine + Environment.NewLine + Block + Environment.NewLine;
     }
 
+    /// <summary>Whether an instruction file carries the current bounded lifecycle.</summary>
+    internal static bool IsCurrent(string content)
+    {
+        var start = content.IndexOf(StartMarker, StringComparison.Ordinal);
+        var end = content.IndexOf(EndMarker, StringComparison.Ordinal);
+        if (start < 0 || end <= start)
+            return false;
+
+        var block = content[start..(end + EndMarker.Length)];
+        return block.Contains("dotnet tool run skies context", StringComparison.Ordinal)
+            && block.Contains("dotnet tool run skies check", StringComparison.Ordinal)
+            && block.Contains("--staged", StringComparison.Ordinal)
+            && block.Contains("--base <target-revision> --fast", StringComparison.Ordinal)
+            && block.Contains("release automation runs `--full`", StringComparison.Ordinal);
+    }
+
     private static string RemoveBlock(string content, string startMarker, string endMarker)
     {
         while (true)

@@ -585,17 +585,17 @@ the push. So the wiring is part of the supply, not an exercise for each app:
   is the authority an implementing LLM cannot edit in the same code change; local hooks and prompts are only
   feedback.
 
-### The scar protocol travels with the scaffold
+### Semantic memory travels with the scaffold
 
-Skies projects also start with Not You Again as the repository-local
-memory of corrected failures:
+Skies projects start with Codebase Semantic Memory as the shared home for NYA,
+RTW, WTW, and NWC:
 
-- `.nya/` stores the versioned skill, shared policy, and team scars. Personal
-  judge selection remains in the user config; an unversioned
-  `.nya/config.local.toml` may override it for one repository.
-- `dotnet tool run skies nya <args...>` resolves the framework-pinned NYA release,
-  downloads one native binary on first use, verifies an embedded SHA-256, and
-  caches it outside the repository. No Rust toolchain or global NYA install is
+- `csm.toml` declares the common storage root. Skies scaffolds `.skies/csm/`,
+  with one child owned by each independent tool. Personal judge selection and
+  disposable indexes remain ignored inside that tree.
+- `dotnet tool run skies <nya|rtw|wtw|nwc> <args...>` resolves the
+  framework-pinned CSM release. CSM verifies, installs, and locks the native
+  tool versions outside the repository. No Rust toolchain or global install is
   part of project setup.
 - Root agent instructions require recall at task start and whenever scope or
   context changes, scar-driven review before accepting a versioned
@@ -608,12 +608,12 @@ memory of corrected failures:
   base-relative recurrence check. CI does not select a model or credential on
   behalf of the team; an organization may add its own ephemeral judge after
   configuring that trust boundary.
-- `skies doctor` validates the versioned NYA surface without reading personal
-  configuration or downloading a binary.
+- `skies doctor` validates the versioned CSM surface without reading personal
+  configuration or downloading binaries.
 
 The split is deliberate. Skies deterministically proves code shape and
-executable behavior. NYA makes repository-specific corrected failures durable
-and supplies them to an isolated semantic judge. Neither replaces the other.
+executable behavior. CSM coordinates the repository-specific semantic layers;
+each underlying tool remains independently usable outside a Skies project.
 
 ### Declaring criteria — born closed, not caught later
 

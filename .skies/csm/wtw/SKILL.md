@@ -1,6 +1,6 @@
 ---
 name: why-this-way
-description: Preserve and retrieve repository decisions and invariants.
+description: Preserve and retrieve repository decisions and invariants with CSM-managed WTW.
 ---
 
 # Why This Way
@@ -16,9 +16,10 @@ Use `dotnet tool run skies wtw explain` only when deeper decision inspection is
 needed. Read the returned authority, rationale, alternatives, violation
 examples, and links before choosing an implementation.
 
-Hosts call `dotnet tool run skies wtw collect` after an authoritative source contains a durable
-choice or falsifiable invariant. There is no manual add command. Two isolated
-judges must return the same evidence-backed candidate before it is written.
+Hosts call `dotnet tool run skies wtw collect` after an authoritative source
+contains a durable choice or falsifiable invariant. There is no manual add
+command. Two isolated judges must return the same evidence-backed candidate
+before it is written.
 
 Use `dotnet tool run skies wtw guard` only for focused investigation or
 maintenance. The standard `skies check` receipt already runs it and treats a

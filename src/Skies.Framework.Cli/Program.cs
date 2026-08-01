@@ -60,10 +60,10 @@ static int Usage()
                                         recall bounded decisions, ways, scars, and due work once
           skies check --task <work> (--staged|--affected|--base <revision>|--full) [--fast]
                                         run AVP + WTW + RTW + NYA + NWC as one fail-closed receipt
-          skies nya <args...>              run the pinned Not You Again CLI; downloads one verified binary on first use
-          skies wtw <args...>              run the pinned Why This Way CLI; downloads one verified binary on first use
-          skies rtw <args...>              run the pinned Right This Way CLI; downloads one verified binary on first use
-          skies nwc <args...>              run the pinned Now We Can CLI; downloads one verified binary on first use
+          skies nya <args...>              run CSM-managed Not You Again
+          skies wtw <args...>              run CSM-managed Why This Way
+          skies rtw <args...>              run CSM-managed Right This Way
+          skies nwc <args...>              run CSM-managed Now We Can
           skies g entity <Module> <Name>   generate a rich [Entity] — encapsulated, with an EnsureValid invariant funnel
           skies g vo <Name>                generate an always-valid [ValueObject] in BuildingBlocks
           skies g crud <Module> <Entity>   generate CRUD slices (list/lookup/create/update/delete +me) for a data-bag entity

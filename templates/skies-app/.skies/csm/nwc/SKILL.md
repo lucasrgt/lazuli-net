@@ -1,6 +1,6 @@
 ---
 name: now-we-can
-description: Collect, wake, resolve, and enforce evidence-backed conditional deferments with the nwc CLI. Use automatically at task and context boundaries, after producing plans or roadmaps, after a completed agent response, and before completion.
+description: Collect, wake, resolve, and enforce evidence-backed conditional deferments with CSM-managed NWC. Use automatically at task and context boundaries, after producing plans or roadmaps, after a completed agent response, and before completion.
 ---
 
 # Now We Can

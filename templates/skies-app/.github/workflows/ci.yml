@@ -12,7 +12,7 @@ on:
 
 jobs:
   gate:
-    name: skies gate (affected proofs + universal inventory)
+    name: skies check (affected proofs + semantic memory)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -26,7 +26,7 @@ jobs:
         if: github.event_name != 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/')
         env:
           SKY_GATE_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: dotnet tool run skies gate --affected
+        run: dotnet tool run skies check --task "CI affected verification" --affected
       - name: full audit
         if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
-        run: dotnet tool run skies gate --full
+        run: dotnet tool run skies check --task "release verification" --full

@@ -33,9 +33,9 @@ public sealed class ProjectTemplateTests
         Assert.Contains("[AVP(", proof, StringComparison.Ordinal);
         Assert.Contains("skies check --task 'pre-commit review' --staged --fast", hooks, StringComparison.Ordinal);
         Assert.Contains("skies check --task 'pre-push review' --base origin/main --fast", hooks, StringComparison.Ordinal);
-        Assert.Contains("skies gate --affected", workflow, StringComparison.Ordinal);
-        Assert.DoesNotContain("skies gate --affected --fast", workflow, StringComparison.Ordinal);
-        Assert.Contains("skies gate --full", workflow, StringComparison.Ordinal);
+        Assert.Contains("skies check --task \"CI affected verification\" --affected", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("--affected --fast", workflow, StringComparison.Ordinal);
+        Assert.Contains("skies check --task \"release verification\" --full", workflow, StringComparison.Ordinal);
         Assert.Contains("tags: [\"v*\"]", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("skies nya check", hooks, StringComparison.Ordinal);
         Assert.DoesNotContain("skies wtw guard", hooks, StringComparison.Ordinal);
@@ -50,10 +50,10 @@ public sealed class ProjectTemplateTests
         var template = SourceTemplate();
         var skills = new[]
         {
-            Path.Combine(".wtw", "SKILL.md"),
-            Path.Combine(".nwc", "SKILL.md"),
-            Path.Combine(".nya", "SKILL.md"),
-            Path.Combine(".rtw", "SKILL.md"),
+            Path.Combine(".skies", "csm", "wtw", "SKILL.md"),
+            Path.Combine(".skies", "csm", "nwc", "SKILL.md"),
+            Path.Combine(".skies", "csm", "nya", "SKILL.md"),
+            Path.Combine(".skies", "csm", "rtw", "SKILL.md"),
         };
 
         foreach (var skill in skills.Select(path => File.ReadAllText(Path.Combine(template, path))))

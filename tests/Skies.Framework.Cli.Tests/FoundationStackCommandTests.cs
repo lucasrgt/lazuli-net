@@ -27,7 +27,7 @@ public class FoundationStackCommandTests
     }
 
     [Fact]
-    public void A_custom_agent_surface_keeps_a_root_protocol_surface_for_nya()
+    public void A_custom_agent_surface_keeps_a_root_protocol_surface_for_csm()
     {
         var files = FoundationStackCommand.ParseAgentFiles(
             ["--agent-file", "docs/AI.md"],

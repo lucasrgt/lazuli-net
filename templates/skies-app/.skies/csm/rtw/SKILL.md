@@ -1,6 +1,6 @@
 ---
 name: right-this-way
-description: Find, follow, record, and verify repository-specific implementation patterns with the rtw CLI. Use at task start, after scope or context changes, when creating code analogous to existing features, after establishing a reusable reference implementation, and before commit, pull request, push, review, or completion.
+description: Find, follow, record, and verify repository-specific implementation patterns with CSM-managed RTW. Use at task start, after scope or context changes, when creating code analogous to existing features, after establishing a reusable reference implementation, and before commit, pull request, push, review, or completion.
 ---
 
 # Right This Way

@@ -1,6 +1,6 @@
 ---
 name: not-you-again
-description: Recover and prevent repository-specific mistakes with the framework-pinned NYA CLI. Use at task start, when scope or context changes, during task or code review, after correcting a real reusable failure, and before commit, pull request, push, or completion.
+description: Recover and prevent repository-specific mistakes with CSM-managed NYA. Use at task start, when scope or context changes, during task or code review, after correcting a real reusable failure, and before commit, pull request, push, or completion.
 ---
 
 # Not You Again

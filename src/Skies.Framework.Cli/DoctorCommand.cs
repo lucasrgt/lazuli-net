@@ -27,19 +27,10 @@ internal static class DoctorCommand
         foreach (var message in manifest.Messages)
             Console.Error.WriteLine($"  {message}");
 
-        var foundations = new[]
-        {
-            (Name: "Not You Again", Outcome: NyaProject.Check(root)),
-            (Name: "Why This Way", Outcome: WtwProject.Check(root)),
-            (Name: "Right This Way", Outcome: RtwProject.Check(root)),
-            (Name: "Now We Can", Outcome: NwcProject.Check(root)),
-        };
-        foreach (var foundation in foundations)
-        {
-            Console.WriteLine($"skies doctor — {foundation.Name} project protocol...");
-            foreach (var message in foundation.Outcome.Messages)
-                Console.Error.WriteLine($"  {message}");
-        }
+        var csm = CsmProject.Check(root);
+        Console.WriteLine("skies doctor — Codebase Semantic Memory project protocol...");
+        foreach (var message in csm.Messages)
+            Console.Error.WriteLine($"  {message}");
 
         // The anti-desync leg (package-first law): a stale Skies.Framework.* package version or a revived
         // vendored frontend copy fails the doctor. The expected version is baked into this CLI, so the gate fires on
@@ -99,7 +90,7 @@ internal static class DoctorCommand
         var code = tasks.Max(task => task.Result);
         if (manifest.Present && !manifest.Valid)
             code = Math.Max(code, 1);
-        if (manifest.Present && foundations.Any(foundation => !foundation.Outcome.Valid))
+        if (manifest.Present && !csm.Valid)
             code = Math.Max(code, 1);
         if (sync.Gating && !sync.InSync)
             code = Math.Max(code, 1);

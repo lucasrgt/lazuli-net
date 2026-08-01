@@ -1,6 +1,6 @@
 ---
 name: why-this-way
-description: Preserve and retrieve repository decisions and invariants.
+description: Preserve and retrieve repository decisions and invariants with CSM-managed WTW.
 ---
 
 # Why This Way
