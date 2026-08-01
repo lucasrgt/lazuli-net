@@ -29,6 +29,8 @@ Topology is declared in `Skies.toml` (the single source of truth; `skies doctor`
   `Skies.Framework.Starter.slnx`.
 - **Frontend** — add a React client under `clients/` (`skies g`); the published
   `eslint-plugin-skies` `SKYFE*` harness gates it.
+- **Design system** `.design/contract.toml` — Assay Design makes Atomic Design tiers, component composition,
+  tokens, semantics, and surface coverage executable; `npm run design:doctor` validates the contract from birth.
 - **Doctor**: `skies doctor` runs both legs.
 - **Done-gate**: `skies gate --affected` (doctor + the Git-derived transitive proof closure + the universal
   traceability inventory) — wired from birth into CI and echoed locally by lefthook. `skies gate --full` is the
@@ -87,6 +89,10 @@ public static class Deposit
 ## Frontend — MVVM + the spine (the React clients, gated by `SKYFE*`)
 
 A screen is a triple: a **View** that renders, a **ViewModel** that owns data, a test that mounts it.
+
+The UI also declares its language-neutral design grammar in `.design/contract.toml`: atoms compose into
+molecules, organisms, and templates; product pages are verified as named surfaces. Rendered components expose
+`data-ui-*` evidence so Assay Design can check the same contract in tests, Storybook, and Figma projections.
 
 - **View renders only** (`SKYFE001`); the **ViewModel is the one data door** to the generated client (`SKYFE002`)
   and is **platform-agnostic** — no `react-native`/`expo` (`SKYFE009`), so the core is shared web↔mobile.

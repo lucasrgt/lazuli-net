@@ -49,6 +49,9 @@ internal static class DoctorCommand
             },
         };
 
+        if (DesignHarness.IsConfigured(root))
+            legs.Add(() => DesignHarness.Run(root));
+
         foreach (var client in FrontendTargets(root))
         {
             var captured = client;

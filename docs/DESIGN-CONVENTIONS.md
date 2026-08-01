@@ -31,6 +31,11 @@ evidence into the same contract and AVP verdict instead of owning competing rule
 stable evidence seam in Skies components. Run `npm run design:doctor` from `frontend-sdk/` to validate
 the contract; the normal frontend check also runs the conformant sample-kit test.
 
+Every `skies new` project carries this contract, its DTCG tokens, and the package-pinned Assay Design CLI at
+the repository root. `npm run check`, lefthook, generated CI, and `skies doctor` all validate it from birth;
+once a product surface exists, its rendered Evidence IR upgrades that structural doctor into an AVP
+conformance proof without changing the contract format.
+
 The reusable kit follows executable Atomic Design: atoms (`Text`, `Button`, `Input`) contain no kit
 components; molecules (`Stack`, `Field`, `Card`) declare their allowed `parts`; `Screen` is the
 template; and a rendered product page is a `surface`, not a fifth reusable tier. Assay Design records

@@ -13,12 +13,16 @@ internal static class ProjectTemplate
         Path.Combine(".skies", "csm", "wtw", "SKILL.md"),
         Path.Combine(".skies", "csm", "nwc", "SKILL.md"),
         Path.Combine(".skies", "csm", "lock.toml"),
+        Path.Combine(".design", "contract.toml"),
+        Path.Combine(".design", "tokens.tokens.json"),
         Path.Combine(".github", "workflows", "ci.yml"),
         Path.Combine("src", "Skies.Framework.Starter.Api", "Modules", "Health", "Slices", "Ping.Tests.cs"),
         Path.Combine("tests", "Skies.Framework.Starter.Tests", "Skies.Framework.Starter.Tests.csproj"),
         "AGENTS.md",
         "csm.toml",
         "lefthook.yml",
+        "package-lock.json",
+        "package.json",
         "Skies.toml",
     ];
 
@@ -64,7 +68,7 @@ internal static class ProjectTemplate
 
         output.WriteLine($"skies: foundation initialized at '{root}'.");
         output.WriteLine(
-            "skies: next, run `dotnet tool restore`, then "
+            "skies: next, run `dotnet tool restore`, `npm install`, then "
             + "`dotnet tool run skies context --task \"<goal>\" --path <expected-path>`.");
         return 0;
     }

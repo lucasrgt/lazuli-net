@@ -4,11 +4,14 @@
   "engines": {
     "node": ">=24"
   },
-  "comment": "Root npm workspace. Today it wires the git hooks (lefthook, installed by `prepare` on `npm install`); frontend clients (clients/<app>) join as workspaces when scaffolded, exactly like the pilots' monorepos.",
+  "comment": "Root npm workspace. It owns the language-neutral Assay Design contract and git hooks; frontend clients (clients/<app>) join as workspaces when scaffolded.",
   "scripts": {
+    "check": "npm run design:doctor",
+    "design:doctor": "assay-design doctor --contract .design/contract.toml",
     "prepare": "lefthook install"
   },
   "devDependencies": {
+    "assay-design": "https://github.com/lucasrgt/assay-design/releases/download/v0.2.0/assay-design-0.2.0.tgz",
     "lefthook": "^1.13.6"
   }
 }

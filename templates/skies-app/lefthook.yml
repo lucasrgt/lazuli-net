@@ -3,10 +3,14 @@
 # selection, so no feature annotation or caller-authored filter can weaken either.
 pre-commit:
   commands:
+    design-check:
+      run: npm run design:doctor
     foundation-check:
       run: dotnet tool run skies check --task 'pre-commit review' --staged --fast
 
 pre-push:
   commands:
+    design-check:
+      run: npm run design:doctor
     foundation-check:
       run: dotnet tool run skies check --task 'pre-push review' --base origin/main --fast
