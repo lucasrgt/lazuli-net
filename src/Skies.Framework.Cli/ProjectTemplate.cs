@@ -37,9 +37,36 @@ internal static class ProjectTemplate
         }
 
         var installed = Tooling.Dotnet("new", ["install", directory, "--force"]);
-        return installed == 0
-            ? Tooling.Dotnet("new", ["skies", "-n", name])
-            : installed;
+        if (installed != 0)
+            return installed;
+
+        var outputDirectory = Path.GetFullPath(name);
+        var scaffolded = Tooling.Dotnet("new", ["skies", "-n", name, "-o", outputDirectory]);
+        return scaffolded == 0
+            ? ValidateFoundation(outputDirectory, Console.Out, Console.Error)
+            : scaffolded;
+    }
+
+    /// <summary>Fail closed when the rendered project did not inherit the mandatory semantic foundation.</summary>
+    internal static int ValidateFoundation(string root, TextWriter output, TextWriter error)
+    {
+        var foundation = CsmProject.Check(root);
+        if (!foundation.Valid)
+        {
+            error.WriteLine($"skies: generated project at '{root}' has an incomplete foundation:");
+            foreach (var message in foundation.Messages)
+                error.WriteLine($"  - {message}");
+            error.WriteLine(
+                "skies: from that project directory, run `dotnet tool restore` and "
+                + "`dotnet tool run skies foundations init` before starting work.");
+            return 2;
+        }
+
+        output.WriteLine($"skies: foundation initialized at '{root}'.");
+        output.WriteLine(
+            "skies: next, run `dotnet tool restore`, then "
+            + "`dotnet tool run skies context --task \"<goal>\" --path <expected-path>`.");
+        return 0;
     }
 
     /// <summary>Resolves the template next to the installed tool.</summary>

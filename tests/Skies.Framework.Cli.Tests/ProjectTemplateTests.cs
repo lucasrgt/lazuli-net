@@ -66,6 +66,35 @@ public sealed class ProjectTemplateTests
         }
     }
 
+    [Fact]
+    public void A_complete_rendered_project_announces_its_initialized_foundation()
+    {
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        var result = ProjectTemplate.ValidateFoundation(SourceTemplate(), output, error);
+
+        Assert.Equal(0, result);
+        Assert.Contains("foundation initialized", output.ToString(), StringComparison.Ordinal);
+        Assert.Contains("dotnet tool run skies context --task", output.ToString(), StringComparison.Ordinal);
+        Assert.Equal("", error.ToString());
+    }
+
+    [Fact]
+    public void An_incomplete_rendered_project_fails_with_the_initialization_command()
+    {
+        var project = Directory.CreateTempSubdirectory("skies-incomplete-template-").FullName;
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        var result = ProjectTemplate.ValidateFoundation(project, output, error);
+
+        Assert.Equal(2, result);
+        Assert.Contains("incomplete foundation", error.ToString(), StringComparison.Ordinal);
+        Assert.Contains("dotnet tool run skies foundations init", error.ToString(), StringComparison.Ordinal);
+        Assert.Equal("", output.ToString());
+    }
+
     private static string SourceTemplate([CallerFilePath] string source = "") =>
         Path.GetFullPath(Path.Combine(Path.GetDirectoryName(source)!, "..", "..", "templates", "skies-app"));
 }
