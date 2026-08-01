@@ -44,10 +44,10 @@ describe("release-guard", () => {
 
   it("compares Assay Design with its installed package manifest", () => {
     expect(canonicalDrift(
-      [{ name: "assay-design", version: "0.1.3" }],
+      [{ name: "assay-design", version: "0.2.0" }],
       (path) => {
         expect(path).toBe("frontend-sdk/node_modules/assay-design/package.json");
-        return JSON.stringify({ version: "0.1.3" });
+        return JSON.stringify({ version: "0.2.0" });
       },
     )).toEqual([]);
   });

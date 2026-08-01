@@ -11,10 +11,12 @@ button_label_pattern = "^[A-ZÀ-Þ][^.!?]*$"
 [[components]]
 name = "screen"
 tier = "template"
+parts = ["stack"]
 
 [[components]]
 name = "stack"
 tier = "molecule"
+parts = ["text", "card"]
 
 [[components]]
 name = "text"
@@ -32,6 +34,7 @@ required_slots = ["label"]
 [[components]]
 name = "field"
 tier = "molecule"
+parts = ["input"]
 
 [[components]]
 name = "input"
@@ -42,6 +45,7 @@ roles = ["textbox"]
 [[components]]
 name = "card"
 tier = "molecule"
+parts = ["field", "button"]
 
 [[surfaces]]
 name = "sample-ui-kit"

@@ -28,6 +28,15 @@ describe("sample UI kit design contract", () => {
     });
     const verdict = await verifyEvidence(contract, evidence);
 
+    expect(evidence.nodes.map(({ component, parent }) => ({ component, parent }))).toEqual([
+      { component: "screen", parent: undefined },
+      { component: "stack", parent: 0 },
+      { component: "text", parent: 1 },
+      { component: "card", parent: 1 },
+      { component: "field", parent: 3 },
+      { component: "input", parent: 4 },
+      { component: "button", parent: 3 },
+    ]);
     expect(verdict.results.filter((result) => result.status !== "pass")).toEqual([]);
     expect(verdict.outcome).toBe("pass");
   });

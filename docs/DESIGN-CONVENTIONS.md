@@ -31,6 +31,12 @@ evidence into the same contract and AVP verdict instead of owning competing rule
 stable evidence seam in Skies components. Run `npm run design:doctor` from `frontend-sdk/` to validate
 the contract; the normal frontend check also runs the conformant sample-kit test.
 
+The reusable kit follows executable Atomic Design: atoms (`Text`, `Button`, `Input`) contain no kit
+components; molecules (`Stack`, `Field`, `Card`) declare their allowed `parts`; `Screen` is the
+template; and a rendered product page is a `surface`, not a fifth reusable tier. Assay Design records
+the nearest `data-ui` parent and rejects undeclared composition, upward tier nesting, cycles, missing
+templates, and unknown parts through the normal AVP composition criterion.
+
 ---
 
 ## The two laws — restated for design
@@ -290,9 +296,9 @@ recipes, the `skies-design` skill.
 - **No overlay primitives in kit v1** (Dialog/Select/Tabs/Toast/DataTable) — apps extend their own
   `ui/` per this constitution; pilot evidence decides what graduates.
 - **No theme runtime.** Dark mode is a value set, not a switcher; the mechanism is the app's.
-- **No icon set, no Figma sync, no visual-regression CI, no TOML/JSON design spec.** Capability,
-  not convention + enforcement. A machine-readable design spec is specifically the mini-language
-  vector the constitution forbids — prose for why, code for what.
+- **No Skies-owned icon set, bidirectional Figma authority, or visual-regression engine.** The
+  standalone Assay Design contract is a validation vocabulary, not a UI generator or behavioral
+  DSL; Git stays canonical while Figma and Storybook only project evidence into AVP.
 
 When a proposal smells like *capability* instead of *convention + enforcement*, it is a scope
 violation. Reject in line.
