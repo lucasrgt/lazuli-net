@@ -5,7 +5,7 @@ namespace Skies.Framework.Cli;
 /// <summary>Runs the framework-pinned Now We Can binary.</summary>
 internal static class NwcCommand
 {
-    internal const string Version = "0.3.0";
+    internal const string Version = "0.3.1";
     internal static readonly FoundationTool Tool = new(
         "nwc",
         "Now We Can",
@@ -14,11 +14,11 @@ internal static class NwcCommand
         "deferments",
         new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["aarch64-apple-darwin"] = "fa643eeda244b673efa6fb06a2e5a952da5e5fc0c2f7aa4d3b817af6865fd2f7",
-            ["aarch64-unknown-linux-gnu"] = "0fa4318eb5f230c12bc57ab149728b47715e172462fb01259ebf91fea226cf0b",
-            ["x86_64-apple-darwin"] = "a8246dd0ee715a7a23131ea185610b82e8e36d6721b569877c5eb9815a439451",
-            ["x86_64-pc-windows-msvc"] = "f6d5f2dac2884d27eb8d831274775bb4a6ca2d8251841789a3473c961bcc8a26",
-            ["x86_64-unknown-linux-gnu"] = "aeb19110e0e25b793c8740fed028e76aa0de345b2f3a0b35ee7b7427443887af",
+            ["aarch64-apple-darwin"] = "1c52c6a3058718b21583ef6fd2221489274e91c7b194e57d7e1207b1fa5bf82e",
+            ["aarch64-unknown-linux-gnu"] = "469c321f9a686b20aa1b628fd6a265932ab9e8f78e420bd9acb67d608b40c94e",
+            ["x86_64-apple-darwin"] = "649dc373112b2b719a0345af64e8b5085cc57ca133a5c37c10064f8b54d84379",
+            ["x86_64-pc-windows-msvc"] = "430f1363489747d9499e6407198280e7a318d887c9b5bea8382e1e217bde21c0",
+            ["x86_64-unknown-linux-gnu"] = "79d1df0eda33bde48c74ecc7f8a9cb6621f86115d613eb1413f38862df7535a2",
         });
 
     /// <summary>Resolve, install, and execute NWC with every argument passed after <c>skies nwc</c>.</summary>

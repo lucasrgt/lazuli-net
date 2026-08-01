@@ -8,10 +8,10 @@ public class FoundationToolTests
     [Fact]
     public void The_framework_pins_every_native_foundation_release()
     {
-        Assert.Equal("1.1.5", NyaCommand.Version);
-        Assert.Equal("0.1.5", WtwCommand.Version);
-        Assert.Equal("0.1.3", RtwCommand.Version);
-        Assert.Equal("0.3.0", NwcCommand.Version);
+        Assert.Equal("1.1.6", NyaCommand.Version);
+        Assert.Equal("0.1.6", WtwCommand.Version);
+        Assert.Equal("0.1.4", RtwCommand.Version);
+        Assert.Equal("0.3.1", NwcCommand.Version);
     }
 
     [Theory]

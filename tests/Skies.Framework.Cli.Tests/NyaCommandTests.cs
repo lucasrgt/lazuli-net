@@ -9,7 +9,7 @@ public class NyaCommandTests
     [Fact]
     public void The_framework_pins_the_current_nya_release()
     {
-        Assert.Equal("1.1.5", NyaCommand.Version);
+        Assert.Equal("1.1.6", NyaCommand.Version);
     }
 
     [Theory]

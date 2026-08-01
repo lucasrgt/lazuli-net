@@ -1,6 +1,9 @@
 {
   "name": "skies-workspace",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "description": "Repository-level development tooling for Skies. The framework is .NET and the frontend packages live in the frontend-sdk workspace.",
   "scripts": {
     "prepare": "lefthook install"

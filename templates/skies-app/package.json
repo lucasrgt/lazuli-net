@@ -1,6 +1,9 @@
 {
   "name": "skies-app",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "comment": "Root npm workspace. Today it wires the git hooks (lefthook, installed by `prepare` on `npm install`); frontend clients (clients/<app>) join as workspaces when scaffolded, exactly like the pilots' monorepos.",
   "scripts": {
     "prepare": "lefthook install"

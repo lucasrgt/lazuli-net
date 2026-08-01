@@ -1,6 +1,6 @@
 {
   "name": "skies-react",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "Skies Framework frontend spine — platform/design-system-agnostic React primitives (AsyncState, Resource, session, paging, …) the app composes.",
   "license": "MIT",
   "author": "Lucas Tinoco",
