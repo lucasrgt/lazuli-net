@@ -19,7 +19,7 @@ import { color, space } from "./tokens-bridge";
 // no style — a screen that needs different paint needs a different primitive, in ui/.
 export function Screen({ children }: { children: ReactNode }) {
   return (
-    <div data-ui="screen" style={{ minHeight: "100%", backgroundColor: color.bg, padding: space.lg }}>
+    <div data-ui="screen" data-ui-region="page" style={{ minHeight: "100%", backgroundColor: color.bg, padding: space.lg }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>{children}</div>
     </div>
   );
@@ -154,6 +154,9 @@ export function Button({
       type="button"
       data-ui="button"
       data-variant={variant}
+      data-state={loading ? "loading" : disabled ? "disabled" : "default"}
+      data-role="button"
+      data-action={variant === "primary" ? "primary" : "secondary"}
       disabled={blocked}
       aria-busy={loading || undefined}
       onClick={onPress}
@@ -185,7 +188,7 @@ export function Button({
         boxShadow: focused ? "0 0 0 2px " + color.focusRing : "none",
       }}
     >
-      {label}
+      <span data-ui-slot="label">{label}</span>
     </button>
   );
 }
@@ -292,6 +295,8 @@ export function Input({
     <input
       id={id}
       data-ui="input"
+      data-state={isInvalid ? "invalid" : "default"}
+      data-role="textbox"
       type={kind === "number" ? "text" : kind}
       inputMode={kind === "number" ? "numeric" : kind === "email" ? "email" : undefined}
       value={value}

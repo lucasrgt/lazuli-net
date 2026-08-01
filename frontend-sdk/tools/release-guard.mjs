@@ -63,6 +63,7 @@ export function violations(units) {
 // Where each canonical entry's own package.json lives (repo-root relative, like RELEASE_UNITS).
 const CANONICAL_MANIFESTS = Object.freeze({
   "skies-frontend-sdk": "frontend-sdk/package.json",
+  "assay-design": "frontend-sdk/node_modules/assay-design/package.json",
   "avp-assay": "frontend-sdk/node_modules/avp-assay/package.json",
   "skies-react": "frontend-sdk/packages/skies-react/package.json",
   "eslint-plugin-skies": "frontend-sdk/packages/eslint-plugin/package.json",

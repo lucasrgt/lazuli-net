@@ -7,6 +7,7 @@
       "react": ["../../../frontend-sdk/node_modules/@types/react/index.d.ts"],
       "react/*": ["../../../frontend-sdk/node_modules/@types/react/*"],
       "skies-react": ["../../../frontend-sdk/packages/skies-react/src/index.ts"],
+      "assay-design": ["../../../frontend-sdk/node_modules/assay-design/dist/index.d.ts"],
       "avp-assay": ["../../../frontend-sdk/node_modules/avp-assay/dist/index.d.ts"],
       "avp-assay/react": ["../../../frontend-sdk/node_modules/avp-assay/dist/react.d.ts"],
       "avp-assay/react/vitest": ["../../../frontend-sdk/node_modules/avp-assay/dist/react/vitest.d.ts"],

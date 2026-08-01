@@ -42,6 +42,9 @@ export function Button({
       type="button"
       data-ui="button"
       data-variant={variant}
+      data-state={loading ? "loading" : disabled ? "disabled" : "default"}
+      data-role="button"
+      data-action={variant === "primary" ? "primary" : "secondary"}
       disabled={blocked}
       aria-busy={loading || undefined}
       onClick={onPress}
@@ -73,7 +76,7 @@ export function Button({
         boxShadow: focused ? "0 0 0 2px " + color.focusRing : "none",
       }}
     >
-      {label}
+      <span data-ui-slot="label">{label}</span>
     </button>
   );
 }

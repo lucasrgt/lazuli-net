@@ -42,6 +42,16 @@ describe("release-guard", () => {
     )).toEqual([]);
   });
 
+  it("compares Assay Design with its installed package manifest", () => {
+    expect(canonicalDrift(
+      [{ name: "assay-design", version: "0.1.2" }],
+      (path) => {
+        expect(path).toBe("frontend-sdk/node_modules/assay-design/package.json");
+        return JSON.stringify({ version: "0.1.2" });
+      },
+    )).toEqual([]);
+  });
+
   it("rejects drift in the externally released Assay protocol", () => {
     const result = canonicalDrift(
       [{ name: "avp-assay", version: "0.4.0" }],

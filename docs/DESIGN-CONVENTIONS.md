@@ -9,19 +9,27 @@ per-screen — is a decision an agent makes differently each time, and the sum r
 arbitrary spacing, forked palettes, unaligned typography, ad-hoc forms.
 
 Determinism is not achieved by instructing harder. It is achieved by **removing decision space**,
-in four layers of decreasing strength:
+in five layers of decreasing strength:
 
 1. **Closed vocabulary** — kit props are unions of token names; a wrong value is *inexpressible*.
    What cannot be typed cannot be wrong. (The strongest layer; everything else guards it.)
 2. **Mechanical enforcement** — the design band (`SKYFE024–026`, beside `SKYFE012`) trips every
    named escape hatch: raw elements, off-scale values, raw color.
-3. **Copyable exemplars** — canonical screens (the recipes). An agent instantiates the nearest
+3. **Executable contract** — [Assay Design](https://github.com/lucasrgt/assay-design) reads the
+   versioned `.design/` vocabulary and returns an AVP verdict over normalized DOM/Figma evidence.
+4. **Copyable exemplars** — canonical screens (the recipes). An agent instantiates the nearest
    recipe; it never composes a screen from a blank file.
-4. **Loaded context** — the `skies-design` skill puts 1–3 in front of the agent at build time and
+5. **Loaded context** — the `skies-design` skill puts 1–4 in front of the agent at build time and
    closes with a visual self-review (lint can verify consistency; only eyes verify beauty).
 
 Ground every design convention here, never memory. The decision trail lives in the Design SDK wave
 (`.specs/`, stages 0001–0007).
+
+`.design/contract.toml` plus DTCG `*.tokens.json` is the machine-readable authority. Figma remains
+the intent/editor surface and Storybook remains the executable component surface; both project
+evidence into the same contract and AVP verdict instead of owning competing rules. `data-ui` is the
+stable evidence seam in Skies components. Run `npm run design:doctor` from `frontend-sdk/` to validate
+the contract; the normal frontend check also runs the conformant sample-kit test.
 
 ---
 

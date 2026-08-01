@@ -1,6 +1,6 @@
 {
   "name": "skies-frontend-sdk",
-  "version": "4.0.4",
+  "version": "4.1.0",
   "type": "module",
   "description": "Canonical Skies frontend doctor and scaffolding tools.",
   "license": "MIT",
@@ -80,15 +80,20 @@
     "assemble-i18n": "node tools/assemble-i18n.mjs",
     "test": "vitest run --exclude **/*.assay.test.ts --exclude **/*.assay.test.tsx",
     "test:avp": "assay verify",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run test:avp"
+    "design:doctor": "assay-design doctor --contract ../.design/contract.toml",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run design:doctor && npm run test:avp"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.50.0",
+    "assay-design": "^0.1.2",
     "avp-assay": "^0.4.0",
     "eslint": ">=9",
     "eslint-plugin-skies": "^4.0.4"
   },
   "peerDependenciesMeta": {
+    "assay-design": {
+      "optional": true
+    },
     "avp-assay": {
       "optional": true
     },
@@ -109,6 +114,7 @@
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "@vitest/eslint-plugin": "^1.1.43",
+    "assay-design": "https://github.com/lucasrgt/assay-design/releases/download/v0.1.2/assay-design-0.1.2.tgz",
     "avp-assay": "^0.4.0",
     "esbuild": "^0.28.1",
     "eslint": "^9.17.0",

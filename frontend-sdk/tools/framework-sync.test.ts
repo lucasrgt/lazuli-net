@@ -12,6 +12,7 @@ describe("framework-sync", () => {
         path: "clients/app/package.json",
         packages: {
           "skies-frontend-sdk": `^${canonical.find((entry) => entry.name === "skies-frontend-sdk")?.version}`,
+          "assay-design": `^${canonical.find((entry) => entry.name === "assay-design")?.version}`,
           "avp-assay": `^${canonical.find((entry) => entry.name === "avp-assay")?.version}`,
           "eslint-plugin-skies": `^${canonical.find((entry) => entry.name === "eslint-plugin-skies")?.version}`,
           "skies-react": `~${canonical.find((entry) => entry.name === "skies-react")?.version}`,
@@ -40,6 +41,7 @@ describe("framework-sync", () => {
     expect(result.messages.join("\n")).toContain("0.10.0");
     expect(result.messages.join("\n")).toContain("skies-react");
     expect(result.messages.join("\n")).toContain("avp-assay");
+    expect(result.messages.join("\n")).toContain("assay-design");
   });
 
   it("rejects the retired in-repo plugin mirror", () => {

@@ -6,7 +6,7 @@ import { color, space } from "./tokens-bridge";
 // no style — a screen that needs different paint needs a different primitive, in ui/.
 export function Screen({ children }: { children: ReactNode }) {
   return (
-    <div data-ui="screen" style={{ minHeight: "100%", backgroundColor: color.bg, padding: space.lg }}>
+    <div data-ui="screen" data-ui-region="page" style={{ minHeight: "100%", backgroundColor: color.bg, padding: space.lg }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>{children}</div>
     </div>
   );

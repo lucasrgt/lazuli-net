@@ -26,6 +26,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "skies-react": r("./packages/skies-react/src/index.ts"),
+      "assay-design": r("./node_modules/assay-design/dist/index.js"),
       "avp-assay/react/vitest": r("./node_modules/avp-assay/dist/react/vitest.js"),
       "avp-assay/react": r("./node_modules/avp-assay/dist/react.js"),
       "avp-assay": r("./node_modules/avp-assay/dist/index.js"),
