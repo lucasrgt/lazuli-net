@@ -8,10 +8,12 @@
   "scripts": {
     "check": "npm run design:doctor",
     "design:doctor": "assay-design doctor --contract .design/contract.toml",
+    "design:recall": "assay-design recall --contract .design/contract.toml",
+    "design:audit": "assay-design audit --contract .design/contract.toml",
     "prepare": "lefthook install"
   },
   "devDependencies": {
-    "assay-design": "https://github.com/lucasrgt/assay-design/releases/download/v0.2.0/assay-design-0.2.0.tgz",
+    "assay-design": "https://github.com/lucasrgt/assay-design/releases/download/v0.4.3/assay-design-0.4.3.tgz",
     "lefthook": "^1.13.6"
   }
 }

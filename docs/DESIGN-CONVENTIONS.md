@@ -29,7 +29,9 @@ Ground every design convention here, never memory. The decision trail lives in t
 the intent/editor surface and Storybook remains the executable component surface; both project
 evidence into the same contract and AVP verdict instead of owning competing rules. `data-ui` is the
 stable evidence seam in Skies components. Run `npm run design:doctor` from `frontend-sdk/` to validate
-the contract; the normal frontend check also runs the conformant sample-kit test.
+the contract; agents run `assay-design recall` before editing UI (`skies-design` skill). Population
+drift is audited with `assay-design audit` / `fleet`; systematic escapes are promoted with
+`assay-design promote`. The normal frontend check also runs the conformant sample-kit test.
 
 Every `skies new` project carries this contract, its DTCG tokens, and the package-pinned Assay Design CLI at
 the repository root. `npm run check`, lefthook, generated CI, and `skies doctor` all validate it from birth;

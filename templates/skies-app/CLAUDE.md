@@ -31,6 +31,7 @@ Topology is declared in `Skies.toml` (the single source of truth; `skies doctor`
   `eslint-plugin-skies` `SKYFE*` harness gates it.
 - **Design system** `.design/contract.toml` — Assay Design makes Atomic Design tiers, component composition,
   tokens, semantics, and surface coverage executable; `npm run design:doctor` validates the contract from birth.
+  Before editing UI, agents run `npm run design:recall` (see the `skies-design` skill).
 - **Doctor**: `skies doctor` runs both legs.
 - **Done-gate**: `skies gate --affected` (doctor + the Git-derived transitive proof closure + the universal
   traceability inventory) — wired from birth into CI and echoed locally by lefthook. `skies gate --full` is the
