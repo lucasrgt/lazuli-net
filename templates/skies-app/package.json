@@ -13,7 +13,7 @@
     "prepare": "lefthook install"
   },
   "devDependencies": {
-    "assay-design": "https://github.com/lucasrgt/assay-design/releases/download/v0.4.3/assay-design-0.4.3.tgz",
+    "assay-design": "https://github.com/lucasrgt/assay-design/releases/download/v0.4.4/assay-design-0.4.4.tgz",
     "lefthook": "^1.13.6"
   }
 }
