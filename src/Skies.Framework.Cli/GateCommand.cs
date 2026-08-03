@@ -13,6 +13,10 @@ internal static class GateCommand
 {
     private const int MaxInlineFilterLength = 6000;
 
+    // Marks the reasons ApplyFastFeedback contributes, so the closing notice can restate exactly what --fast held
+    // back without re-deriving it or matching on prose.
+    internal const string FastDeferralMarker = "deferred by --fast";
+
     /// <summary>The human-facing matrix artifact, written at the workspace root.</summary>
     public const string MarkdownArtifact = "VERIFICATION.md";
 
@@ -123,7 +127,48 @@ internal static class GateCommand
         Console.WriteLine(code == 0
             ? "gate: GREEN — form, proofs and the matrix all hold."
             : "gate: RED — a leg failed or the matrix has findings (see above).");
+
+        var deferred = DeferredCoverage(options, effectiveFull, impact, frontend);
+        if (deferred.Count > 0)
+        {
+            Console.WriteLine($"gate: this run did not cover ({scope}) —");
+            foreach (var notice in deferred)
+                Console.WriteLine($"  not covered: {notice}");
+        }
         return code;
+    }
+
+    /// <summary>
+    /// What this run did not prove, restated after the verdict. The selection reasons print before a long doctor and
+    /// proof run and have scrolled away by the time the verdict lands, and a green change-scoped line reads like a
+    /// full pass — which is how a branch accumulates commits behind green pre-commit and pre-push hooks while its
+    /// E2E closure has been red since its first slice. The gate's scope is correct; only its silence was.
+    /// </summary>
+    internal static IReadOnlyList<string> DeferredCoverage(
+        GateOptions options,
+        bool effectiveFull,
+        GateImpactPlan impact,
+        IReadOnlyList<FrontendGateLeg> frontend)
+    {
+        if (effectiveFull)
+            return [];
+
+        var notices = new List<string>();
+        // --fast runs the E2E contract check but never the runner, so a surface package reports an E2E leg that
+        // never executed a flow. Naming it is the difference between a caveat and a false green.
+        if (options.Fast && frontend.Any(leg => leg.Role == FrontendPackageRole.Surface))
+            notices.Add(
+                "browser/device E2E execution — --fast runs the E2E contract check only; no flow was driven. "
+                + "Run `skies gate --full` before pushing a slice, or rely on affected CI.");
+
+        notices.AddRange(impact.Reasons
+            .Where(reason => reason.Contains(FastDeferralMarker, StringComparison.Ordinal))
+            .Select(reason => reason.Replace($" {FastDeferralMarker}", string.Empty, StringComparison.Ordinal)));
+
+        notices.Add(
+            $"proofs outside the {(options.Mode == GateMode.Staged ? "staged" : "affected")} closure — a "
+            + "change-scoped gate proves the impact of these changes, not the suite.");
+        return notices;
     }
 
     /// <summary>Print gate-specific help before any workspace discovery or proof execution begins.</summary>
@@ -148,7 +193,9 @@ internal static class GateCommand
 
             options:
               --base <rev> compare <rev>...HEAD in affected mode; local uncommitted paths are excluded
-              --fast       keep local feedback bounded; authoritative affected CI executes deferred closures
+              --fast       keep local feedback bounded: no browser/device E2E flow is driven and an
+                           exhaustive fallback is held back; authoritative affected CI executes both.
+                           Every run closes by listing what it did not cover.
               -h, --help   print this help without executing the gate
 
             The gate always runs the universal inventory and rejects caller-authored test filters.
@@ -173,11 +220,11 @@ internal static class GateCommand
 
         var reasons = new List<string>(impact.Reasons);
         if (impact.Backend.Full)
-            reasons.Add("backend: exhaustive fallback deferred by --fast; affected CI or an explicit --full audit executes it");
+            reasons.Add($"backend: exhaustive fallback {FastDeferralMarker}; affected CI or an explicit --full audit executes it");
         if (oversized)
-            reasons.Add("backend: oversized transitive proof closure deferred by --fast; direct mappings still execute and affected CI executes the complete closure");
+            reasons.Add($"backend: oversized transitive proof closure {FastDeferralMarker}; direct mappings still execute and affected CI executes the complete closure");
         if (exhaustiveFrontend)
-            reasons.Add("frontend: exhaustive runtime closure deferred by --fast; affected CI executes every test and Assay");
+            reasons.Add($"frontend: exhaustive runtime closure {FastDeferralMarker}; affected CI executes every test and Assay");
 
         return impact with
         {

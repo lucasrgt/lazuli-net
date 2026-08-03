@@ -193,4 +193,70 @@ public class GateCommandTests
     {
         Assert.Equal(expected, GateCommand.PersistsArtifacts((GateMode)mode));
     }
+
+    // A surface package's E2E leg reports the contract check under --fast while no flow is ever driven. Left unsaid,
+    // a branch collects commits behind green hooks while its E2E closure is red — so the omission is named.
+    [Fact]
+    public void A_fast_run_names_the_browser_closure_it_did_not_drive()
+    {
+        var options = new GateOptions(GateMode.Staged, Fast: true, BaseRevision: null, ToolArguments: []);
+        var impact = new GateImpactPlan(
+            new BackendImpact(false, new HashSet<string> { "LoginProof" }, new HashSet<string> { "Account/Login" }),
+            [],
+            []);
+        var frontend = new[]
+        {
+            new FrontendGateLeg("web", FrontendPackageRole.Surface, 0, 0, 0, E2eShape: 0, E2e: null, "affected-fast"),
+        };
+
+        var deferred = GateCommand.DeferredCoverage(options, effectiveFull: false, impact, frontend);
+
+        Assert.Contains(deferred, notice => notice.Contains("E2E execution", StringComparison.Ordinal));
+        Assert.Contains(deferred, notice => notice.Contains("--full", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void A_fast_run_restates_every_closure_it_deferred()
+    {
+        var options = new GateOptions(GateMode.Affected, Fast: true, BaseRevision: null, ToolArguments: []);
+        var impact = GateCommand.ApplyFastFeedback(
+            new GateImpactPlan(
+                new BackendImpact(true, new HashSet<string>(), new HashSet<string>()),
+                [],
+                ["backend contract changed"]),
+            fast: true);
+
+        var deferred = GateCommand.DeferredCoverage(options, effectiveFull: false, impact, []);
+
+        Assert.Contains(deferred, notice => notice.Contains("exhaustive fallback", StringComparison.Ordinal));
+        // The selection reason is restated as an omission, so the marker that classified it does not leak into the
+        // closing notice as if --fast were still a pending action.
+        Assert.DoesNotContain(deferred, notice => notice.Contains(GateCommand.FastDeferralMarker, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void A_change_scoped_run_says_it_proved_the_change_and_not_the_suite()
+    {
+        var options = new GateOptions(GateMode.Affected, Fast: false, BaseRevision: null, ToolArguments: []);
+        var impact = new GateImpactPlan(
+            new BackendImpact(false, new HashSet<string>(), new HashSet<string>()),
+            [],
+            []);
+
+        var deferred = GateCommand.DeferredCoverage(options, effectiveFull: false, impact, []);
+
+        Assert.Contains(deferred, notice => notice.Contains("outside the affected closure", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void An_exhaustive_audit_has_nothing_left_to_disclose()
+    {
+        var options = new GateOptions(GateMode.Full, Fast: false, BaseRevision: null, ToolArguments: []);
+        var impact = new GateImpactPlan(
+            new BackendImpact(true, new HashSet<string>(), new HashSet<string>()),
+            [],
+            []);
+
+        Assert.Empty(GateCommand.DeferredCoverage(options, effectiveFull: true, impact, []));
+    }
 }
