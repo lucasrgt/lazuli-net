@@ -415,6 +415,14 @@ compiles them via glob. No mirror-the-architecture test tree.
     connection in `SwapStores`. Keyed stores let two contexts share one database (the
     "written-by-one-request, read-by-the-next" pattern). The in-memory package never enters the
     graph. (Graduated from the hostpoint pilot's `TestDatabase`.)
+    **Take stores from `CreateStore(...)` and dispose the lease.** A clone is a physical copy of the
+    migrated template, so a database is only reclaimed when its lease is returned — keyed stores when
+    the last holder returns theirs. A ~700-test suite asking for two or three stores each and returning
+    none leaves ~1500 live databases in the shared container; the WSL2/Docker VM grows with them and the
+    host starts killing processes (measured: 14.4 GB resident, the symptoms surfacing as Npgsql timeouts
+    and killed test workers rather than as anything database-shaped). `CreateDatabase(...)` returns a bare
+    connection string with no lifetime and cannot reclaim anything — it remains only for callers written
+    before leases existed, and the class warns on stderr once a run accumulates enough un-returned clones.
 - **Assertions and mocking are the app's free choice** — the kit ships and mandates none
   (FluentAssertions, Shouldly, NSubstitute, xUnit-native all work). The one deliberate coupling is
   the **runner: xUnit** (the categories are xUnit traits).
