@@ -39,12 +39,16 @@ identifiers, and template identities follow the same mapping.
 ## Upgrade an existing repository
 
 1. Replace every `AeroFortress.Framework.*` package reference with the matching
-   `Skies.Framework.*` package at version `4.0.3`.
-2. Replace the tool package and command:
+   `Skies.Framework.*` package at version `4.1.0`. Migrate straight to `4.1.0`
+   rather than an earlier 4.0.x: `Skies.Framework.Testing.Postgres` never
+   dropped the databases it cloned per test before `4.1.0`, and a large suite
+   leaves enough of them behind to exhaust the Docker VM's memory.
+2. Replace the tool package and command. The CLI carries its own version,
+   independent of the `Skies.Framework.*` library line:
 
    ```bash
    dotnet tool uninstall -g aerofortress-framework-cli
-   dotnet tool install -g skies-framework-cli --version 4.0.3
+   dotnet tool install -g skies-framework-cli --version 4.1.1
    ```
 
 3. Rename `AeroFortress.toml` to `Skies.toml` and `.aerofortress/` to
