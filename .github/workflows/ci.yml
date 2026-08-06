@@ -54,8 +54,12 @@ jobs:
       - run: npm run check
 
   node:
-    name: node-sdk (lint + typecheck + test)
-    runs-on: ubuntu-latest
+    name: node-sdk (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: node-sdk
@@ -66,5 +70,25 @@ jobs:
           node-version: "24"
           cache: npm
           cache-dependency-path: node-sdk/package-lock.json
-      - run: npm ci
+      - run: npm ci --ignore-scripts
+      - run: npm audit --audit-level=moderate
       - run: npm run check
+      - name: PostgreSQL Testcontainers integration proof
+        if: runner.os == 'Linux'
+        run: npm run test:integration
+      - name: pilot full proof gate
+        if: runner.os == 'Linux'
+        run: npm run gate:full --workspace @skiesjs/pilot-api
+      - name: upload pilot proof receipts
+        if: ${{ runner.os == 'Linux' && always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: node-pilot-proof-receipts
+          path: |
+            node-sdk/examples/pilot-api/.skies/foundation/*.json
+            node-sdk/examples/pilot-api/VERIFICATION.*
+          if-no-files-found: warn
+      - run: npm run package-smoke
+      - name: pilot mutation calibration
+        if: runner.os == 'Linux'
+        run: npm run mutate --workspace @skiesjs/pilot-api

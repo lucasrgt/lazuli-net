@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using Skies.Framework.Auth;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -131,6 +132,27 @@ public class AccessTokenValidationTests
         Assert.Equal(sid, current.SessionId);
     }
 
+    [Fact]
+    public async Task Validates_the_committed_Node_issued_HS256_wire_fixture()
+    {
+        var fixture = JsonSerializer.Deserialize<InteropFixture>(
+            await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "jwt-interop.json")),
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        Assert.NotNull(fixture);
+
+        var result = await new JsonWebTokenHandler().ValidateTokenAsync(
+            fixture.NodeToken,
+            JwtAccessTokenExtensions.BuildValidationParameters(fixture.Secret, fixture.Issuer, fixture.Audience));
+
+        Assert.True(result.IsValid, result.Exception?.Message);
+        var user = new ClaimsCurrentUser(new ClaimsPrincipal(result.ClaimsIdentity));
+        Assert.Equal(Guid.Parse(fixture.UserId), user.UserId);
+        Assert.Equal(Guid.Parse(fixture.OrgId), user.OrgId);
+        Assert.Equal(Guid.Parse(fixture.SessionId), user.SessionId);
+        Assert.Equal(fixture.Role, user.Role);
+        Assert.Equal(fixture.Name, user.Name);
+    }
+
     // Seed 4: the validator pins HS256. A token signed with a different algorithm (even with the same key)
     // must be rejected, closing algorithm-substitution by construction.
     [Fact]
@@ -150,4 +172,15 @@ public class AccessTokenValidationTests
 
         Assert.False(result.IsValid);
     }
+
+    private sealed record InteropFixture(
+        string Secret,
+        string Issuer,
+        string Audience,
+        string NodeToken,
+        string UserId,
+        string OrgId,
+        string SessionId,
+        string Role,
+        string Name);
 }

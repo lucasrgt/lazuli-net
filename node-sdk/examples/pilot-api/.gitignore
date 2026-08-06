@@ -1,0 +1,8 @@
+dist/
+coverage/
+node_modules/
+.data/
+.stryker-tmp/
+.skies/foundation/
+VERIFICATION.json
+VERIFICATION.md

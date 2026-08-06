@@ -1,86 +1,29 @@
 import assert from "node:assert/strict";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { RuleTester } from "eslint";
-import tsParser from "@typescript-eslint/parser";
-import plugin from "./index.js";
+import plugin, { ruleIds } from "./index.js";
 import manifest from "./package.json" with { type: "json" };
+import "./tests/core-rules.test.js";
+import "./tests/error-code-registry.test.js";
+import "./tests/explicit-slice-contract.test.js";
+import "./tests/no-repository.test.js";
+import "./tests/path-and-size.test.js";
 
 assert.equal(plugin.meta.version, manifest.version);
-
-const directory = path.dirname(fileURLToPath(import.meta.url));
-const ruleTester = new RuleTester({
-  languageOptions: {
-    parser: tsParser,
-    ecmaVersion: 2022,
-    sourceType: "module",
-    parserOptions: { range: true },
-  },
+assert.equal(plugin.ruleIds, ruleIds);
+assert.deepEqual(ruleIds, {
+  "slice-shape": "SKYN0001",
+  "thin-map": "SKYN0002",
+  "require-slice-test": "SKYN0003",
+  "no-repository": "SKYN0006",
+  "file-size": "SKYN0007",
+  "tests-under-source": "SKYN0011",
+  "error-code-registry": "SKYN0018",
+  "explicit-slice-contract": "SKYN0022",
 });
 
-const canonical = `
-  export interface Input { id: string }
-  export interface Output { id: string }
-  export async function handle(input: Input): Promise<Result<Output>> { return Result.ok(input); }
-  export function map(router: Router): void { router.get("/:id", endpoint(() => handle({ id: "1" }))); }
-`;
-
-ruleTester.run("slice-shape", plugin.rules["slice-shape"], {
-  valid: [{ filename: "wallet.slice.ts", code: canonical }],
-  invalid: [
-    {
-      filename: "wallet.slice.ts",
-      code: `export interface Input {}
-export async function handle(input: Input): Promise<Result<Output>> { return Result.ok(input); }`,
-      errors: [{ messageId: "missing" }, { messageId: "missing" }],
-    },
-    {
-      filename: "wallet.slice.ts",
-      code: `
-        export interface Output { id: string }
-        export interface Input { id: string }
-        export function handle(input: Input): Result<Output> { return Result.ok(input); }
-        export async function map(router: Router): Promise<void> {}
-      `,
-      errors: [
-        { messageId: "order" },
-        { messageId: "handleAsync" },
-        { messageId: "handleSignature" },
-        { messageId: "mapSignature" },
-      ],
-    },
-  ],
-});
-
-ruleTester.run("thin-map", plugin.rules["thin-map"], {
-  valid: [
-    { filename: "wallet.slice.ts", code: canonical },
-    {
-      filename: "wallet.slice.ts",
-      code: `export function map(router: Router, cache: Cache): void { cache.get("key"); router.get("/", endpoint(() => handle({}))); }`,
-    },
-  ],
-  invalid: [
-    {
-      filename: "wallet.slice.ts",
-      code: `export function map(router: Router): void { router.get("/:id", async (_request) => ({ id: "1" })); }`,
-      errors: [{ messageId: "inline" }],
-    },
-  ],
-});
-
-ruleTester.run("require-slice-test", plugin.rules["require-slice-test"], {
-  valid: [
-    {
-      filename: path.join(directory, "fixtures", "with-test", "health.slice.ts"),
-      code: canonical,
-    },
-  ],
-  invalid: [
-    {
-      filename: path.join(directory, "fixtures", "without-test", "health.slice.ts"),
-      code: canonical,
-      errors: [{ messageId: "missing", data: { test: "health.slice.test.ts" } }],
-    },
-  ],
-});
+const configured = plugin.configs["flat/recommended"].rules;
+for (const [name, id] of Object.entries(ruleIds)) {
+  const messages = Object.values(plugin.rules[name].meta.messages);
+  assert.ok(messages.length > 0, `${name} must publish messages`);
+  assert.ok(messages.every((message) => message.startsWith(`${id}:`)), `${name} messages must carry ${id}`);
+  assert.equal(configured[`skies-node/${name}`], name === "require-slice-test" ? undefined : "error");
+}

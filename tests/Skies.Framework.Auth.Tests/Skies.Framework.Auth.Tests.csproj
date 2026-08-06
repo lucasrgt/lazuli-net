@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Skies.Framework.Auth\Skies.Framework.Auth.csproj" />
+    <None Include="..\fixtures\jwt-interop.json" Link="jwt-interop.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

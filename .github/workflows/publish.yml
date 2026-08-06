@@ -135,6 +135,9 @@ jobs:
     name: publish Node.js packages to npm
     needs: guard
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance attestations
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -146,7 +149,8 @@ jobs:
       - name: install and build
         working-directory: node-sdk
         run: |
-          npm ci
+          npm ci --ignore-scripts
+          npm audit --audit-level=moderate
           npm run build
       - name: publish public packages in dependency order
         working-directory: node-sdk
@@ -157,13 +161,52 @@ jobs:
             echo "NPM_TOKEN not set — Node.js packages cannot be published."
             exit 1
           fi
-          for dir in packages/core packages/express packages/eslint-plugin-skies-node packages/cli; do
+          for dir in packages/core packages/openapi packages/express packages/auth packages/auth-express packages/socketio packages/identity packages/mail packages/sms packages/storage packages/storage-express packages/rate-limit-express packages/drizzle-postgres packages/testing packages/testing-postgres packages/doctor packages/eslint-plugin-skies-node packages/foundation packages/framework packages/cli; do
             name=$(node -p "require('./$dir/package.json').name")
             ver=$(node -p "require('./$dir/package.json').version")
             if npm view "$name@$ver" version >/dev/null 2>&1; then
               echo "$name@$ver already on npm — skip"
             else
               echo "publishing $name@$ver"
-              ( cd "$dir" && npm publish )
+              ( cd "$dir" && npm publish --access public --provenance )
             fi
           done
+      - name: verify exact published packages from the registry
+        working-directory: node-sdk
+        run: |
+          receipt="$RUNNER_TEMP/skies-node-publish-receipt"
+          rm -rf "$receipt"
+          mkdir -p "$receipt"
+          cd "$receipt"
+          npm init -y >/dev/null
+          specs=""
+          for dir in $GITHUB_WORKSPACE/node-sdk/packages/{core,openapi,express,auth,auth-express,socketio,identity,mail,sms,storage,storage-express,rate-limit-express,drizzle-postgres,testing,testing-postgres,doctor,eslint-plugin-skies-node,foundation,framework,cli}; do
+            name=$(node -p "require('$dir/package.json').name")
+            ver=$(node -p "require('$dir/package.json').version")
+            specs="$specs $name@$ver"
+          done
+          installed=false
+          for attempt in 1 2 3 4 5 6; do
+            if npm install --ignore-scripts --no-audit --no-fund --save-exact $specs; then
+              installed=true
+              break
+            fi
+            rm -rf node_modules package-lock.json
+            sleep 10
+          done
+          [ "$installed" = "true" ] || { echo "registry packages did not become consumable"; exit 1; }
+          node --input-type=module -e 'await Promise.all([
+            "@skiesjs/core", "@skiesjs/openapi", "@skiesjs/express", "@skiesjs/auth",
+            "@skiesjs/auth-express", "@skiesjs/socketio", "@skiesjs/identity", "@skiesjs/mail", "@skiesjs/sms",
+            "@skiesjs/storage", "@skiesjs/storage-express", "@skiesjs/rate-limit-express",
+            "@skiesjs/drizzle-postgres", "@skiesjs/testing", "@skiesjs/testing-postgres",
+            "@skiesjs/doctor", "@skiesjs/foundation", "eslint-plugin-skies-node", "@skiesjs/cli",
+          ].map((name) => import(name)))'
+          npx --no-install skies-node --help
+          npx --no-install skies-node-doctor --help
+          npm ls --all --json > npm-receipt.json
+      - uses: actions/upload-artifact@v6
+        with:
+          name: skies-node-publish-receipt
+          path: ${{ runner.temp }}/skies-node-publish-receipt/npm-receipt.json
+          if-no-files-found: error

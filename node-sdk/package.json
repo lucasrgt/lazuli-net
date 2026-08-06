@@ -12,12 +12,16 @@
     "examples/*"
   ],
   "scripts": {
-    "clean": "node -e \"import('node:fs').then(({rmSync}) => { for (const path of ['packages/core/dist', 'packages/express/dist', 'packages/cli/dist']) rmSync(path, { recursive: true, force: true }); })\"",
-    "build": "npm run clean && npm run build --workspace @skiesjs/core && npm run build --workspace @skiesjs/express && npm run build --workspace @skiesjs/cli",
-    "typecheck": "npm run build && tsc --noEmit -p examples/sample-api/tsconfig.json",
-    "test": "npm run build && vitest run && node packages/eslint-plugin-skies-node/index.test.js",
-    "check": "npm run lint && npm run typecheck && npm run test",
-    "lint": "eslint packages examples"
+    "clean": "node tools/clean.mjs",
+    "build": "npm run clean && npm run build --workspace @skiesjs/core && npm run build --workspace @skiesjs/openapi && npm run build --workspace @skiesjs/express && npm run build --workspace @skiesjs/auth && npm run build --workspace @skiesjs/auth-express && npm run build --workspace @skiesjs/socketio && npm run build --workspace @skiesjs/identity && npm run build --workspace @skiesjs/mail && npm run build --workspace @skiesjs/sms && npm run build --workspace @skiesjs/storage && npm run build --workspace @skiesjs/storage-express && npm run build --workspace @skiesjs/rate-limit-express && npm run build --workspace @skiesjs/drizzle-postgres && npm run build --workspace @skiesjs/testing && npm run build --workspace @skiesjs/testing-postgres && npm run build --workspace @skiesjs/doctor && npm run build --workspace @skiesjs/foundation && npm run build --workspace @skiesjs/cli && npm run build --workspace @skiesjs/pilot-api",
+    "typecheck": "npm run build && tsc -p tsconfig.tests.json && tsc --noEmit -p examples/sample-api/tsconfig.json && npm run typecheck --workspace @skiesjs/pilot-api",
+    "doctor": "npm run build --workspace @skiesjs/doctor && skies-node-doctor examples/sample-api && skies-node-doctor examples/pilot-api",
+    "test:unit": "vitest run --exclude '**/integration.test.ts' --exclude '**/*.integration.test.ts' --exclude 'packages/eslint-plugin-skies-node/**' && node packages/eslint-plugin-skies-node/index.test.js",
+    "test:integration": "cross-env SKIES_TEST_POSTGRES=1 vitest run packages/testing-postgres/src/integration.test.ts packages/drizzle-postgres/src/integration.test.ts",
+    "test": "npm run build && npm run test:unit",
+    "check": "npm run lint && npm run typecheck && npm run doctor && npm run test:unit",
+    "package-smoke": "node tools/package-smoke.mjs",
+    "lint": "eslint packages examples tools"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
@@ -28,6 +32,12 @@
     "express": "^5.0.0",
     "supertest": "^7.0.0",
     "typescript": "^5.7.0",
-    "vitest": "^4.0.0"
+    "vitest": "^4.0.0",
+    "cross-env": "^10.0.0",
+    "@hey-api/openapi-ts": "0.97.3"
+  },
+  "overrides": {
+    "qs": "6.15.3",
+    "@hey-api/json-schema-ref-parser": "1.4.1"
   }
 }

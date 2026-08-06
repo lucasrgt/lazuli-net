@@ -21,11 +21,14 @@
   "files": [
     "index.js",
     "index.d.ts",
+    "lib",
+    "rules",
     "README.md"
   ],
   "scripts": {
     "test": "node index.test.js",
-    "prepublishOnly": "node index.test.js"
+    "prepublishOnly": "node index.test.js",
+    "lint": "eslint ."
   },
   "peerDependencies": {
     "@typescript-eslint/parser": ">=8",
@@ -33,5 +36,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

@@ -26,10 +26,12 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run --root ../.. packages/express/src",
+    "lint": "eslint src"
   },
   "dependencies": {
-    "@skiesjs/core": "0.1.0"
+    "@skiesjs/core": "0.1.0",
+    "@skiesjs/openapi": "0.1.0"
   },
   "peerDependencies": {
     "express": "^5.0.0"

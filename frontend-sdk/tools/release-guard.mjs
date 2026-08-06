@@ -13,6 +13,35 @@ import { FRONTEND_PACKAGE_VERSIONS } from "./package-versions.mjs";
 // The publishable surface. A unit "changed" if any shipped path differs since the tag; `version` is the file
 // whose number must move when that happens. The NuGet packages share one number (the library props); each npm
 // package carries its own. SelfHarness is framework-dev-only and never shipped, so it is not a unit here.
+const NODE_PACKAGES = Object.freeze([
+  ["core", "@skiesjs/core"],
+  ["openapi", "@skiesjs/openapi"],
+  ["express", "@skiesjs/express"],
+  ["auth", "@skiesjs/auth"],
+  ["auth-express", "@skiesjs/auth-express"],
+  ["socketio", "@skiesjs/socketio"],
+  ["identity", "@skiesjs/identity"],
+  ["mail", "@skiesjs/mail"],
+  ["sms", "@skiesjs/sms"],
+  ["storage", "@skiesjs/storage"],
+  ["storage-express", "@skiesjs/storage-express"],
+  ["rate-limit-express", "@skiesjs/rate-limit-express"],
+  ["drizzle-postgres", "@skiesjs/drizzle-postgres"],
+  ["testing", "@skiesjs/testing"],
+  ["testing-postgres", "@skiesjs/testing-postgres"],
+  ["doctor", "@skiesjs/doctor"],
+  ["eslint-plugin-skies-node", "eslint-plugin-skies-node"],
+  ["foundation", "@skiesjs/foundation"],
+  ["framework", "@skiesjs/framework"],
+  ["cli", "@skiesjs/cli"],
+]);
+
+function nodeReleaseUnit([directory, name]) {
+  const root = `node-sdk/packages/${directory}`;
+  const version = `${root}/package.json`;
+  return { name, version, paths: [root, version] };
+}
+
 export const RELEASE_UNITS = Object.freeze([
   {
     name: "Skies.Framework.* (nuget)",
@@ -43,26 +72,7 @@ export const RELEASE_UNITS = Object.freeze([
     version: "frontend-sdk/package.json",
     paths: ["frontend-sdk/tools", "frontend-sdk/README.md", "frontend-sdk/package.json"],
   },
-  {
-    name: "@skiesjs/core",
-    version: "node-sdk/packages/core/package.json",
-    paths: ["node-sdk/packages/core/src", "node-sdk/packages/core/README.md", "node-sdk/packages/core/package.json"],
-  },
-  {
-    name: "@skiesjs/express",
-    version: "node-sdk/packages/express/package.json",
-    paths: ["node-sdk/packages/express/src", "node-sdk/packages/express/README.md", "node-sdk/packages/express/package.json"],
-  },
-  {
-    name: "eslint-plugin-skies-node",
-    version: "node-sdk/packages/eslint-plugin-skies-node/package.json",
-    paths: ["node-sdk/packages/eslint-plugin-skies-node", "node-sdk/packages/eslint-plugin-skies-node/package.json"],
-  },
-  {
-    name: "@skiesjs/cli",
-    version: "node-sdk/packages/cli/package.json",
-    paths: ["node-sdk/packages/cli/bin", "node-sdk/packages/cli/src", "node-sdk/packages/cli/README.md", "node-sdk/packages/cli/package.json"],
-  },
+  ...NODE_PACKAGES.map(nodeReleaseUnit),
 ]);
 
 /**

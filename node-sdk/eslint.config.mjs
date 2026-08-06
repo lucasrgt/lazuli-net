@@ -21,7 +21,7 @@ export default [
     rules: selfHarnessRules,
   },
   {
-    files: ["packages/**/*.js"],
+    files: ["packages/**/*.js", "tools/**/*.mjs"],
     rules: selfHarnessRules,
   },
   {
