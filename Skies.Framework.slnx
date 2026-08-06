@@ -27,6 +27,7 @@
     <Project Path="tests/Skies.Framework.Testing.Postgres.Tests/Skies.Framework.Testing.Postgres.Tests.csproj" />
     <Project Path="tests/Skies.Framework.AspNetCore.Tests/Skies.Framework.AspNetCore.Tests.csproj" />
     <Project Path="tests/Skies.Framework.Auth.Tests/Skies.Framework.Auth.Tests.csproj" />
+    <Project Path="tests/Skies.Framework.Ports.Tests/Skies.Framework.Ports.Tests.csproj" />
   </Folder>
   <Folder Name="/examples/">
     <Project Path="examples/sample-app/backend/Sample.Api/Sample.Api.csproj" />

@@ -1,0 +1,1161 @@
+{
+  "$schema": "./skies.parity.schema.json",
+  "schemaVersion": 1,
+  "policy": {
+    "behaviorPatterns": {
+      "dotnet": [
+        "analyzers/Skies.Framework.Doctor/**/*.cs",
+        "examples/sample-app/backend/**/*.cs",
+        "src/**/*.cs",
+        "tests/Skies.Framework.*.Tests/**/*.cs",
+        "analyzers/Skies.Framework.Doctor/*.csproj",
+        "examples/sample-app/backend/**/*.csproj",
+        "src/**/*.csproj",
+        "src/Skies.Framework.Cli/Templates/**/*.cstmpl"
+      ],
+      "node": [
+        "node-sdk/examples/pilot-api/src/**/*.ts",
+        "node-sdk/examples/sample-api/src/**/*.ts",
+        "node-sdk/packages/**/*.js",
+        "node-sdk/packages/**/*.mjs",
+        "node-sdk/packages/**/*.ts",
+        "node-sdk/examples/pilot-api/package.json",
+        "node-sdk/examples/pilot-api/skies.node.json",
+        "node-sdk/examples/pilot-api/stryker.config.mjs",
+        "node-sdk/examples/sample-api/package.json",
+        "node-sdk/packages/*/package.json"
+      ]
+    },
+    "ignoredBehavior": [
+      "tests/Skies.Framework.SelfHarness.Tests/**/*.cs"
+    ]
+  },
+  "sharedContracts": [
+    {
+      "id": "jwt.hs256",
+      "path": "tests/fixtures/jwt-interop.json",
+      "consumers": {
+        "dotnet": [
+          "tests/Skies.Framework.Auth.Tests/AccessTokenValidationTests.cs",
+          "tests/Skies.Framework.Auth.Tests/Skies.Framework.Auth.Tests.csproj"
+        ],
+        "node": [
+          "node-sdk/packages/auth/src/index.test.ts"
+        ]
+      }
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "architecture.explicit-slices",
+      "statement": "Runtime composition remains explicit and portable: markers/contracts carry metadata but never hidden behavior.",
+      "parity": "adapter-specific",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Abstractions/EntityAttribute.cs",
+          "src/Skies.Framework.Abstractions/ModuleAttribute.cs",
+          "src/Skies.Framework.Abstractions/SliceAttribute.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "doctor",
+            "path": "tests/Skies.Framework.Doctor.Tests/SliceConformanceAnalyzerTests.cs"
+          },
+          {
+            "kind": "doctor",
+            "path": "tests/Skies.Framework.Doctor.Tests/ModuleAnalyzerTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/openapi/src/types.ts",
+          "node-sdk/packages/express/src/map-slice.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/openapi/src/index.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/express/src/map-slice.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "core.ordered-lifecycle",
+      "statement": "Lifecycle participants advance in declared order without skips or regressions.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Abstractions/OrderedLifecycle.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Abstractions.Tests/OrderedLifecycleTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/core/src/ordered-lifecycle.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/core/src/ordered-lifecycle.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "core.page",
+      "statement": "Paged results preserve bounds, totals, emptiness, and projection metadata.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Abstractions/Page.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Abstractions.Tests/PageTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/core/src/page.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/core/src/page.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "core.result-errors",
+      "statement": "Handlers use a closed result and nine-kind error algebra with stable field errors.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Abstractions/Result.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Abstractions.Tests/ResultTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/core/src/index.ts",
+          "node-sdk/packages/core/src/result.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/core/src/index.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "core.scalar-wire",
+      "statement": "Nominal domain scalars cross transport boundaries through explicit primitive codecs.",
+      "parity": "wire-compatible",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Abstractions/ScalarJsonConverter.cs",
+          "src/Skies.Framework.Abstractions/ValueObjectAttribute.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Abstractions.Tests/ScalarJsonConverterTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/core/src/scalar-codec.ts",
+          "node-sdk/packages/openapi/src/scalar.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/core/src/scalar-codec.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/openapi/src/scalar.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "core.validation",
+      "statement": "Validation accumulates stable field failures and preserves nested field paths.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Abstractions/Validation.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Abstractions.Tests/ValidationTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/core/src/validation.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/core/src/validation.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "data.postgres",
+      "statement": "Reference persistence proves stable tenant paging, bounded materialization, raw SQL ownership, and optimistic concurrency.",
+      "parity": "adapter-specific",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.EntityFrameworkCore/**/*.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "integration",
+            "path": "tests/Skies.Framework.EntityFrameworkCore.Tests/**/*.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/drizzle-postgres/src/**/*.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/drizzle-postgres/src/index.test.ts"
+          },
+          {
+            "kind": "integration",
+            "path": "node-sdk/packages/drizzle-postgres/src/integration.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "delivery.packages-release",
+      "statement": "Both runtimes ship immutable versioned packages with dependency ordering and post-install consumption proof.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "build/Skies.Framework.Library.props",
+          "frontend-sdk/tools/release-guard.mjs",
+          ".github/workflows/publish.yml"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "frontend-sdk/tools/release-guard.test.ts"
+          },
+          {
+            "kind": "build",
+            "path": "Skies.Framework.slnx"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/framework/package.json",
+          "node-sdk/tools/package-smoke.mjs",
+          ".github/workflows/publish.yml"
+        ],
+        "proofs": [
+          {
+            "kind": "package-smoke",
+            "path": "node-sdk/tools/package-smoke.mjs"
+          },
+          {
+            "kind": "test",
+            "path": "frontend-sdk/tools/release-guard.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "doctor.enforcement",
+      "statement": "Removable static doctors enforce application shape, auth, error ownership, journeys, and proof completeness.",
+      "parity": "adapter-specific",
+      "dotnet": {
+        "scopes": [
+          "analyzers/Skies.Framework.Doctor/**/*.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "doctor",
+            "path": "tests/Skies.Framework.Doctor.Tests/**/*.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/doctor/**/*.ts",
+          "node-sdk/packages/doctor/**/*.mjs",
+          "node-sdk/packages/eslint-plugin-skies-node/**/*.js",
+          "node-sdk/packages/eslint-plugin-skies-node/index.d.ts",
+          "node-sdk/packages/eslint-plugin-skies-node/fixtures/**/*.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "doctor",
+            "path": "node-sdk/packages/doctor/src/**/*.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/eslint-plugin-skies-node/**/*.test.js"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "http.contract-openapi",
+      "statement": "HTTP adapters map results canonically and publish deterministic client-safe OpenAPI contracts.",
+      "parity": "adapter-specific",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.AspNetCore/EndpointKinds.cs",
+          "src/Skies.Framework.AspNetCore/OpenApiExtensions.cs",
+          "src/Skies.Framework.AspNetCore/ResultHttpExtensions.cs",
+          "src/Skies.Framework.AspNetCore/SkiesExtensions.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.AspNetCore.Tests/ResultHttpExtensionsTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.AspNetCore.Tests/EndpointKindTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "examples/sample-app/backend/Sample.Api/OpenApi*.Tests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/express/**/*.ts",
+          "node-sdk/packages/openapi/src/document.ts",
+          "node-sdk/packages/openapi/src/index.ts",
+          "node-sdk/packages/openapi/src/registry.ts",
+          "node-sdk/packages/openapi/src/types.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/express/src/**/*.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/openapi/src/index.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/openapi/src/client-smoke.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "http.rate-limit",
+      "statement": "Rate limiting returns the canonical error envelope and retry metadata.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.AspNetCore/RateLimitingExtensions.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.AspNetCore.Tests/RateLimitingExtensionsTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/rate-limit-express/src/index.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/rate-limit-express/src/index.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "packaging.omakase",
+      "statement": "The convenience bundle includes the recommended spine while keeping persistence, realtime, and tests opt-in.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "src/Skies/Skies.Framework.csproj"
+        ],
+        "proofs": [
+          {
+            "kind": "build",
+            "path": "Skies.Framework.slnx"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/framework/package.json"
+        ],
+        "proofs": [
+          {
+            "kind": "package-smoke",
+            "path": "node-sdk/tools/package-smoke.mjs"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "packaging.public-graphs",
+      "statement": "Public project and package manifests declare both runtimes explicitly and remain consumable as a coherent graph.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "analyzers/Skies.Framework.Doctor/*.csproj",
+          "src/**/*.csproj"
+        ],
+        "proofs": [
+          {
+            "kind": "build",
+            "path": "Skies.Framework.slnx"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/*/package.json"
+        ],
+        "proofs": [
+          {
+            "kind": "package-smoke",
+            "path": "node-sdk/tools/package-smoke.mjs"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "pilot.nontrivial",
+      "statement": "A nontrivial reference application proves auth, storage, paging, OpenAPI, and write journeys without source copies.",
+      "parity": "adapter-specific",
+      "dotnet": {
+        "scopes": [
+          "examples/sample-app/backend/Sample.Api/**/*.cs",
+          "examples/sample-app/backend/Sample.Tests/**/*.cs",
+          "examples/sample-app/backend/**/*.csproj"
+        ],
+        "proofs": [
+          {
+            "kind": "journey",
+            "path": "examples/sample-app/backend/Sample.Api/Journeys/*.Tests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "examples/sample-app/backend/Sample.Tests/**/*.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/examples/pilot-api/src/**/*.ts",
+          "node-sdk/examples/sample-api/src/**/*.ts",
+          "node-sdk/examples/pilot-api/skies.node.json",
+          "node-sdk/examples/pilot-api/package.json",
+          "node-sdk/examples/pilot-api/stryker.config.mjs",
+          "node-sdk/examples/sample-api/package.json"
+        ],
+        "proofs": [
+          {
+            "kind": "journey",
+            "path": "node-sdk/examples/pilot-api/src/**/*.journey.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/examples/pilot-api/src/**/*.test.ts"
+          },
+          {
+            "kind": "mutation",
+            "path": "node-sdk/examples/pilot-api/stryker.config.mjs"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "ports.identity-mail-sms",
+      "statement": "Identity, mail, and SMS remain explicit vendor-neutral ports with development adapters.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Identity/**/*.cs",
+          "src/Skies.Framework.Mail/**/*.cs",
+          "src/Skies.Framework.Sms/**/*.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Ports.Tests/DevelopmentAdapterTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/identity/src/**/*.ts",
+          "node-sdk/packages/mail/src/**/*.ts",
+          "node-sdk/packages/sms/src/**/*.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/identity/src/index.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/mail/src/index.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/sms/src/index.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "proof.gates-foundations",
+      "statement": "Closed proof graphs select affected/base/full evidence and fail closed on omissions, suppressions, timeouts, and Git uncertainty.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Cli/Avp*.cs",
+          "src/Skies.Framework.Cli/Criteria*.cs",
+          "src/Skies.Framework.Cli/CSharpImpactGraph.cs",
+          "src/Skies.Framework.Cli/Csm*.cs",
+          "src/Skies.Framework.Cli/DesignHarness.cs",
+          "src/Skies.Framework.Cli/DoctorCommand.cs",
+          "src/Skies.Framework.Cli/Foundation*.cs",
+          "src/Skies.Framework.Cli/Gate*.cs",
+          "src/Skies.Framework.Cli/GitChanges.cs",
+          "src/Skies.Framework.Cli/NwcCommand.cs",
+          "src/Skies.Framework.Cli/NyaCommand.cs",
+          "src/Skies.Framework.Cli/RtwCommand.cs",
+          "src/Skies.Framework.Cli/SkiesManifest.cs",
+          "src/Skies.Framework.Cli/SuppressionGate.cs",
+          "src/Skies.Framework.Cli/WtwCommand.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/Avp*.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/Criteria*.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/DesignHarnessTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/DoctorCommandTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/Foundation*.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/Gate*.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/GitChangesTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/SkiesManifestTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/SuppressionGateTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/foundation/**/*.ts",
+          "node-sdk/packages/foundation/**/*.mjs",
+          "node-sdk/packages/testing/src/reporter.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/foundation/src/**/*.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/testing/src/reporter.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "realtime.opt-in",
+      "statement": "Realtime is opt-in, authenticated, contract-validated, thin, and removable from the default application.",
+      "parity": "adapter-specific",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Cli/HubGenerator.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/HubGeneratorTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/socketio/src/**/*.ts",
+          "node-sdk/packages/cli/src/generators-hub.ts",
+          "node-sdk/packages/cli/src/templates-hub.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "integration",
+            "path": "node-sdk/packages/socketio/src/index.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/cli/src/generators-final.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "security.jwt-current-user-cookie",
+      "statement": "JWT claims, current-user boundaries, and refresh cookies have equivalent security semantics.",
+      "parity": "wire-compatible",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Auth/**/*.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Auth.Tests/**/*.cs"
+          },
+          {
+            "kind": "wire-fixture",
+            "path": "tests/fixtures/jwt-interop.json"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/auth/src/**/*.ts",
+          "node-sdk/packages/auth-express/src/**/*.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/auth/src/index.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/auth-express/src/**/*.test.ts"
+          },
+          {
+            "kind": "wire-fixture",
+            "path": "tests/fixtures/jwt-interop.json"
+          }
+        ]
+      },
+      "sharedContracts": [
+        "jwt.hs256"
+      ]
+    },
+    {
+      "id": "storage.local-http",
+      "statement": "Local storage safely streams, rejects traversal, and exposes upload/download and byte-range HTTP routes.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Storage/**/*.cs",
+          "src/Skies.Framework.AspNetCore/LocalFileStorageExtensions.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.AspNetCore.Tests/LocalFileStorageExtensionsTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/storage/src/**/*.ts",
+          "node-sdk/packages/storage-express/src/**/*.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/storage/src/index.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/storage-express/src/index.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "testing.vocabulary-postgres",
+      "statement": "Unit, integration, E2E, journey, host, and PostgreSQL clone evidence share lifecycle and isolation guarantees.",
+      "parity": "adapter-specific",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Testing/**/*.cs",
+          "src/Skies.Framework.Testing.InMemory/**/*.cs",
+          "src/Skies.Framework.Testing.Postgres/**/*.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Testing.Postgres.Tests/**/*.cs"
+          },
+          {
+            "kind": "journey",
+            "path": "examples/sample-app/backend/Sample.Api/Journeys/*.Tests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/testing/src/index.ts",
+          "node-sdk/packages/testing-postgres/src/**/*.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/testing/src/index.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/testing-postgres/src/index.test.ts"
+          },
+          {
+            "kind": "integration",
+            "path": "node-sdk/packages/testing-postgres/src/integration.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "tooling.generators",
+      "statement": "Transactional generators emit explicit modules, slices, domain types, CRUD, auth, storage, and complete fresh applications.",
+      "parity": "adapter-specific",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Cli/*Generator.cs",
+          "src/Skies.Framework.Cli/*Templates.cs",
+          "src/Skies.Framework.Cli/*Scaffold.cs",
+          "src/Skies.Framework.Cli/CrudAcceptance.cs",
+          "src/Skies.Framework.Cli/FlowTemplates.cs",
+          "src/Skies.Framework.Cli/FrameworkPackageVersions.cs",
+          "src/Skies.Framework.Cli/ProjectTemplate.cs",
+          "src/Skies.Framework.Cli/Templates/**/*"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/*GeneratorTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/ErrorCodeScaffoldTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/ProjectTemplateTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/SpecManifestScaffoldTests.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/cli/src/file-plan.ts",
+          "node-sdk/packages/cli/src/generate-application.ts",
+          "node-sdk/packages/cli/src/generators*.ts",
+          "node-sdk/packages/cli/src/naming.ts",
+          "node-sdk/packages/cli/src/proof-registry.ts",
+          "node-sdk/packages/cli/src/registry.ts",
+          "node-sdk/packages/cli/src/slice-registry.ts",
+          "node-sdk/packages/cli/src/templates*.ts",
+          "node-sdk/packages/cli/src/types.ts"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/cli/src/generate-application.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/cli/src/generators*.test.ts"
+          }
+        ]
+      },
+      "sharedContracts": []
+    },
+    {
+      "id": "tooling.surface-sync",
+      "statement": "Both command surfaces route strict arguments and keep pilot package versions synchronized.",
+      "parity": "equivalent",
+      "dotnet": {
+        "scopes": [
+          "src/Skies.Framework.Cli/FrameworkSync.cs",
+          "src/Skies.Framework.Cli/FrontendGate.cs",
+          "src/Skies.Framework.Cli/FrontendScriptContract.cs",
+          "src/Skies.Framework.Cli/FrontendWarningGate.cs",
+          "src/Skies.Framework.Cli/Program.cs",
+          "src/Skies.Framework.Cli/Tooling.cs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/FrameworkSyncTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/Frontend*.cs"
+          }
+        ]
+      },
+      "node": {
+        "scopes": [
+          "node-sdk/packages/cli/src/index.ts",
+          "node-sdk/packages/cli/bin/skies-node.mjs"
+        ],
+        "proofs": [
+          {
+            "kind": "test",
+            "path": "node-sdk/packages/cli/src/index.test.ts"
+          },
+          {
+            "kind": "package-smoke",
+            "path": "node-sdk/tools/package-smoke.mjs"
+          }
+        ]
+      },
+      "sharedContracts": []
+    }
+  ],
+  "deferments": [],
+  "diagnostics": [
+    {
+      "dotnet": "SKY0001",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0001"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0002",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0002"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0003",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0003"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0004",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0004"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0005",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0005"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0006",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0006"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0007",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0007"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0008",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0008"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0009",
+      "node": {
+        "kind": "language",
+        "value": "explicit module imports and registry boundaries"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0010",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0010"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0011",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0011"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0012",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0012"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0013",
+      "node": {
+        "kind": "explicit-api",
+        "value": "defineScalarCodec"
+      },
+      "capability": "core.scalar-wire"
+    },
+    {
+      "dotnet": "SKY0014",
+      "node": {
+        "kind": "generator",
+        "value": "explicit Drizzle table and entity generation"
+      },
+      "capability": "tooling.generators"
+    },
+    {
+      "dotnet": "SKY0015",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0015"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0016",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0016"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0017",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0017"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0018",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0018"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0019",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0019"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0020",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0020"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0021",
+      "node": {
+        "kind": "language",
+        "value": "branded scalar codecs"
+      },
+      "capability": "core.scalar-wire"
+    },
+    {
+      "dotnet": "SKY0022",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0022"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0023",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0023"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0024",
+      "node": {
+        "kind": "explicit-api",
+        "value": "defineRawSql"
+      },
+      "capability": "data.postgres"
+    },
+    {
+      "dotnet": "SKY0025",
+      "node": {
+        "kind": "language",
+        "value": "discriminated Result union narrowing"
+      },
+      "capability": "core.result-errors"
+    },
+    {
+      "dotnet": "SKY0026",
+      "node": {
+        "kind": "explicit-api",
+        "value": "executeVersionedMutation"
+      },
+      "capability": "data.postgres"
+    },
+    {
+      "dotnet": "SKY0027",
+      "node": {
+        "kind": "explicit-api",
+        "value": "pagePolicy bounded selection"
+      },
+      "capability": "data.postgres"
+    },
+    {
+      "dotnet": "SKY0028",
+      "node": {
+        "kind": "explicit-api",
+        "value": "pagePolicy stable tiebreaker"
+      },
+      "capability": "data.postgres"
+    },
+    {
+      "dotnet": "SKY0030",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0030"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0031",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0031"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0032",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0032"
+      },
+      "capability": "doctor.enforcement"
+    },
+    {
+      "dotnet": "SKY0033",
+      "node": {
+        "kind": "diagnostic",
+        "value": "SKYN0033"
+      },
+      "capability": "doctor.enforcement"
+    }
+  ]
+}

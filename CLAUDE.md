@@ -80,6 +80,12 @@ npm --prefix node-sdk run check       # the Node.js doctor, typecheck, and tests
 
 Green platform gates mean the conventions are held. Never leave an affected workspace red.
 
+Cross-runtime capability work is also governed by `parity/skies.parity.json`. Run `npm run test:parity` and
+`npm run check:parity -- --base <revision>` when a .NET or Node runtime contract changes. A change under a declared
+implementation scope must include its peer-runtime scope or an owned, justified, expiring deferment for the missing
+side. Add new behavior to the manifest rather than annotating TypeScript: parity metadata stays external and
+removable, never in decorators, JSDoc, reflection, or runtime code.
+
 ---
 
 ## The doctor vs the self-harness — keep them separate

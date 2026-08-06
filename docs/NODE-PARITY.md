@@ -1,10 +1,41 @@
-# Skies Node.js parity ledger
+# Skies Node.js parity overview
 
-This ledger is the acceptance record for the Node backend peer of Skies .NET. **Parity** means the same user-visible
-capability and enforcement strength where the platform permits it, not a mechanical translation of ASP.NET,
-Roslyn, or EF APIs. Every claim below names executable evidence in this repository.
+This document is the readable overview of the Node backend peer of Skies .NET. The authoritative cross-runtime
+catalog is [`parity/skies.parity.json`](../parity/skies.parity.json), validated by its closed
+[JSON Schema](../parity/skies.parity.schema.json) and `tools/parity-guard.mjs`. **Parity** means the same
+user-visible capability and enforcement strength where the platform permits it, not a mechanical translation of
+ASP.NET, Roslyn, or EF APIs. Every machine-readable capability binds both implementations to executable evidence.
 
 Status values are **done**, **equivalent**, and **adapter-specific**. There are no planned or active rows.
+
+## Machine-readable parity contract
+
+The manifest owns stable capability IDs, a relationship (`equivalent`, `wire-compatible`, or `adapter-specific`),
+implementation scopes and executable proof paths for both runtimes, the complete `SKY####` mapping to a
+`SKYN####` diagnostic or an explicit TypeScript mechanism, shared language-neutral contracts, and explicit
+deferments. The guard fails closed when:
+
+- a schema field is missing or unknown, an ID is duplicated or unsorted, or any declared path/glob resolves to no file;
+- first-party behavior under an owned .NET or Node pattern is absent from the catalog;
+- an implementation scope changes on only one runtime without an owned, justified, non-expired deferment for the
+  missing counterpart; or
+- a shared contract lacks consumers and a capability on both runtimes.
+
+Proof-only improvements do not require an artificial counterpart source edit. Runtime pairing is computed only
+from implementation scopes, while every proof remains resolvable and mapped. Deferments use an ISO expiry date
+and name the owner, reason, capability, and temporarily missing side; an expired deferment is a failure.
+
+```bash
+npm run test:parity                         # guard regression suite
+npm run check:parity -- --changed <path>   # focused local drift check
+npm run check:parity -- --base <revision>  # branch/PR diff
+node tools/parity-guard.mjs list
+node tools/parity-guard.mjs explain <path>
+```
+
+CI fetches full history, validates the inventory and schema, and compares the current change with the event base.
+This mechanism is deliberately **annotation-free**: it does not add TypeScript decorators, JSDoc tags, reflection,
+or runtime metadata. Plain TypeScript stays plain; the external manifest, shared fixtures, tests, and CI own parity.
 
 ## Non-negotiable laws
 

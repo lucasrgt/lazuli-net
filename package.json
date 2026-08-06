@@ -7,7 +7,9 @@
   "description": "Repository-level tooling for the Skies .NET, Node.js, and frontend SDK workspaces.",
   "scripts": {
     "prepare": "lefthook install",
-    "check:node": "npm --prefix node-sdk run check"
+    "check:node": "npm --prefix node-sdk run check",
+    "check:parity": "node tools/parity-guard.mjs check",
+    "test:parity": "node --test tools/parity-guard.test.mjs"
   },
   "devDependencies": {
     "lefthook": "^1.10.10"

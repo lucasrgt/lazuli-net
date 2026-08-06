@@ -22,6 +22,21 @@ on:
 # Three native engines, one front door: the .NET backend, Node.js backend, and React/TS frontend each get a gate.
 # Pull requests and pushes run the affected closure; release callers explicitly request full.
 jobs:
+  parity:
+    name: cross-runtime parity manifest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      - name: verify parity guard behavior
+        run: npm run test:parity
+      - name: reject unmapped or unilateral runtime drift
+        run: npm run check:parity -- --ci
+
   dotnet:
     name: backend (skies gate)
     runs-on: ubuntu-latest

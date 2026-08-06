@@ -11,6 +11,9 @@ x64/
 x86/
 [Bb]in/
 [Oo]bj/
+# Publishable Node package executables are source, not build output.
+!node-sdk/packages/*/bin/
+!node-sdk/packages/*/bin/*.mjs
 
 ## .NET / IDE
 *.user
