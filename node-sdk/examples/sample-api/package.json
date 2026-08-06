@@ -1,0 +1,11 @@
+{
+  "name": "@skiesjs/sample-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@skiesjs/core": "0.1.0",
+    "@skiesjs/express": "0.1.0",
+    "express": "^5.0.0"
+  }
+}

@@ -1,13 +1,14 @@
-# Skies (.NET) — Operating manual for AI agents
+# Skies — Operating manual for AI agents
 
-Skies is the **opinionated .NET convention bundle**: a standardized vertical-slice
-architecture + a build-time harness (the doctor) + an ai-context discipline, so an LLM has
-less to decide and what it writes is enforced. It is the **Rails mindset in .NET** — the
-mentality (convention over configuration, quality control, semantic density), **not** the
-mechanism (no runtime metaprogramming, no language). Reference codebase: `rails/rails`.
+Skies is the **opinionated convention bundle for .NET and Node.js**: standardized vertical-slice
+architecture + removable build-time doctors + an ai-context discipline, so an LLM has less to decide
+and what it writes is enforced. It is the **Rails mindset** — the mentality (convention over configuration,
+quality control, semantic density), **not** the mechanism (no runtime metaprogramming, no language).
+Reference codebase: `rails/rails`.
 
 > This is **not** the Skies language (the Rust project — parked). Same name, same soul
-> (semantic density for the AI + CoC), different body: plain, idiomatic .NET.
+> (semantic density for the AI + CoC), different bodies: plain, idiomatic C# and TypeScript. The detailed
+> guidance below describes the established .NET engine; `node-sdk/AGENTS.md` specializes it for Node.js.
 
 Mirrored verbatim at `AGENTS.md` for tooling that loads it (Codex, Aider, etc.).
 
@@ -15,9 +16,9 @@ Mirrored verbatim at `AGENTS.md` for tooling that loads it (Codex, Aider, etc.).
 
 ## The two laws (never violate)
 
-1. **Stranger-maintainable.** The output is always plain, idiomatic C# that a .NET dev who
-   has never heard of Skies can read and maintain.
-2. **Doctor-removable.** `dotnet remove` the analyzers and the project still **compiles and
+1. **Stranger-maintainable.** The output is always plain, idiomatic code that a platform developer who
+   has never heard of Skies can read and maintain: C# for .NET, TypeScript for Node.js.
+2. **Doctor-removable.** Remove the Roslyn analyzer or ESLint plugin and the project still **compiles and
    runs** — you only lose enforcement. The harness is wire, not apparatus.
 
 Any feature that fails both — hidden source-gen of behavior, a DSL, a runtime you inherit
@@ -39,7 +40,8 @@ src/Skies.Framework.Cli/               `skies` — scaffolders (module/slice/ent
 analyzers/Skies.Framework.Doctor/      SHIPPED harness. SKY* rules + the CA* security-floor globalconfig — run on the USER's code.
 analyzers/Skies.Framework.SelfHarness/ FRAMEWORK-DEV ONLY. SKYSELF* rules — run on OUR code. Never shipped.
 frontend-sdk/                 The front half: skies-react (the spine), eslint-plugin-skies (SKYFE* rules), tools/ (doctors).
-examples/sample-app/          The reference app + canonical slice (backend/Sample.Api, Sample.Tests, frontend/).
+node-sdk/                     The Node.js backend: @skiesjs/core, Express adapter, SKYN doctor, CLI, and sample API.
+examples/sample-app/          The reference .NET app + canonical slice (backend/Sample.Api, Sample.Tests, frontend/).
 templates/skies-app/         The `skies new` starter the CLI scaffolds from.
 build/Skies.Framework.Library.props    The library standard, declared once.
 docs/CONVENTIONS.md           The backend constitution + slice shape + full SKY* rule catalog.
@@ -47,8 +49,8 @@ docs/FRONTEND-CONVENTIONS.md  The frontend constitution + MVVM shape + full SKYF
 docs/DESIGN-CONVENTIONS.md    The design constitution: token taxonomy + closed kit shape + the SKYFE design band.
 ```
 
-Ground every convention fact in `docs/CONVENTIONS.md` / `docs/FRONTEND-CONVENTIONS.md` /
-`docs/DESIGN-CONVENTIONS.md`, never memory.
+Ground every convention fact in `docs/CONVENTIONS.md` / `docs/NODE-CONVENTIONS.md` /
+`docs/FRONTEND-CONVENTIONS.md` / `docs/DESIGN-CONVENTIONS.md`, never memory.
 
 ---
 
@@ -71,11 +73,12 @@ target is source a Microsoft .NET MVP would read and be proud of.
 ## Build & verify — green before you are done
 
 ```
-dotnet build Skies.Framework.slnx     # the doctor + self-harness run inside the build
-dotnet test  Skies.Framework.slnx     # the slice tests
+dotnet build Skies.Framework.slnx     # the .NET doctor + self-harness
+dotnet test  Skies.Framework.slnx     # the .NET slice tests
+npm --prefix node-sdk run check       # the Node.js doctor, typecheck, and tests
 ```
 
-A green build means the conventions are held. Never leave the workspace red.
+Green platform gates mean the conventions are held. Never leave an affected workspace red.
 
 ---
 

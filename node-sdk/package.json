@@ -1,0 +1,33 @@
+{
+  "name": "skies-node-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The Skies convention framework for plain TypeScript and Express applications.",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "clean": "node -e \"import('node:fs').then(({rmSync}) => { for (const path of ['packages/core/dist', 'packages/express/dist', 'packages/cli/dist']) rmSync(path, { recursive: true, force: true }); })\"",
+    "build": "npm run clean && npm run build --workspace @skiesjs/core && npm run build --workspace @skiesjs/express && npm run build --workspace @skiesjs/cli",
+    "typecheck": "npm run build && tsc --noEmit -p examples/sample-api/tsconfig.json",
+    "test": "npm run build && vitest run && node packages/eslint-plugin-skies-node/index.test.js",
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "lint": "eslint packages examples"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "@types/supertest": "^6.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "express": "^5.0.0",
+    "supertest": "^7.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.0.0"
+  }
+}

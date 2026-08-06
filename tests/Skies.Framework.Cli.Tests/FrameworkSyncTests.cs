@@ -67,6 +67,18 @@ public class FrameworkSyncTests
     }
 
     [Fact]
+    public void Dependency_workspaces_are_not_scanned_as_consumer_projects()
+    {
+        var app = NewApp();
+        var dependency = Directory.CreateDirectory(Path.Combine(app, "node_modules", "linked-package")).FullName;
+        WriteCsproj(dependency, "Linked.csproj", "Skies.Framework", StaleVersion);
+
+        var outcome = FrameworkSync.Check(app);
+
+        Assert.True(outcome.InSync);
+    }
+
+    [Fact]
     public void A_retired_plugin_copy_fails_even_without_a_frontend()
     {
         var app = NewApp();

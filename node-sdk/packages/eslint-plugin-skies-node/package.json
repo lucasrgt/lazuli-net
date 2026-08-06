@@ -1,0 +1,37 @@
+{
+  "name": "eslint-plugin-skies-node",
+  "version": "0.1.0",
+  "description": "The removable SKYN doctor for Skies Node.js backend slices.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Lucas Tinoco",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasrgt/skies.git",
+    "directory": "node-sdk/packages/eslint-plugin-skies-node"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node index.test.js",
+    "prepublishOnly": "node index.test.js"
+  },
+  "peerDependencies": {
+    "@typescript-eslint/parser": ">=8",
+    "eslint": ">=9"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

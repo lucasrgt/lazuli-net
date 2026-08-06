@@ -43,6 +43,26 @@ export const RELEASE_UNITS = Object.freeze([
     version: "frontend-sdk/package.json",
     paths: ["frontend-sdk/tools", "frontend-sdk/README.md", "frontend-sdk/package.json"],
   },
+  {
+    name: "@skiesjs/core",
+    version: "node-sdk/packages/core/package.json",
+    paths: ["node-sdk/packages/core/src", "node-sdk/packages/core/README.md", "node-sdk/packages/core/package.json"],
+  },
+  {
+    name: "@skiesjs/express",
+    version: "node-sdk/packages/express/package.json",
+    paths: ["node-sdk/packages/express/src", "node-sdk/packages/express/README.md", "node-sdk/packages/express/package.json"],
+  },
+  {
+    name: "eslint-plugin-skies-node",
+    version: "node-sdk/packages/eslint-plugin-skies-node/package.json",
+    paths: ["node-sdk/packages/eslint-plugin-skies-node", "node-sdk/packages/eslint-plugin-skies-node/package.json"],
+  },
+  {
+    name: "@skiesjs/cli",
+    version: "node-sdk/packages/cli/package.json",
+    paths: ["node-sdk/packages/cli/bin", "node-sdk/packages/cli/src", "node-sdk/packages/cli/README.md", "node-sdk/packages/cli/package.json"],
+  },
 ]);
 
 /**

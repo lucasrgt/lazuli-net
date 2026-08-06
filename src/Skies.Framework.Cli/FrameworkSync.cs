@@ -36,7 +36,7 @@ internal static class FrameworkSync
     private static void CheckAssayPackageVersion(string root, List<string> messages)
     {
         var expected = FrameworkPackageVersions.Assay;
-        var stale = Directory.EnumerateFiles(root, "*.csproj", SearchOption.AllDirectories)
+        var stale = EnumerateProjectFiles(root)
             .Where(IsConsumerFile)
             .SelectMany(p => Regex.Matches(File.ReadAllText(p), @"Include=""Assay\.Net""\s+Version=""([^""]+)""")
                 .Where(m => m.Groups[1].Value != expected)
@@ -57,7 +57,7 @@ internal static class FrameworkSync
     private static void CheckBackendPackageVersions(string root, List<string> messages)
     {
         var expected = FrameworkPackageVersions.Framework;
-        var stale = Directory.EnumerateFiles(root, "*.csproj", SearchOption.AllDirectories)
+        var stale = EnumerateProjectFiles(root)
             .Where(IsConsumerFile)
             .SelectMany(p => Regex.Matches(File.ReadAllText(p), @"Include=""(Skies[^""]*)""\s+Version=""([^""]+)""")
                 .Where(m => m.Groups[2].Value != expected)
@@ -82,6 +82,25 @@ internal static class FrameworkSync
             messages.Add(
                 "framework-sync: clients/eslint-plugin-skies is a retired vendored plugin copy — delete it "
                 + "and consume eslint-plugin-skies from npm");
+    }
+
+    // Filter before descent rather than after a recursive enumeration. Workspace dependencies may be symbolic
+    // links that another host runtime cannot traverse (for example, npm links created by WSL and inspected by a
+    // Windows dotnet process); they are not consumer projects and must never make the doctor crash.
+    private static IEnumerable<string> EnumerateProjectFiles(string root)
+    {
+        var pending = new Stack<string>();
+        pending.Push(root);
+        while (pending.Count > 0)
+        {
+            var current = pending.Pop();
+            foreach (var file in Directory.EnumerateFiles(current, "*.csproj", SearchOption.TopDirectoryOnly))
+                yield return file;
+
+            foreach (var directory in Directory.EnumerateDirectories(current))
+                if (IsConsumerFile(directory))
+                    pending.Push(directory);
+        }
     }
 
     private static bool IsConsumerFile(string path) =>

@@ -16,13 +16,17 @@ describe("release-guard", () => {
     expect(violations([{ name: "x", changed: false, versionBumped: false }])).toEqual([]);
   });
 
-  it("covers every publishable package (framework NuGets, CLI, and the three npm packages)", () => {
+  it("covers every publishable package across .NET, frontend, and Node.js", () => {
     expect(RELEASE_UNITS.map((u) => u.name)).toEqual([
       "Skies.Framework.* (nuget)",
       "skies-framework-cli",
       "skies-react",
       "eslint-plugin-skies",
       "skies-frontend-sdk",
+      "@skiesjs/core",
+      "@skiesjs/express",
+      "eslint-plugin-skies-node",
+      "@skiesjs/cli",
     ]);
   });
 

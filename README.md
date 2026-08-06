@@ -13,10 +13,12 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License"></a>
 </p>
 
-An opinionated .NET convention framework — Rails mindset in C#: minimal decision space, plain
-stranger-maintainable code, and a "doctor" of Roslyn analyzers that enforce the conventions at build.
+An opinionated convention framework — the Rails mindset for .NET and Node.js: minimal decision space, plain
+stranger-maintainable code, and removable doctors that enforce the conventions at build.
 
-- **Slices** — one operation = one `[Slice]` (`Input` / `Output` / `Handle` / `Map`), thin endpoints.
+- **Two native backends** — the established .NET framework and the initial plain TypeScript + Express 5 port share
+  the same laws without sharing runtime machinery.
+- **Slices** — one operation = one visible `Input` / `Output` / `handle` / `map` spine with thin endpoints.
 - **Modular monolith** — modules are logical bounded contexts sharing one `AppDb`; a module writes only
   its own entities (SKY0009) and references others by id, so a context stays carvable into its own service.
 - **The doctor** — the `SKY####` analyzers catch structural drift (slice shape, co-located tests, `ctx.md`
@@ -57,6 +59,21 @@ skies g slice Billing CreateInvoice    # a slice + its co-located test
 skies g auth                           # the auth module (register/login/refresh/logout/me)
 skies doctor                           # run the conventions over back + front
 ```
+
+### Node.js + Express 5 (initial milestone)
+
+The Node.js implementation lives in the same repository as an independent npm workspace:
+
+```bash
+cd node-sdk
+npm ci
+npm run check
+npx skies-node g slice Billing CreateInvoice --method post --route /invoices
+```
+
+Its runtime packages are `@skiesjs/core` and `@skiesjs/express`; `eslint-plugin-skies-node` is the removable
+`SKYN####` doctor, and `@skiesjs/cli` ships the non-conflicting `skies-node` generator. See
+[`docs/NODE-CONVENTIONS.md`](docs/NODE-CONVENTIONS.md).
 
 ## Agent foundation stack
 
@@ -152,9 +169,22 @@ surface is present and still points through the pinned framework commands.
 The focused packages are à la carte; the `Skies.Framework` meta is the front door. (The harness is removable: drop the
 `Skies.Framework.Doctor` analyzer and the app still builds — you only lose the build-time enforcement.)
 
+## Node.js packages (initial)
+
+| Package | What it is |
+|---|---|
+| `@skiesjs/core` | HTTP-agnostic `Result<T>` and structured expected errors. |
+| `@skiesjs/express` | Explicit Express 5 result-to-HTTP boundary. |
+| `eslint-plugin-skies-node` | The removable `SKYN####` slice doctor. |
+| `@skiesjs/cli` | The `skies-node` slice generator. |
+
+These packages start at `0.1.0` while the conventions are proven in a real Node.js pilot.
+
 ## Docs
 
-- [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) — the constitution: the slice shape + the full `SKY####` rule catalog.
+- [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) — the .NET constitution: the slice shape + the full `SKY####` rule catalog.
+- [`docs/NODE-CONVENTIONS.md`](docs/NODE-CONVENTIONS.md) — the TypeScript + Express constitution (`SKYN####`).
+- [`docs/NODE-PARITY.md`](docs/NODE-PARITY.md) — the live capability/quality ledger required before Node reaches .NET parity.
 - [`docs/FRONTEND-CONVENTIONS.md`](docs/FRONTEND-CONVENTIONS.md) — the React Native + web harness (`SKYFE*`).
 - [`docs/MONOREPO-ARCHITECTURE.md`](docs/MONOREPO-ARCHITECTURE.md) — how the pieces fit.
 - [`docs/MIGRATING-TO-SKIES.md`](docs/MIGRATING-TO-SKIES.md) — the complete v3 to v4 rename map.

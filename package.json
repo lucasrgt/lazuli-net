@@ -4,9 +4,10 @@
   "engines": {
     "node": ">=24"
   },
-  "description": "Repository-level development tooling for Skies. The framework is .NET and the frontend packages live in the frontend-sdk workspace.",
+  "description": "Repository-level tooling for the Skies .NET, Node.js, and frontend SDK workspaces.",
   "scripts": {
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "check:node": "npm --prefix node-sdk run check"
   },
   "devDependencies": {
     "lefthook": "^1.10.10"

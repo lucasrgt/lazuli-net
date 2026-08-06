@@ -1,11 +1,11 @@
 name: publish
 
-# Publishes the Skies framework — both engines off ONE version tag (e.g. `v1.0.0`): the .NET backend to
-# nuget.org and the React frontend to npm. Bump the version first (back: <Version> in
-# build/Skies.Framework.Library.props; front: each publishable packages/* package.json), then tag.
+# Publishes the Skies framework — all engines off ONE version tag (e.g. `v1.0.0`): the .NET backend to
+# nuget.org and the React frontend plus Node.js backend packages to npm. Bump each changed package version first,
+# then tag.
 # Auth: NuGet prefers Trusted Publishing and falls back to the repository's scoped NUGET_API_KEY when an
-# external trust policy is unavailable; npm uses NPM_TOKEN. The two jobs are independent — one
-# ecosystem failing does not block the other. The nuget set below is
+# external trust policy is unavailable; npm uses NPM_TOKEN. The ecosystem jobs are independent — one
+# failing does not block the others. The nuget set below is
 # the public framework surface: SelfHarness (framework-dev only), Geocoding (not yet on the library standard),
 # and the sample/tests are deliberately excluded.
 on:
@@ -122,6 +122,43 @@ jobs:
             [ -z "$name" ] && continue
             private=$(node -p "try{!!require('./$dir/package.json').private}catch(e){true}")
             [ "$private" = "true" ] && { echo "skip $name (private)"; continue; }
+            ver=$(node -p "require('./$dir/package.json').version")
+            if npm view "$name@$ver" version >/dev/null 2>&1; then
+              echo "$name@$ver already on npm — skip"
+            else
+              echo "publishing $name@$ver"
+              ( cd "$dir" && npm publish )
+            fi
+          done
+
+  node-npm:
+    name: publish Node.js packages to npm
+    needs: guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          cache: npm
+          cache-dependency-path: node-sdk/package-lock.json
+      - name: install and build
+        working-directory: node-sdk
+        run: |
+          npm ci
+          npm run build
+      - name: publish public packages in dependency order
+        working-directory: node-sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "NPM_TOKEN not set — Node.js packages cannot be published."
+            exit 1
+          fi
+          for dir in packages/core packages/express packages/eslint-plugin-skies-node packages/cli; do
+            name=$(node -p "require('./$dir/package.json').name")
             ver=$(node -p "require('./$dir/package.json').version")
             if npm view "$name@$ver" version >/dev/null 2>&1; then
               echo "$name@$ver already on npm — skip"
