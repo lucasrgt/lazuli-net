@@ -1,5 +1,5 @@
 import { execFile, spawn } from "node:child_process";
-import { resolve } from "node:path";
+import { relative, resolve } from "node:path";
 import type { ChildProcess } from "node:child_process";
 import type { CommandRequest, CommandResult, CommandRunner, GitClient } from "./types.js";
 
@@ -95,6 +95,22 @@ function nulPaths(output: string): string[] {
   return output.split("\0").filter((item) => item.length > 0);
 }
 
+// Git reports worktree-root-relative paths, but source scopes are relative to the workspace root the gate
+// runs from (a generated app, or a sample inside a monorepo). Rewrite paths beneath that root to root-relative
+// form; paths outside it stay worktree-relative and fall through fail-closed mapping.
+async function rootRelative(root: string, paths: readonly string[], cwd: string): Promise<string[]> {
+  const base = resolve(root);
+  const top = (await execGit(["rev-parse", "--show-toplevel"], cwd)).trim();
+  if (top.length === 0) return [...paths];
+  return paths.map((path) => {
+    const absolute = resolve(top, path);
+    const rel = relative(base, absolute);
+    return rel.startsWith("..") || rel.startsWith(`..${"/"}`)
+      ? path
+      : rel.replaceAll("\\", "/");
+  });
+}
+
 export class DefaultGitClient implements GitClient {
   async changedPaths(root: string, baseRevision: string): Promise<readonly string[]> {
     if (baseRevision.startsWith("-") || /[\u0000-\u0020]/u.test(baseRevision)) throw new Error("unsafe Git base revision");
@@ -107,6 +123,19 @@ export class DefaultGitClient implements GitClient {
       execGit(["diff", "--cached", "--name-only", "-z", "--diff-filter=ACDMRTUXB"], cwd),
       execGit(["ls-files", "--others", "--exclude-standard", "-z"], cwd),
     ]);
-    return [...new Set(outputs.flatMap(nulPaths))].sort((left, right) => left.localeCompare(right));
+    return [...new Set(await rootRelative(root, outputs.flatMap(nulPaths), cwd))].sort((left, right) => left.localeCompare(right));
+  }
+
+  async stagedPaths(root: string): Promise<readonly string[]> {
+    const cwd = resolve(root);
+    const output = await execGit(["diff", "--cached", "--name-only", "--diff-filter=ACDMRTUXB", "-z", "--"], cwd);
+    return rootRelative(root, nulPaths(output), cwd);
+  }
+
+  async baseDiffPaths(root: string, baseRevision: string): Promise<readonly string[]> {
+    if (baseRevision.startsWith("-") || /[\u0000-\u0020]/u.test(baseRevision)) throw new Error("unsafe Git base revision");
+    const cwd = resolve(root);
+    const output = await execGit(["diff", "--name-only", "--diff-filter=ACDMRTUXB", "-z", `${baseRevision}...HEAD`, "--"], cwd);
+    return rootRelative(root, nulPaths(output), cwd);
   }
 }

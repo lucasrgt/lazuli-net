@@ -32,7 +32,9 @@ export interface CheckOptions {
   readonly task: string;
   readonly mode: GateMode;
   readonly changedPaths?: readonly string[];
+  readonly baseRevision?: string;
   readonly mergeBase?: string;
+  readonly fast?: boolean;
   readonly reportPath?: string | false;
   readonly markdownPath?: string | false;
   readonly forwardOutput?: boolean;
@@ -101,7 +103,9 @@ export async function runFoundationCheck(
     root: options.root, mode: options.mode,
     ...(options.configPath === undefined ? {} : { configPath: options.configPath }),
     ...(options.changedPaths === undefined ? {} : { changedPaths: options.changedPaths }),
+    ...(options.baseRevision === undefined ? {} : { baseRevision: options.baseRevision }),
     ...(options.mergeBase === undefined ? {} : { mergeBase: options.mergeBase }),
+    ...(options.fast === undefined ? {} : { fast: options.fast }),
     ...(options.reportPath === undefined ? {} : { reportPath: options.reportPath }),
     ...(options.markdownPath === undefined ? {} : { markdownPath: options.markdownPath }),
     forwardOutput: options.forwardOutput ?? true,

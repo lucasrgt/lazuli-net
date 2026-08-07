@@ -62,11 +62,28 @@ describe("CLI contract", () => {
   it("strictly validates gate mode combinations", async () => {
     const root = await workspace();
     const conflict = capture();
-    expect(await main(["gate", "--base", "--changed", "src/a.ts", "--root", root], conflict.io)).toBe(2);
-    expect(conflict.error()).toContain("only valid with --affected");
+    expect(await main(["gate", "--base", "HEAD", "--changed", "src/a.ts", "--root", root], conflict.io)).toBe(2);
+    expect(conflict.error()).toContain("incompatible with --base");
     const modes = capture();
-    expect(await main(["gate", "--base", "--full", "--root", root], modes.io)).toBe(2);
+    expect(await main(["gate", "--staged", "--full", "--root", root], modes.io)).toBe(2);
     expect(modes.error()).toContain("mutually exclusive");
+    const fullFast = capture();
+    expect(await main(["gate", "--full", "--fast", "--root", root], fullFast.io)).toBe(2);
+    expect(fullFast.error()).toContain("conflict");
+    const bareBase = capture();
+    expect(await main(["gate", "--base", "--root", root], bareBase.io)).toBe(2);
+    expect(bareBase.error()).toContain("requires a value");
+    const unsafeBase = capture();
+    expect(await main(["gate", "--base", "HEAD HEAD", "--root", root], unsafeBase.io)).toBe(2);
+    expect(unsafeBase.error()).toContain("safe Git revisions");
+  });
+
+  it("rejects the agent-facing WTW collect command as host-only", async () => {
+    const root = await workspace();
+    await main(["foundations", "init", "--root", root], capture().io);
+    const denied = capture();
+    expect(await main(["wtw", "collect", "--root", root, "--id", "x", "--title", "X", "--statement", "X.", "--kind", "decision"], denied.io)).toBe(2);
+    expect(denied.error()).toContain("unknown wtw operation");
   });
 
   it("rejects operation-specific CSM flags instead of silently ignoring them", async () => {
@@ -105,7 +122,16 @@ describe("CLI contract", () => {
     const ambiguous = capture();
     expect(await main(["check", "--task", "review", "--root", root], ambiguous.io)).toBe(2);
     const output = capture();
-    expect(await main(["foundation", "workflow", "check", "--task", "review", "--base", "--root", root, "--no-report", "--json"], output.io)).toBe(0);
+    expect(await main(["foundation", "workflow", "check", "--task", "review", "--affected", "--changed", "src/a.ts", "--root", root, "--no-report", "--json"], output.io)).toBe(0);
     expect((JSON.parse(output.out()) as { steps: { id: string }[] }).steps.map((step) => step.id)).toEqual(["gate", "wtw", "rtw", "nya", "nwc"]);
+    const staged = capture();
+    // Without a Git checkout a staged check fails closed and bounded instead of widening to the full inventory.
+    expect(await main(["foundation", "workflow", "check", "--task", "review", "--staged", "--root", root, "--no-report", "--json"], staged.io)).toBe(1);
+    expect(staged.out()).toContain("staged discovery failed");
+    const fastBase = capture();
+    // Without a Git checkout a base-relative fast check fails closed and bounded, never widening.
+    expect(await main(["foundation", "workflow", "check", "--task", "review", "--base", "HEAD^", "--fast", "--root", root, "--no-report", "--json"], fastBase.io)).toBe(1);
+    expect(fastBase.out()).toContain("base discovery failed");
+    expect((JSON.parse(fastBase.out()) as { steps: { id: string }[] }).steps.map((step) => step.id)).toEqual(["gate", "wtw", "rtw", "nya", "nwc"]);
   });
 });

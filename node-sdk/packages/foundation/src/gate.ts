@@ -53,15 +53,11 @@ export function selectProofs(
   config: FoundationConfig,
   mode: GateMode,
   changedPaths: readonly string[] = [],
+  fast = false,
 ): Selection {
   const reasons: string[] = [];
   if (mode === "full") {
     return { selected: new Set(config.proofs.map((proof) => proof.id)), paths: [], reasons: ["full mode selects every proof"] };
-  }
-  if (mode === "base") {
-    const selected = new Set(config.proofs.filter((proof) => proof.kind === "unit" || proof.kind === "integration").map((proof) => proof.id));
-    reasons.push("base mode selects every unit and integration proof");
-    return { selected: dependencyClosure(config, selected, reasons), paths: [], reasons };
   }
 
   const paths = [...new Set(changedPaths.map((path, index) => normalizeRelativePath(path, `changedPaths[${index}]`)))]
@@ -70,13 +66,19 @@ export function selectProofs(
   for (const path of paths) {
     const proofMatches = config.proofs.filter((proof) => proof.sourceScopes.some((scope) => matchesScope(path, scope)));
     if (config.forceFullScopes.some((scope) => matchesScope(path, scope))) {
-      for (const proof of config.proofs) selected.add(proof.id);
-      reasons.push(`'${path}' matches a force-full scope`);
+      if (fast) {
+        reasons.push(`'${path}' matches a force-full scope; exhaustive closure deferred by --fast; affected CI executes it`);
+      } else {
+        for (const proof of config.proofs) selected.add(proof.id);
+        reasons.push(`'${path}' matches a force-full scope`);
+      }
     } else if (proofMatches.length > 0) {
       for (const proof of proofMatches) selected.add(proof.id);
       reasons.push(`'${path}' selects ${proofMatches.map((proof) => proof.id).join(", ")}`);
     } else if (config.ignoreScopes.some((scope) => matchesScope(path, scope))) {
       reasons.push(`'${path}' is explicitly ignored`);
+    } else if (fast) {
+      reasons.push(`'${path}' has no proof mapping; exhaustive fallback deferred by --fast; affected CI executes it`);
     } else {
       for (const proof of config.proofs) selected.add(proof.id);
       reasons.push(`'${path}' has no mapping; fail-closed widening selects every proof`);
@@ -140,21 +142,55 @@ export async function runGate(options: GateOptions, dependencies: GateDependenci
   const config = loadConfig(options.root, options.configPath);
   const now = dependencies.now ?? (() => new Date());
   const startedAt = now().toISOString();
+  const git = dependencies.git ?? new DefaultGitClient();
+  // Staged checks are always bounded, the way composed .NET checks are: --staged implies --fast.
+  const fast = (options.fast ?? false) || options.mode === "staged";
   let selection: Selection;
   let baseRevision: string | null = null;
-  if (options.mode === "affected" && options.changedPaths === undefined) {
-    baseRevision = options.mergeBase ?? config.gitBase;
+  let boundedFailure: string | null = null;
+  if (options.mode === "staged") {
     try {
-      const changed = await (dependencies.git ?? new DefaultGitClient()).changedPaths(config.root, baseRevision);
-      selection = selectProofs(config, "affected", changed);
+      const changed = await git.stagedPaths(config.root);
+      selection = selectProofs(config, "staged", changed, true);
     } catch (error) {
-      selection = selectProofs(config, "full");
-      selection = {
-        ...selection,
-        reasons: [`Git impact discovery failed; fail-closed widening selects every proof: ${error instanceof Error ? error.message : String(error)}`],
-      };
+      // A staged check must never execute the exhaustive fallback; it fails closed and bounded instead.
+      boundedFailure = `Git staged discovery failed; exhaustive fallback deferred by --fast: ${error instanceof Error ? error.message : String(error)}`;
+      selection = { selected: new Set<string>(), paths: [], reasons: [boundedFailure] };
     }
-  } else selection = selectProofs(config, options.mode, options.changedPaths);
+  } else if (options.mode === "affected" && options.changedPaths === undefined) {
+    if (options.baseRevision !== undefined) {
+      // An explicit base freezes the proof scope to the commits that can actually be pushed or reviewed.
+      baseRevision = options.baseRevision;
+      try {
+        const changed = await git.baseDiffPaths(config.root, baseRevision);
+        selection = selectProofs(config, "affected", changed, fast);
+      } catch (error) {
+        if (fast) {
+          // Pre-push verification stays bounded and fast; it never widens into the exhaustive inventory.
+          boundedFailure = `Git base discovery failed; exhaustive fallback deferred by --fast: ${error instanceof Error ? error.message : String(error)}`;
+          selection = { selected: new Set<string>(), paths: [], reasons: [boundedFailure] };
+        } else {
+          selection = selectProofs(config, "full");
+          selection = {
+            ...selection,
+            reasons: [`Git base discovery failed; fail-closed widening selects every proof: ${error instanceof Error ? error.message : String(error)}`],
+          };
+        }
+      }
+    } else {
+      baseRevision = options.mergeBase ?? config.gitBase;
+      try {
+        const changed = await git.changedPaths(config.root, baseRevision);
+        selection = selectProofs(config, "affected", changed, fast);
+      } catch (error) {
+        selection = selectProofs(config, "full");
+        selection = {
+          ...selection,
+          reasons: [`Git impact discovery failed; fail-closed widening selects every proof: ${error instanceof Error ? error.message : String(error)}`],
+        };
+      }
+    }
+  } else selection = selectProofs(config, options.mode, options.changedPaths, fast);
 
   const laneIds = [...new Set(config.proofs.filter((proof) => selection.selected.has(proof.id)).map((proof) => proof.lane))];
   const runner = dependencies.runner ?? defaultCommandRunner;
@@ -177,18 +213,18 @@ export async function runGate(options: GateOptions, dependencies: GateDependenci
     return { id: proof.id, kind: proof.kind, lane: proof.lane, criteria: proof.criteria, outcome };
   });
   const findings = [...criteriaFindings(config), ...await scanSuppressions(config.root)];
-  if (options.mode === "base" && selection.selected.size === 0) findings.push("base mode selected no unit or integration proof");
+  if (boundedFailure !== null) findings.push(boundedFailure);
   if (options.mode === "full" && selection.selected.size === 0) findings.push("full mode selected no proof");
   const draft = {
     schemaVersion: 1 as const, type: "skies-node-foundation-gate" as const,
     config: relative(config.root, config.path).replaceAll("\\", "/"), configFingerprint: config.fingerprint,
-    mode: options.mode, baseRevision, changedPaths: selection.paths, selectionReasons: selection.reasons,
+    mode: options.mode, fast, baseRevision, changedPaths: selection.paths, selectionReasons: selection.reasons,
     selectedProofs: config.proofs.filter((proof) => selection.selected.has(proof.id)).map((proof) => proof.id),
     proofResults, lanes, matrix: [], findings, verdict: "red" as const, startedAt, finishedAt: "",
   };
   const matrix = matrixFromReceipt(config, draft as GateReceipt);
   const red = findings.length > 0 || matrix.some((row) => row.outcome === "fail" || row.outcome === "not-run" || row.outcome === "no-proof");
-  const noChanges = options.mode === "affected" && selection.selected.size === 0 && !red;
+  const noChanges = (options.mode === "affected" || options.mode === "staged") && selection.selected.size === 0 && !red;
   const receipt: GateReceipt = {
     ...draft, matrix, verdict: red ? "red" : noChanges ? "no-changes" : "green", finishedAt: now().toISOString(),
   };

@@ -76,14 +76,17 @@ skies-node-foundation gate --affected --changed src/wallet/withdraw.ts --changed
 skies-node-foundation gate --affected
 skies-node-foundation gate --affected --merge-base origin/release
 
-# All unit and integration proofs, plus their declared dependencies
-skies-node-foundation gate --base
+# Pre-push scope: committed diff base...HEAD, exhaustive fallbacks deferred to CI
+skies-node-foundation gate --base origin/main --fast
 
-# Every proof and canonical release artifacts
+# Staged index diff, always bounded
+skies-node-foundation gate --staged
+
+# Every proof and canonical release artifacts (release automation only)
 skies-node-foundation gate --full
 ```
 
-Affected and base gates write `.skies/foundation/gate-receipt.json`. Full writes `VERIFICATION.json` and `VERIFICATION.md`. Override with `--report <path>` and `--markdown <path>`, or use `--no-report`. JSON receipts contain the configuration SHA-256, mode/base, normalized changed paths, selection reasons, argv/cwd/timeout, bounded stdout/stderr, exit/signal/timeout/duration, every proof outcome, criteria matrix, findings, and overall verdict. If Git ancestry is unavailable, affected mode widens to full.
+Affected, base, and staged gates write `.skies/foundation/gate-receipt.json`. Full writes `VERIFICATION.json` and `VERIFICATION.md`. Override with `--report <path>` and `--markdown <path>`, or use `--no-report`. `--fast` defers force-full and unmapped-path widening to authoritative CI; `--full` and `--fast` conflict. JSON receipts contain the configuration SHA-256, mode/base, normalized changed paths, selection reasons, argv/cwd/timeout, bounded stdout/stderr, exit/signal/timeout/duration, every proof outcome, criteria matrix, findings, and overall verdict. If Git ancestry is unavailable, affected mode widens to full.
 
 The process runner forwards `SIGINT`, `SIGTERM`, and `SIGHUP` to the active process group, terminates timed-out processes, never enables a shell, and caps captured output. Use the exported `CommandRunner`, `GitClient`, and clock seams for deterministic embedding/tests.
 
@@ -96,7 +99,7 @@ skies-node-foundation foundations sync [--dry-run]
 skies-node-foundation foundation stack init
 ```
 
-The stack creates `csm.json`, a pinned lock, managed Node-focused `SKILL.md` surfaces, versioned empty stores, and one managed protocol block in detected agent files. A custom nested agent file also installs the portable root `AGENTS.md` surface. Init refuses conflicting managed files; sync updates only recognized owned assets. Plans are preflighted and applied transactionally. Parent traversal, absolute paths, non-files, and symlinks are rejected. Re-running either operation is idempotent.
+The stack creates `csm.toml` (the shared CSM storage contract, mirroring the .NET side), a pinned lock, managed Node-focused `SKILL.md` surfaces, versioned empty stores, and one managed protocol block in detected agent files. A legacy `csm.json` is still read for migration but never written. A custom nested agent file also installs the portable root `AGENTS.md` surface. Init refuses conflicting managed files; sync updates only recognized owned assets. Plans are preflighted and applied transactionally. Parent traversal, absolute paths, non-files, and symlinks are rejected. Re-running either operation is idempotent.
 
 CSM records are ordinary formatted JSON text beneath the configured storage root:
 
@@ -134,7 +137,8 @@ skies-node-foundation context --task "Add retry status" \
   --path src/status.ts --event dependency:retry-ready --limit 8
 
 skies-node-foundation check --task "Review retry status" --affected
-skies-node-foundation check --task "Review base proofs" --base
+skies-node-foundation check --task "Pre-commit review" --staged
+skies-node-foundation check --task "Pre-push review" --base origin/main --fast
 skies-node-foundation check --task "Release audit" --full
 # equivalent:
 skies-node-foundation foundation workflow context --task "Add retry status"

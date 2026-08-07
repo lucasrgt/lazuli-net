@@ -152,6 +152,9 @@ jobs:
           npm ci --ignore-scripts
           npm audit --audit-level=moderate
           npm run build
+      - name: exhaustive Node release gate
+        working-directory: node-sdk
+        run: npm run gate:full --workspace @skiesjs/pilot-api
       - name: publish public packages in dependency order
         working-directory: node-sdk
         env:

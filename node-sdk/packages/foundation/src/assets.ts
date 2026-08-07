@@ -3,7 +3,10 @@ import { normalizeRelativePath } from "./config.js";
 import { applyTextPlan, readSafeText, type TextAction, type TextChange } from "./safe-fs.js";
 
 export const FOUNDATION_VERSION = "0.1.0";
-export const CSM_CONFIG = "csm.json";
+/** Shared CSM configuration, mirroring the .NET side: [storage] root = ".skies/csm". */
+export const CSM_CONFIG = "csm.toml";
+/** Pre-CSM contract legacy JSON config; read for migration but never written. */
+export const LEGACY_CSM_CONFIG = "csm.json";
 export const INSTRUCTIONS_START = "<!-- skies-node:foundations:start -->";
 export const INSTRUCTIONS_END = "<!-- skies-node:foundations:end -->";
 const MANAGED = "<!-- managed by @skiesjs/foundation; run `skies-node-foundation foundations sync` -->";
@@ -27,7 +30,7 @@ export interface FoundationAssetsResult {
   readonly actions: readonly TextAction[];
 }
 
-function skill(id: "nwc" | "nya" | "rtw" | "wtw", purpose: string, operations: readonly string[]): string {
+function skill(id: "nwc" | "nya" | "rtw", purpose: string, operations: readonly string[]): string {
   return `${MANAGED}
 # ${id.toUpperCase()} — ${purpose}
 
@@ -39,19 +42,38 @@ ${operations.map((operation) => `- \`skies-node-foundation ${id} ${operation}\``
 `;
 }
 
-export const FOUNDATION_INSTRUCTIONS = `${INSTRUCTIONS_START}
-## Skies Node foundations
+// WTW mirrors the shared CSM contract: agents explain and guard; hosts alone collect after an
+// authoritative source contains a durable choice or falsifiable invariant.
+const WTW_SKILL = `${MANAGED}
+# WTW — decisions and invariants
 
-Use only the repository-owned foundation assets beneath the storage root declared in \`csm.json\`.
-Before implementation, run \`skies-node-foundation context --task "<goal>" --path "<path>"\`.
-Before handoff, run one explicitly scoped review:
+This is the repository-local Node foundation surface. Do not install or invoke an ambient CSM binary.
 
+Use \`skies-node-foundation wtw explain\` only when deeper decision inspection is needed. Read the returned authority, rationale, alternatives, violation examples, and links before choosing an implementation.
+
+WTW records are written only by the host through the shared CSM host collection after an authoritative source contains a durable choice or falsifiable invariant. This Node surface has no manual add command: \`skies-node-foundation wtw collect\` does not exist. Two isolated judges must return the same evidence-backed candidate before a record is written.
+
+Use \`skies-node-foundation wtw guard\` only for focused investigation or maintenance. The standard \`skies-node-foundation check\` receipt already runs it and treats a malformed record, conflicting local relation, dangling WTW URI, or suite-mode invariant without an inbound proof as a blocking health failure.
+
+- \`skies-node-foundation context --task "<goal>"\`
 - \`skies-node-foundation check --task "<goal>" --affected\`
-- \`skies-node-foundation check --task "<goal>" --base\`
-- \`skies-node-foundation check --task "<goal>" --full\`
+`;
 
-A skipped, missing, unknown, or timed-out proof is never a pass. Run foundation commands through
-\`skies-node-foundation\`; do not invoke an ambient NWC, NYA, RTW, or WTW installation.
+export const FOUNDATION_INSTRUCTIONS = `${INSTRUCTIONS_START}
+## Skies Node foundation workflow
+
+The primary coding agent owns the complete foundation lifecycle. Never create or delegate one agent per foundation.
+
+1. At task start, run \`skies-node-foundation context --task "<goal>" --path <expected-path>\`. Treat every returned decision, invariant, way, scar, and due deferment as governing context.
+2. Rerun \`skies-node-foundation context\` after scope changes, context compaction, or movement into an unfamiliar area. Keep retrieval bounded with accurate task text and paths.
+3. Use the repository-local foundation skills only when a real lifecycle event occurs: accepted decisions for WTW, proven patterns for RTW, corrected failures for NYA, or evidence-backed conditional deferments for NWC. Never record hypothetical guidance.
+4. Run focused repository tests and linters during implementation.
+5. Before commit, stage the exact intended paths and run \`skies-node-foundation check --task "<completed work>" --staged\`. Staged checks are always bounded: mapped proofs run, while exhaustive fallbacks and browser/device execution wait for authoritative CI.
+6. Before push, run \`skies-node-foundation check --task "<review>" --base <target-revision> --fast\`. The pre-push hook repeats this bounded committed-diff review.
+7. Never replace the automation-owned depth gates: pull-request CI runs affected without --fast, and release automation runs --full. Do not report an external delivery complete until its required status is green. Bare \`skies-node-foundation check --task ...\` is intentionally invalid so an ambiguous scope cannot start a surprise exhaustive run.
+8. Rerun the same check after every fix. Exit code 1 means findings remain. Exit code 2 or greater means validation was incomplete. Neither is a pass.
+
+Tests, linters, review, and individual foundation commands do not replace \`skies-node-foundation check\`.
 ${INSTRUCTIONS_END}`;
 
 function consolidateInstructions(content: string): string {
@@ -71,28 +93,59 @@ function consolidateInstructions(content: string): string {
 `;
 }
 
-function parseCsm(json: string): CsmConfig {
+const STORAGE_PATTERN = /^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/u;
+
+function storage(value: string, at: string): string {
+  const normalized = normalizeRelativePath(value, at);
+  if (normalized === ".") throw new FoundationError(`${at} must not be the workspace root`);
+  if (!STORAGE_PATTERN.test(normalized)) throw new FoundationError(`${at} must be a portable relative directory`);
+  return normalized;
+}
+
+function parseCsmJson(json: string): CsmConfig {
   let value: unknown;
   try { value = JSON.parse(json) as unknown; } catch (error) {
-    throw new FoundationError(`cannot parse ${CSM_CONFIG}: ${error instanceof Error ? error.message : String(error)}`, "config");
+    throw new FoundationError(`cannot parse ${LEGACY_CSM_CONFIG}: ${error instanceof Error ? error.message : String(error)}`, "config");
   }
-  if (value === null || typeof value !== "object" || Array.isArray(value)) throw new FoundationError(`${CSM_CONFIG} must be an object`);
+  if (value === null || typeof value !== "object" || Array.isArray(value)) throw new FoundationError(`${LEGACY_CSM_CONFIG} must be an object`);
   const raw = value as Record<string, unknown>;
   const unknown = Object.keys(raw).filter((key) => !["schemaVersion", "storage"].includes(key));
-  if (unknown.length > 0) throw new FoundationError(`${CSM_CONFIG} has unknown key(s): ${unknown.sort().join(", ")}`);
-  if (raw.schemaVersion !== 1 || typeof raw.storage !== "string") throw new FoundationError(`${CSM_CONFIG} requires schemaVersion 1 and a storage string`);
-  const storage = normalizeRelativePath(raw.storage, `${CSM_CONFIG}.storage`);
-  if (storage === ".") throw new FoundationError(`${CSM_CONFIG}.storage must not be the workspace root`);
-  if (!/^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)*$/u.test(storage)) {
-    throw new FoundationError(`${CSM_CONFIG}.storage must be a portable relative directory`);
+  if (unknown.length > 0) throw new FoundationError(`${LEGACY_CSM_CONFIG} has unknown key(s): ${unknown.sort().join(", ")}`);
+  if (raw.schemaVersion !== 1 || typeof raw.storage !== "string") throw new FoundationError(`${LEGACY_CSM_CONFIG} requires schemaVersion 1 and a storage string`);
+  return { schemaVersion: 1, storage: storage(raw.storage, `${LEGACY_CSM_CONFIG}.storage`) };
+}
+
+function parseCsmToml(content: string): CsmConfig {
+  const lines = content.split(/\r?\n/u);
+  const storageIndex = lines.findIndex((line) => /^\s*\[storage\]\s*$/u.test(line));
+  if (storageIndex < 0) throw new FoundationError(`${CSM_CONFIG}: [storage] must declare a root`, "config");
+  let root: string | undefined;
+  for (let index = storageIndex + 1; index < lines.length; index++) {
+    const line = lines[index]!;
+    if (/^\s*\[/u.test(line)) break;
+    const match = /^\s*root\s*=\s*"(?<value>[^"]+)"\s*$/u.exec(line);
+    if (match !== null) { root = match.groups!.value; break; }
   }
-  return { schemaVersion: 1, storage };
+  if (root === undefined || root.trim().length === 0) {
+    throw new FoundationError(`${CSM_CONFIG}: [storage] must declare a non-empty root`, "config");
+  }
+  return { schemaVersion: 1, storage: storage(root, `${CSM_CONFIG}.storage`) };
+}
+
+export function tomlConfig(config: CsmConfig): string {
+  return `schema = 1
+
+[storage]
+root = "${config.storage}"
+`;
 }
 
 export async function loadCsmConfig(root: string): Promise<CsmConfig> {
-  const content = await readSafeText(root, CSM_CONFIG);
-  if (content === undefined) throw new FoundationError(`${CSM_CONFIG} is missing; run foundations init`, "config");
-  return parseCsm(content);
+  const toml = await readSafeText(root, CSM_CONFIG);
+  if (toml !== undefined) return parseCsmToml(toml);
+  const legacy = await readSafeText(root, LEGACY_CSM_CONFIG);
+  if (legacy !== undefined) return parseCsmJson(legacy);
+  throw new FoundationError(`${CSM_CONFIG} is missing; run foundations init`, "config");
 }
 
 function managedAssets(storage: string): readonly { path: string; content: string }[] {
@@ -109,7 +162,7 @@ function managedAssets(storage: string): readonly { path: string; content: strin
     { path: `${storage}/nwc/SKILL.md`, content: skill("nwc", "next work and deferments", ["wake", "collect", "resolve", "check"]) },
     { path: `${storage}/nya/SKILL.md`, content: skill("nya", "corrected scars and lessons", ["recall", "spec", "check", "replay"]) },
     { path: `${storage}/rtw/SKILL.md`, content: skill("rtw", "repository ways and guidance", ["guide", "add", "check"]) },
-    { path: `${storage}/wtw/SKILL.md`, content: skill("wtw", "decisions and invariants", ["explain", "collect", "guard"]) },
+    { path: `${storage}/wtw/SKILL.md`, content: WTW_SKILL },
     { path: `${storage}/nwc/deferments/.gitkeep`, content: keep },
     { path: `${storage}/nya/scars/.gitkeep`, content: keep },
     { path: `${storage}/rtw/ways/.gitkeep`, content: keep },
@@ -127,8 +180,7 @@ export interface FoundationTextFile {
 export function defaultFoundationFiles(): readonly FoundationTextFile[] {
   const config = { schemaVersion: 1 as const, storage: ".skies/csm" };
   return [
-    { path: CSM_CONFIG, content: `${JSON.stringify(config, null, 2)}
-` },
+    { path: CSM_CONFIG, content: tomlConfig(config) },
     ...managedAssets(config.storage),
     { path: "AGENTS.md", content: `${FOUNDATION_INSTRUCTIONS}
 ` },
@@ -159,12 +211,16 @@ async function agentTargets(root: string, selected?: readonly string[]): Promise
 }
 
 export async function installFoundationAssets(options: FoundationAssetsOptions): Promise<FoundationAssetsResult> {
-  const existingConfig = await readSafeText(options.root, CSM_CONFIG);
-  const config = existingConfig === undefined ? { schemaVersion: 1 as const, storage: ".skies/csm" } : parseCsm(existingConfig);
+  const existingToml = await readSafeText(options.root, CSM_CONFIG);
+  const legacyJson = existingToml === undefined ? await readSafeText(options.root, LEGACY_CSM_CONFIG) : undefined;
+  const config = existingToml !== undefined
+    ? parseCsmToml(existingToml)
+    : legacyJson !== undefined
+      ? parseCsmJson(legacyJson)
+      : { schemaVersion: 1 as const, storage: ".skies/csm" };
   const changes: TextChange[] = [{
     path: CSM_CONFIG,
-    content: existingConfig ?? `${JSON.stringify(config, null, 2)}
-`,
+    content: existingToml ?? tomlConfig(config),
     overwrite: false,
   }];
   for (const asset of managedAssets(config.storage)) {

@@ -13,7 +13,7 @@ describe("transactional foundation stack", () => {
     const root = await workspace();
     const result = await installFoundationAssets({ root, operation: "init", dryRun: true });
     expect(result.actions.every((action) => action.action === "create")).toBe(true);
-    await expect(readFile(join(root, "csm.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(readFile(join(root, "csm.toml"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   it("installs the complete Node-focused stack and is idempotent", async () => {
@@ -22,6 +22,10 @@ describe("transactional foundation stack", () => {
     const first = await installFoundationAssets({ root, operation: "init" });
     expect(first.actions.some((action) => action.path.endsWith("wtw/SKILL.md"))).toBe(true);
     expect(await readFile(join(root, "AGENTS.md"), "utf8")).toContain(`# Local instructions\n\n${FOUNDATION_INSTRUCTIONS}`);
+    const wtw = await readFile(join(root, ".skies/csm/wtw/SKILL.md"), "utf8");
+    expect(wtw).toContain("host through the shared CSM host collection");
+    expect(wtw).not.toContain("- `skies-node-foundation wtw collect`");
+    expect(await readFile(join(root, "csm.toml"), "utf8")).toContain('[storage]');
     expect(await checkFoundationAssets(root)).toEqual([]);
     const second = await installFoundationAssets({ root, operation: "init" });
     expect(second.actions.every((action) => action.action === "unchanged")).toBe(true);
@@ -70,7 +74,7 @@ describe("transactional foundation stack", () => {
     const root = await workspace();
     await writeFile(join(root, "AGENTS.md"), "<!-- skies-node:foundations:start -->\nbroken\n");
     await expect(installFoundationAssets({ root, operation: "init" })).rejects.toThrow("malformed");
-    await expect(readFile(join(root, "csm.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(readFile(join(root, "csm.toml"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
   });
 });
 

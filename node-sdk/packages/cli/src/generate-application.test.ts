@@ -110,6 +110,14 @@ describe("generateApplication", () => {
     const workspaceModules = path.resolve(import.meta.dirname, "../../../node_modules");
     await symlink(workspaceModules, path.join(app, "node_modules"), process.platform === "win32" ? "junction" : "dir");
     const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+    // A real generated app lives in a Git repository with an origin/main base; the pre-push base gate
+    // resolves origin/main...HEAD and stays bounded instead of widening.
+    await execute("git", ["init", "-q"], { cwd: app });
+    await execute("git", ["config", "user.email", "fixture@example.test"], { cwd: app });
+    await execute("git", ["config", "user.name", "Fixture"], { cwd: app });
+    await execute("git", ["add", "-A"], { cwd: app });
+    await execute("git", ["commit", "-q", "-m", "fixture"], { cwd: app });
+    await execute("git", ["update-ref", "refs/remotes/origin/main", "HEAD"], { cwd: app });
     const outputs: string[] = [];
 
     for (const script of ["lint", "typecheck", "test", "doctor", "build", "proofs", "criteria"]) {
@@ -134,7 +142,7 @@ describe("generateApplication", () => {
     expect(outputs[5]).toContain("Skies Node proof inventory");
     expect(outputs[6]).toContain("COVERED");
     expect(outputs[7]).toContain("Gate verdict: GREEN");
-    expect(outputs[8]).toContain("Gate verdict: GREEN");
+    expect(outputs[8]).toContain("Gate verdict: NO-CHANGES");
     expect(outputs[9]).toContain("Gate verdict: GREEN");
     expect(await readFile(path.join(app, "VERIFICATION.json"), "utf8")).toContain('"verdict": "green"');
     expect(await readFile(path.join(app, "VERIFICATION.md"), "utf8")).toContain("# Verification matrix");

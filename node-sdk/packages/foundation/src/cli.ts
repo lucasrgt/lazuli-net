@@ -19,20 +19,22 @@ Usage:
   skies-node-foundation inventory [--json] [--root <dir>] [--config <file>]
   skies-node-foundation matrix [--receipt <file>] [--json] [--root <dir>]
   skies-node-foundation criteria [check] [--json] [--root <dir>]
-  skies-node-foundation gate [--affected | --base | --full] [options]
+  skies-node-foundation gate [--affected [--base <revision>] | --staged | --full] [--fast] [options]
   skies-node-foundation foundations <init|sync> [--dry-run] [--agent-file <file>]
   skies-node-foundation <nwc|nya|rtw|wtw> <operation> [options]
   skies-node-foundation context --task <goal> [--path <path>] [--event <event>]
-  skies-node-foundation check --task <goal> (--affected | --base | --full) [options]
+  skies-node-foundation check --task <goal> (--affected | --staged | --base <revision> | --full) [--fast] [options]
 
 Gate modes:
-  --affected   Select proofs by --changed paths, or Git merge-base plus working changes (default).
-  --base       Run every unit and integration proof, plus declared dependencies.
-  --full       Run every declared proof and write VERIFICATION.json plus VERIFICATION.md.
+  --affected            Select proofs by --changed paths, or Git merge-base plus working changes (default).
+  --base <revision>     Freeze affected selection to the committed diff <revision>...HEAD (pre-push scope).
+  --staged              Select proofs by the Git index diff; always bounded (implies --fast).
+  --full                Run every declared proof and write VERIFICATION.json plus VERIFICATION.md.
 
 Gate options:
-  --changed <path>       Explicit changed path; repeatable and incompatible with --merge-base.
-  --merge-base <ref>     Override git.base for affected discovery.
+  --fast                Defer exhaustive fallbacks to authoritative CI; conflicts with --full.
+  --changed <path>      Explicit changed path; repeatable and incompatible with --merge-base/--base.
+  --merge-base <ref>    Override git.base for affected discovery; incompatible with --base.
   --report <path>        JSON receipt path; --no-report disables receipt files.
   --markdown <path>      Markdown report path.
 
@@ -137,17 +139,22 @@ async function criteriaCommand(args: readonly string[], io: CliIo): Promise<numb
 
 interface GateCli {
   root: string; config?: string; mode: GateMode; modeSeen: boolean; changed: string[];
-  changedSeen: boolean; mergeBase?: string; report?: string | false; markdown?: string | false; json: boolean;
+  changedSeen: boolean; mergeBase?: string; baseRevision?: string; fast: boolean;
+  report?: string | false; markdown?: string | false; json: boolean;
 }
 
 function parseGate(args: readonly string[], requireMode: boolean): GateCli {
-  const result: GateCli = { root: process.cwd(), mode: "affected", modeSeen: false, changed: [], changedSeen: false, json: false };
+  const result: GateCli = { root: process.cwd(), mode: "affected", modeSeen: false, changed: [], changedSeen: false, fast: false, json: false };
   const cursor = new Arguments(args);
   for (let argument = cursor.next(); argument !== undefined; argument = cursor.next()) {
-    if (["--affected", "--base", "--full"].includes(argument)) {
+    if (["--affected", "--staged", "--full"].includes(argument)) {
       if (result.modeSeen) throw new FoundationError("gate modes are mutually exclusive", "invocation");
       result.modeSeen = true; result.mode = argument.slice(2) as GateMode;
-    } else if (argument === "--root") result.root = cursor.value(argument);
+    } else if (argument === "--base") {
+      if (result.modeSeen) throw new FoundationError("gate modes are mutually exclusive", "invocation");
+      result.modeSeen = true; result.mode = "affected"; result.baseRevision = cursor.value(argument);
+    } else if (argument === "--fast") result.fast = true;
+    else if (argument === "--root") result.root = cursor.value(argument);
     else if (argument === "--config") result.config = cursor.value(argument);
     else if (argument === "--changed") { result.changed.push(cursor.value(argument)); result.changedSeen = true; }
     else if (argument === "--merge-base") result.mergeBase = cursor.value(argument);
@@ -158,10 +165,20 @@ function parseGate(args: readonly string[], requireMode: boolean): GateCli {
     else failUnknown(argument);
   }
   if (requireMode && !result.modeSeen) throw new FoundationError("check requires one explicit gate mode", "invocation");
-  if (result.mode !== "affected" && (result.changedSeen || result.mergeBase !== undefined)) throw new FoundationError("--changed and --merge-base are only valid with --affected", "invocation");
+  if (result.mode !== "affected" && (result.changedSeen || result.mergeBase !== undefined)) {
+    throw new FoundationError("--changed and --merge-base are only valid with --affected", "invocation");
+  }
   if (result.changedSeen && result.mergeBase !== undefined) throw new FoundationError("--changed and --merge-base are mutually exclusive", "invocation");
-  if (result.mergeBase !== undefined && (result.mergeBase.startsWith("-") || /[\u0000-\u0020]/u.test(result.mergeBase))) {
-    throw new FoundationError("--merge-base must be a safe Git revision", "invocation");
+  if (result.baseRevision !== undefined && (result.changedSeen || result.mergeBase !== undefined)) {
+    throw new FoundationError("--changed and --merge-base are incompatible with --base <revision>", "invocation");
+  }
+  for (const revision of [result.mergeBase, result.baseRevision]) {
+    if (revision !== undefined && (revision.startsWith("-") || /[\u0000-\u0020]/u.test(revision))) {
+      throw new FoundationError("--base and --merge-base must be safe Git revisions", "invocation");
+    }
+  }
+  if (result.mode === "full" && result.fast) {
+    throw new FoundationError("--full and --fast conflict; a full audit executes every proof", "invocation");
   }
   return result;
 }
@@ -173,6 +190,8 @@ async function gateCommand(args: readonly string[], io: CliIo): Promise<number> 
     ...(options.config === undefined ? {} : { configPath: options.config }),
     ...(options.changedSeen ? { changedPaths: options.changed } : {}),
     ...(options.mergeBase === undefined ? {} : { mergeBase: options.mergeBase }),
+    ...(options.baseRevision === undefined ? {} : { baseRevision: options.baseRevision }),
+    ...(options.fast || options.mode === "staged" ? { fast: true } : {}),
     ...(options.report === undefined ? {} : { reportPath: options.report }),
     ...(options.markdown === undefined ? {} : { markdownPath: options.markdown }),
     forwardOutput: !options.json,
@@ -239,7 +258,9 @@ function assertRecordOptions(options: RecordCli, allowed: readonly string[], all
 
 async function csmCommand(family: CsmFamily, operation: string | undefined, args: readonly string[], io: CliIo): Promise<number> {
   const readOperations: Record<CsmFamily, readonly string[]> = { nwc: ["wake"], nya: ["recall", "replay"], rtw: ["guide"], wtw: ["explain"] };
-  const writeOperation: Record<CsmFamily, string> = { nwc: "collect", nya: "spec", rtw: "add", wtw: "collect" };
+  // WTW records are host-written through the shared CSM host tool after an authoritative source; the
+  // agent-facing Node surface intentionally exposes no direct add/collect command.
+  const writeOperation: Record<CsmFamily, string | undefined> = { nwc: "collect", nya: "spec", rtw: "add", wtw: undefined };
   const checkOperation: Record<CsmFamily, string> = { nwc: "check", nya: "check", rtw: "check", wtw: "guard" };
   const options = parseRecord(args);
   if (operation !== undefined && readOperations[family].includes(operation)) {
@@ -248,7 +269,7 @@ async function csmCommand(family: CsmFamily, operation: string | undefined, args
     if (options.json) writeJson(io, result); else io.stdout.write(recordsHuman(family, result));
     return result.findings.length > 0 ? 1 : 0;
   }
-  if (operation === writeOperation[family]) {
+  if (operation !== undefined && operation === writeOperation[family]) {
     const statementKey = family === "nwc" ? "action" : family === "nya" ? "lesson" : family === "rtw" ? "guidance" : "statement";
     const allowed = ["id", "title", statementKey, ...(statementKey === "statement" ? [] : ["statement"]), ...(family === "wtw" ? ["kind", "violation"] : [])];
     assertRecordOptions(options, allowed, true);
@@ -323,6 +344,8 @@ async function checkCommand(args: readonly string[], io: CliIo): Promise<number>
     ...(options.config === undefined ? {} : { configPath: options.config }),
     ...(options.changedSeen ? { changedPaths: options.changed } : {}),
     ...(options.mergeBase === undefined ? {} : { mergeBase: options.mergeBase }),
+    ...(options.baseRevision === undefined ? {} : { baseRevision: options.baseRevision }),
+    ...(options.fast || options.mode === "staged" ? { fast: true } : {}),
     ...(options.report === undefined ? {} : { reportPath: options.report }),
     ...(options.markdown === undefined ? {} : { markdownPath: options.markdown }),
     forwardOutput: !options.json,

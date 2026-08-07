@@ -37,7 +37,7 @@ export interface FoundationConfig {
   readonly fingerprint: string;
 }
 
-export type GateMode = "affected" | "base" | "full";
+export type GateMode = "affected" | "staged" | "full";
 export type ProofOutcome = "pass" | "fail" | "not-run" | "not-affected" | "no-proof";
 
 export interface CommandRequest {
@@ -62,6 +62,10 @@ export type CommandRunner = (request: CommandRequest) => Promise<CommandResult>;
 
 export interface GitClient {
   changedPaths(root: string, baseRevision: string): Promise<readonly string[]>;
+  /** Paths present in the Git index (staged diff). */
+  stagedPaths(root: string): Promise<readonly string[]>;
+  /** Committed diff between a base revision and HEAD (explicit pre-push scope). */
+  baseDiffPaths(root: string, baseRevision: string): Promise<readonly string[]>;
 }
 
 export interface LaneReceipt {
@@ -100,6 +104,7 @@ export interface GateReceipt {
   readonly config: string;
   readonly configFingerprint: string;
   readonly mode: GateMode;
+  readonly fast: boolean;
   readonly baseRevision: string | null;
   readonly changedPaths: readonly string[];
   readonly selectionReasons: readonly string[];
@@ -118,7 +123,11 @@ export interface GateOptions {
   readonly configPath?: string;
   readonly mode: GateMode;
   readonly changedPaths?: readonly string[];
+  /** Explicit base revision freezing affected selection to base...HEAD. */
+  readonly baseRevision?: string;
   readonly mergeBase?: string;
+  /** Defer exhaustive fallbacks (force-full and unmapped widening) to authoritative CI. */
+  readonly fast?: boolean;
   readonly reportPath?: string | false;
   readonly markdownPath?: string | false;
   readonly forwardOutput?: boolean;

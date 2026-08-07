@@ -80,6 +80,8 @@ jobs:
         working-directory: node-sdk
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: "24"
@@ -91,8 +93,11 @@ jobs:
       - name: PostgreSQL Testcontainers integration proof
         if: runner.os == 'Linux'
         run: npm run test:integration
-      - name: pilot full proof gate
-        if: runner.os == 'Linux'
+      - name: pilot affected proof gate
+        if: ${{ runner.os == 'Linux' && !inputs.full }}
+        run: npm run gate:affected --workspace @skiesjs/pilot-api
+      - name: pilot exhaustive release gate
+        if: ${{ runner.os == 'Linux' && inputs.full }}
         run: npm run gate:full --workspace @skiesjs/pilot-api
       - name: upload pilot proof receipts
         if: ${{ runner.os == 'Linux' && always() }}

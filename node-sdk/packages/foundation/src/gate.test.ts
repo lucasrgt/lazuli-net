@@ -38,7 +38,7 @@ async function workspace(value: unknown = topology): Promise<string> {
   return root;
 }
 
-describe("affected/base/full selection", () => {
+describe("affected/staged/full selection", () => {
   it("selects direct scopes and their declared dependencies", () => {
     const selection = selectProofs(config(), "affected", ["src/shared/adapter.ts"]);
     expect([...selection.selected]).toEqual(["p-integration", "p-unit"]);
@@ -56,9 +56,19 @@ describe("affected/base/full selection", () => {
     expect(selectProofs(config(), "affected", ["package.json"]).selected.size).toBe(3);
   });
 
-  it("gives base and full distinct exhaustive semantics", () => {
-    expect([...selectProofs(config(), "base").selected]).toEqual(["p-unit", "p-integration"]);
+  it("selects staged changes like affected and gives full the exhaustive semantics", () => {
+    expect([...selectProofs(config(), "staged", ["src/shared/adapter.ts"]).selected]).toEqual(["p-integration", "p-unit"]);
     expect(selectProofs(config(), "full").selected.size).toBe(3);
+  });
+
+  it("fast defers exhaustive widening instead of returning a false green or a surprise full run", () => {
+    const widened = selectProofs(config(), "affected", ["unknown.txt"]);
+    expect(widened.selected.size).toBe(3);
+    const fast = selectProofs(config(), "affected", ["unknown.txt"], true);
+    expect(fast.selected.size).toBe(0);
+    expect(fast.reasons.join(" ")).toContain("deferred by --fast");
+    expect(selectProofs(config(), "affected", ["package.json"], true).selected.size).toBe(0);
+    expect(selectProofs(config(), "affected", ["package.json"], true).reasons.join(" ")).toContain("deferred by --fast");
   });
 
   it("matches globstar at zero or multiple directory levels", () => {
@@ -84,7 +94,7 @@ describe("gate execution and receipts", () => {
   it("makes nonzero, timeout, spawn error, and missing execution findings red", async () => {
     const root = await workspace();
     const answers = [result(0), result(0, { timedOut: true, exitCode: null, signal: "SIGTERM" })];
-    const run = await runGate({ root, mode: "base", reportPath: false }, { runner: async () => answers.shift()! });
+    const run = await runGate({ root, mode: "affected", changedPaths: ["src/shared/a.ts"], reportPath: false }, { runner: async () => answers.shift()! });
     expect(run.exitCode).toBe(1);
     expect(run.receipt.verdict).toBe("red");
     expect(run.receipt.proofResults[1]?.outcome).toBe("fail");
@@ -96,15 +106,42 @@ describe("gate execution and receipts", () => {
     const calls: string[] = [];
     const runner: CommandRunner = async (request) => { calls.push(request.command[1]!); return result(); };
     const normal = await runGate({ root, mode: "affected", reportPath: false }, {
-      runner, git: { changedPaths: async (_root, base) => { expect(base).toBe("origin/main"); return ["src/unit/a.ts"]; } },
+      runner, git: {
+        changedPaths: async (_root, base) => { expect(base).toBe("origin/main"); return ["src/unit/a.ts"]; },
+        stagedPaths: async () => [], baseDiffPaths: async () => [],
+      },
     });
     expect(normal.receipt.selectedProofs).toEqual(["p-unit"]);
     const widened = await runGate({ root, mode: "affected", reportPath: false }, {
-      runner, git: { changedPaths: async () => { throw new Error("no ancestry"); } },
+      runner, git: { changedPaths: async () => { throw new Error("no ancestry"); }, stagedPaths: async () => [], baseDiffPaths: async () => [] },
     });
     expect(widened.receipt.selectedProofs).toHaveLength(3);
     expect(widened.receipt.selectionReasons[0]).toContain("fail-closed widening");
     expect(calls).toContain("journey.js");
+  });
+
+  it("uses staged index discovery and records the bounded fast receipt", async () => {
+    const root = await workspace();
+    const run = await runGate({ root, mode: "staged", reportPath: false }, {
+      runner: async () => result(),
+      git: { changedPaths: async () => [], stagedPaths: async () => ["src/unit/a.ts"], baseDiffPaths: async () => [] },
+    });
+    expect(run.receipt.selectedProofs).toEqual(["p-unit"]);
+    expect(run.receipt.fast).toBe(true);
+    expect(run.exitCode).toBe(0);
+  });
+
+  it("freezes affected selection to an explicit base revision", async () => {
+    const root = await workspace();
+    const run = await runGate({ root, mode: "affected", baseRevision: "origin/main", reportPath: false }, {
+      runner: async () => result(),
+      git: {
+        changedPaths: async () => [], stagedPaths: async () => [],
+        baseDiffPaths: async (_root, base) => { expect(base).toBe("origin/main"); return ["src/journey/a.ts"]; },
+      },
+    });
+    expect(run.receipt.baseRevision).toBe("origin/main");
+    expect(run.receipt.selectedProofs).toEqual(["p-journey"]);
   });
 
   it("calls an explicitly empty affected change successful without calling it green", async () => {

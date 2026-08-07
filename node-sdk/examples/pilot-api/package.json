@@ -18,9 +18,10 @@
     "proofs": "skies-node-foundation inventory",
     "criteria": "skies-node-foundation criteria check",
     "gate:affected": "skies-node-foundation gate --affected",
-    "gate:base": "skies-node-foundation gate --base",
+    "gate:base": "skies-node-foundation gate --base origin/main --fast",
     "gate:full": "skies-node-foundation gate --full",
-    "mutate": "stryker run stryker.config.mjs && node tools/assert-mutation.mjs"
+    "mutate": "stryker run stryker.config.mjs && node tools/assert-mutation.mjs",
+    "gate:staged": "skies-node-foundation gate --staged"
   },
   "dependencies": {
     "@skiesjs/auth": "0.1.0",

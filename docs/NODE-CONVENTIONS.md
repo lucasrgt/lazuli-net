@@ -108,10 +108,13 @@ APIs and live PostgreSQL tests rather than unsafe generic name matching.
 
 `skies.node.json` is the closed criterion/lane/proof/source-scope graph. `skies-node-foundation` validates it, rejects
 unknown or missing facts, scans enforcement suppressions, computes explainable dependency closure, and runs
-`--affected`, `--base`, or `--full` without a shell. Full writes `VERIFICATION.json` and `VERIFICATION.md`; skipped,
-not-run, timed-out, unknown-impact, and missing proofs cannot become green.
+`--affected [--base <revision>]`, `--staged`, or `--full` with an optional `--fast` bound without a shell. Staged
+checks are always bounded; `--fast` defers exhaustive fallbacks to authoritative CI and conflicts with `--full`.
+Full writes `VERIFICATION.json` and `VERIFICATION.md`; skipped, not-run, timed-out, unknown-impact, and missing
+proofs cannot become green.
 
-Repository-owned NWC/NYA/RTW/WTW assets are pinned under the `csm.json` storage root. `context` reads the bounded
+Repository-owned NWC/NYA/RTW/WTW assets are pinned under the shared `csm.toml` storage root (`.skies/csm` default;
+a legacy `csm.json` is read for migration but never written). `context` reads the bounded
 WTW → RTW → NYA → NWC view; `check` always runs gate → WTW → RTW → NYA → NWC. Help/context/check perform no network
 or ambient installation mutation.
 

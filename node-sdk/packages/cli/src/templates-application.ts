@@ -15,7 +15,8 @@ export function applicationPackageSource(name: string): string {
       proofs: "skies-node-foundation inventory",
       criteria: "skies-node-foundation criteria check",
       "gate:affected": "skies-node-foundation gate --affected",
-      "gate:base": "skies-node-foundation gate --base",
+      "gate:staged": "skies-node-foundation gate --staged",
+      "gate:base": "skies-node-foundation gate --base origin/main --fast",
       "gate:full": "skies-node-foundation gate --full",
       "foundations:sync": "skies-node-foundation foundations sync",
       "hooks:install": "git config core.hooksPath .githooks",
@@ -303,9 +304,23 @@ export function nodeCiSource(): string {
   return `name: node-api
 
 on:
+  workflow_call:
+    inputs:
+      full:
+        description: run the exhaustive release gate
+        required: false
+        default: false
+        type: boolean
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      full:
+        description: run the exhaustive release gate
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   verify:
@@ -316,12 +331,19 @@ jobs:
     runs-on: \${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: npm
       - run: npm ci
-      - run: npm run gate:full
+      - name: affected verification
+        if: \${{ !inputs.full }}
+        run: npm run gate:affected
+      - name: exhaustive release verification
+        if: \${{ inputs.full }}
+        run: npm run gate:full
       - if: runner.os == 'Linux'
         uses: actions/upload-artifact@v6
         with:
@@ -336,7 +358,7 @@ jobs:
 export function preCommitHookSource(): string {
   return `#!/usr/bin/env sh
 set -eu
-npm run gate:affected
+npm run gate:staged
 `;
 }
 
