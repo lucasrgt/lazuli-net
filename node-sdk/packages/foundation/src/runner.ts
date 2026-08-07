@@ -32,7 +32,8 @@ export const defaultCommandRunner: CommandRunner = async (request) => new Promis
   const child = spawn(request.command[0], request.command.slice(1), {
     cwd: request.cwd,
     env: { ...process.env, ...request.env },
-    shell: false,
+    // Windows resolves npm/git only as .cmd scripts, which require a shell; argv is never user-controlled.
+    shell: process.platform === "win32",
     windowsHide: true,
     detached: process.platform !== "win32",
     stdio: ["ignore", "pipe", "pipe"],

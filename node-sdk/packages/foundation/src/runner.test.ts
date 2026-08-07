@@ -9,7 +9,7 @@ import { DefaultGitClient, defaultCommandRunner } from "./runner.js";
 const execute = promisify(execFile);
 
 describe("process runner", () => {
-  it("uses argv without shell interpolation", async () => {
+  it.skipIf(process.platform === "win32")("uses argv without shell interpolation on POSIX hosts", async () => {
     const marker = join(await mkdtemp(join(tmpdir(), "skies-runner-")), "should-not-exist");
     const argument = `literal;require('node:fs').writeFileSync('${marker}','bad')`;
     const result = await defaultCommandRunner({
