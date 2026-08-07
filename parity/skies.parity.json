@@ -955,6 +955,14 @@
       "reason": "Coordinated release version bump of the .NET framework packages (4.1.0 -> 4.1.2 after the 4.1.0/4.1.1 rollback); the Node package graph ships at 0.1.0 in the same release and its packaging tooling is unchanged.",
       "owner": "lucasrgt",
       "expires": "2026-08-21"
+    },
+    {
+      "id": "release-412-template-ssot",
+      "capability": "tooling.generators",
+      "side": "node",
+      "reason": "Starter template package references and the CLI baked-version SSOT follow the 4.1.2 framework bump for the 4.1.5 release; the Node generator templates ship unchanged at 0.1.0 in the same release.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-21"
     }
   ],
   "diagnostics": [
