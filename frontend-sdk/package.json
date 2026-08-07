@@ -1,6 +1,6 @@
 {
   "name": "@skiesjs/frontend-sdk",
-  "version": "4.1.5",
+  "version": "4.1.6",
   "type": "module",
   "description": "Canonical Skies frontend doctor and scaffolding tools.",
   "license": "MIT",
@@ -87,7 +87,7 @@
   },
   "peerDependencies": {
     "@playwright/test": ">=1.50.0",
-    "assay-design": "^0.4.0",
+    "assay-design": ">=0.2.0",
     "avp-assay": "^0.4.0",
     "eslint": ">=9",
     "@skiesjs/eslint-plugin": "^4.0.4"
