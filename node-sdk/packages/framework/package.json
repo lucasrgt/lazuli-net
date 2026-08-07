@@ -27,7 +27,7 @@
     "@skiesjs/storage-express": "0.1.0",
     "@skiesjs/rate-limit-express": "0.1.0",
     "@skiesjs/doctor": "0.1.0",
-    "eslint-plugin-skies-node": "0.1.0"
+    "@skiesjs/eslint-plugin-node": "0.1.1"
   },
   "publishConfig": {
     "access": "public"

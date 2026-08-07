@@ -42,10 +42,10 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
 
   let plugin;
   try {
-    plugin = require("eslint-plugin-skies");
+    plugin = require("@skiesjs/eslint-plugin");
   } catch {
     console.error(
-      "SKYFE release gate: eslint-plugin-skies is unavailable; install the framework-pinned frontend packages.",
+      "SKYFE release gate: @skiesjs/eslint-plugin is unavailable; install the framework-pinned frontend packages.",
     );
     process.exit(1);
   }

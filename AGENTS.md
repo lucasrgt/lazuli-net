@@ -39,7 +39,7 @@ src/Skies.Framework.Auth/ + others     The optional component standards (auth, m
 src/Skies.Framework.Cli/               `skies` — scaffolders (module/slice/entity/vo/…) that emit doctor-conformant code.
 analyzers/Skies.Framework.Doctor/      SHIPPED harness. SKY* rules + the CA* security-floor globalconfig — run on the USER's code.
 analyzers/Skies.Framework.SelfHarness/ FRAMEWORK-DEV ONLY. SKYSELF* rules — run on OUR code. Never shipped.
-frontend-sdk/                 The front half: skies-react (the spine), eslint-plugin-skies (SKYFE* rules), tools/ (doctors).
+frontend-sdk/                 The front half: @skiesjs/react (the spine), @skiesjs/eslint-plugin (SKYFE* rules), tools/ (doctors).
 node-sdk/                     The Node.js backend: @skiesjs/core, Express adapter, SKYN doctor, CLI, and sample API.
 examples/sample-app/          The reference .NET app + canonical slice (backend/Sample.Api, Sample.Tests, frontend/).
 templates/skies-app/         The `skies new` starter the CLI scaffolds from.
@@ -137,7 +137,7 @@ is the failure mode that buried half this framework inside hostpoint for months.
 2. `dotnet pack Skies.Framework.slnx -c Release -o local-feed` — the pilots' `nuget.config` fronts nuget.org with
    this feed. **Re-packing the same version requires purging the consumer cache**
    (`rm -rf ~/.nuget/packages/<package>/<version>`) or the pilot keeps restoring the stale bits.
-3. In each pilot: bump the `Skies*`, `eslint-plugin-skies`, and `skies-react` package
+3. In each pilot: bump the `Skies*`, `@skiesjs/eslint-plugin`, and `@skiesjs/react` package
    versions, refresh the lockfiles, and fix what the new doctors reveal. The fallout IS the feature.
 
 Enforcement, not memory: `skies doctor` carries a **framework-sync leg** (`src/Skies.Framework.Cli/FrameworkSync.cs`)

@@ -1,6 +1,6 @@
 {
-  "name": "eslint-plugin-skies",
-  "version": "4.0.4",
+  "name": "@skiesjs/eslint-plugin",
+  "version": "4.0.5",
   "description": "The Skies Framework frontend harness — SKYFE* rules that keep React Native + web screens wired, not mocked.",
   "license": "MIT",
   "author": "Lucas Tinoco",
@@ -11,9 +11,20 @@
   },
   "homepage": "https://skies.build",
   "bugs": "https://github.com/lucasrgt/skies/issues",
-  "keywords": ["eslint", "eslintplugin", "eslint-plugin", "skies", "mvvm", "react", "react-native"],
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin",
+    "skies",
+    "mvvm",
+    "react",
+    "react-native"
+  ],
   "main": "index.cjs",
-  "files": ["index.cjs", "README.md"],
+  "files": [
+    "index.cjs",
+    "README.md"
+  ],
   "peerDependencies": {
     "eslint": ">=9"
   },

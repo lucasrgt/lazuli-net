@@ -1,5 +1,5 @@
 import tsParser from "@typescript-eslint/parser";
-import skiesNode from "eslint-plugin-skies-node";
+import skiesNode from "@skiesjs/eslint-plugin-node";
 
 export default [
   { ignores: ["dist/**", "coverage/**"] },

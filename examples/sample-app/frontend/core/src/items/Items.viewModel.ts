@@ -1,4 +1,4 @@
-import { toAsyncState, type AsyncState } from "skies-react";
+import { toAsyncState, type AsyncState } from "@skiesjs/react";
 // Illustrative: the orval-generated typed hook for the `list_items` slice — the ONLY data the door touches.
 import { useListItems } from "@/client.gen/sample";
 import i18n from "@/i18n";

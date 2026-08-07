@@ -157,7 +157,7 @@ describe("checkE2e", () => {
     const dir = tmp();
     try {
       writeFileSync(join(dir, "package.json"), JSON.stringify({
-        devDependencies: { "skies-frontend-sdk": "4.0.0" },
+        devDependencies: { "@skiesjs/frontend-sdk": "4.0.0" },
       }));
       writeFileSync(join(dir, "playwright.config.ts"), "export default {};\n");
       mkdirSync(join(dir, "e2e"));
@@ -171,7 +171,7 @@ describe("checkE2e", () => {
 
       const result = checkE2e(dir);
 
-      expect(result.messages.join(" ")).toContain("skies-frontend-sdk/playwright");
+      expect(result.messages.join(" ")).toContain("@skiesjs/frontend-sdk/playwright");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -181,7 +181,7 @@ describe("checkE2e", () => {
     const dir = tmp();
     try {
       writeFileSync(join(dir, "package.json"), JSON.stringify({
-        devDependencies: { "skies-frontend-sdk": "4.0.0" },
+        devDependencies: { "@skiesjs/frontend-sdk": "4.0.0" },
       }));
       writeFileSync(join(dir, "playwright.config.ts"), "export default {};\n");
       mkdirSync(join(dir, "e2e"));
@@ -189,7 +189,7 @@ describe("checkE2e", () => {
         { id: "welcome", name: "welcome", path: "happy", target: "web", terminal: "/home", spec: "e2e/welcome.spec.ts" },
       ]));
       writeFileSync(join(dir, "e2e", "welcome.spec.ts"), [
-        'import { expect, test } from "skies-frontend-sdk/playwright";',
+        'import { expect, test } from "@skiesjs/frontend-sdk/playwright";',
         'test("welcome", async ({ page }) => expect(page).toHaveURL("/home"));',
       ].join("\n"));
 
@@ -460,9 +460,9 @@ describe("checkE2e", () => {
     try {
       mkdirSync(join(dir, "e2e"));
       writeFileSync(join(dir, "e2e", "backend.spec.ts"),
-        'import { expectBackendSlices, observeBackend } from "skies-frontend-sdk/playwright-backend";\nconst backend = await observeBackend(page, "contract/api.json"); expectBackendSlices(backend, ["Login"], { status: "success" });\n');
+        'import { expectBackendSlices, observeBackend } from "@skiesjs/frontend-sdk/playwright-backend";\nconst backend = await observeBackend(page, "contract/api.json"); expectBackendSlices(backend, ["Login"], { status: "success" });\n');
       writeFileSync(join(dir, "e2e", "seed.spec.ts"),
-        'import { expectBackendSlices, observeBackend } from "skies-frontend-sdk/playwright-backend";\nconst backend = await observeBackend(page, "contract/api.json"); expectBackendSlices(backend, ["Login"], { status: "success" }); requireSeed();\n');
+        'import { expectBackendSlices, observeBackend } from "@skiesjs/frontend-sdk/playwright-backend";\nconst backend = await observeBackend(page, "contract/api.json"); expectBackendSlices(backend, ["Login"], { status: "success" }); requireSeed();\n');
       writeFileSync(join(dir, "e2e", "smoke.spec.ts"), "test('renders', () => {});\n");
       writeFileSync(join(dir, "e2e", "disabled.spec.ts"), "test.skip('later', () => {});\n");
       writeFileSync(join(dir, "e2e", "nested-disabled.spec.ts"), "test.each([1]).skip('later', () => {});\n");
@@ -503,7 +503,7 @@ describe("checkE2e", () => {
         },
       ]));
       writeFileSync(join(dir, "e2e", "login.spec.ts"), [
-        'import { expectBackendSlices, observeBackend } from "skies-frontend-sdk/playwright-backend";',
+        'import { expectBackendSlices, observeBackend } from "@skiesjs/frontend-sdk/playwright-backend";',
         'test("real login", async ({ page }) => { const backend = await observeBackend(page, "contract/api.json"); await expect(page).toHaveURL("/home"); expectBackendSlices(backend, ["Login"], { status: "success" }); });',
         'test("mocked profile", async ({ page }) => { await expect(page).toHaveURL("/profile"); });',
       ].join("\n"));
@@ -533,7 +533,7 @@ describe("checkE2e", () => {
         },
       ]));
       writeFileSync(join(dir, "e2e", "login.spec.ts"), [
-        'import { expectBackendSlices, observeBackend } from "skies-frontend-sdk/playwright-backend";',
+        'import { expectBackendSlices, observeBackend } from "@skiesjs/frontend-sdk/playwright-backend";',
         'async function accountApi(page) { await page.route("**/account/**", route => route.fulfill({ status: 200 })); }',
         'test("signs in", async ({ page }) => { const backend = await observeBackend(page, "contract/api.json"); await accountApi(page); await expect(page).toHaveURL("/home"); expectBackendSlices(backend, ["Login"], { status: "success" }); });',
       ].join("\n"));
@@ -571,7 +571,7 @@ describe("checkE2e", () => {
 
       expect(result.execution["front-only"]).toBe(1);
       expect(result.gaps).toBe(1);
-      expect(result.messages.join(" ")).toContain("skies-frontend-sdk/playwright-backend");
+      expect(result.messages.join(" ")).toContain("@skiesjs/frontend-sdk/playwright-backend");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -589,7 +589,7 @@ describe("checkE2e", () => {
         backendSlices: ["Missing"], backendContract: "contract/api.json",
       }]));
       writeFileSync(join(dir, "e2e", "login.spec.ts"), [
-        'import { expectBackendSlices, observeBackend } from "skies-frontend-sdk/playwright-backend";',
+        'import { expectBackendSlices, observeBackend } from "@skiesjs/frontend-sdk/playwright-backend";',
         'test("rejects credentials", async ({ page }) => { const backend = await observeBackend(page, "contract/api.json"); await expect(page.getByText("invalid")).toBeVisible(); expectBackendSlices(backend, ["Login"], { status: "success" }); });',
       ].join("\n"));
 
@@ -615,7 +615,7 @@ describe("checkE2e", () => {
         backendContract: "contract/api.json",
       }]));
       writeFileSync(join(dir, "e2e", "login.spec.ts"), [
-        'import { observeBackend, waitForBackendSlices } from "skies-frontend-sdk/playwright-backend";',
+        'import { observeBackend, waitForBackendSlices } from "@skiesjs/frontend-sdk/playwright-backend";',
         'test("signs in", async ({ browser }) => {',
         '  const traveler = await browser.newPage();',
         '  const backend = await observeBackend(traveler, "contract/api.json");',
@@ -649,7 +649,7 @@ describe("checkE2e", () => {
         backendSlices: ["GetNotification", "MarkNotificationRead"], backendContract: "contract/api.json",
       }]));
       writeFileSync(join(dir, "e2e", "notification.spec.ts"), [
-        'import { expectBackendSlices, observeBackend, waitForBackendSlices } from "skies-frontend-sdk/playwright-backend";',
+        'import { expectBackendSlices, observeBackend, waitForBackendSlices } from "@skiesjs/frontend-sdk/playwright-backend";',
         'test("opens a notification", async ({ page }) => {',
         '  const backend = await observeBackend(page, "contract/api.json");',
         '  await waitForBackendSlices(backend, ["GetNotification"], { status: "success" });',
@@ -679,7 +679,7 @@ describe("checkE2e", () => {
         backendSlices: ["ListVisits"], backendContract: "contract/api.json", backendOutcome: "success",
       }]));
       writeFileSync(join(dir, "e2e", "visits.spec.ts"), [
-        'import { expectBackendSlices, observeBackend } from "skies-frontend-sdk/playwright-backend";',
+        'import { expectBackendSlices, observeBackend } from "@skiesjs/frontend-sdk/playwright-backend";',
         'test("shows the empty state", async ({ page }) => { const backend = await observeBackend(page, "contract/api.json"); await expect(page.getByText("no visits")).toBeVisible(); expectBackendSlices(backend, ["ListVisits"], { status: "success" }); });',
       ].join("\n"));
 
@@ -724,7 +724,7 @@ describe("checkE2e", () => {
         backendSlices: ["Login"], backendContract: "contract/api.json",
       }]));
       writeFileSync(join(dir, "e2e", "login.spec.ts"), [
-        'import { expectBackendSlices, observeBackend } from "skies-frontend-sdk/playwright-backend";',
+        'import { expectBackendSlices, observeBackend } from "@skiesjs/frontend-sdk/playwright-backend";',
         'test("signs in", async ({ page }) => { const backend = await observeBackend(page, "contract/api.json"); await page.evaluate(() => fetch("/login")); await expect(page).toHaveURL("/home"); expectBackendSlices(backend, ["Login"], { status: "success" }); });',
       ].join("\n"));
 
@@ -758,7 +758,7 @@ describe("checkE2e", () => {
         'export function hiddenMock(page) { return page.route("**/login", route => route.fulfill({ status: 200 })); }\n',
       );
       writeFileSync(join(dir, "e2e", "login.spec.ts"), [
-        'import { expectBackendSlices, observeBackend } from "skies-frontend-sdk/playwright-backend";',
+        'import { expectBackendSlices, observeBackend } from "@skiesjs/frontend-sdk/playwright-backend";',
         'import { bypass } from "./support";',
         'test("signs in", async ({ page }) => { const backend = await observeBackend(page, "contract/api.json"); await bypass(page); await expect(page).toHaveURL("/home"); expectBackendSlices(backend, ["Login"], { status: "success" }); });',
       ].join("\n"));

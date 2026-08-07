@@ -45,13 +45,13 @@
     "@types/supertest": "6.0.3",
     "@typescript-eslint/parser": "8.66.0",
     "eslint": "9.39.5",
-    "eslint-plugin-skies-node": "0.1.0",
     "supertest": "7.2.2",
     "typescript": "5.9.3",
     "vitest": "4.1.10",
     "@skiesjs/foundation": "0.1.0",
     "@stryker-mutator/core": "9.6.0",
     "@stryker-mutator/typescript-checker": "9.6.0",
-    "@stryker-mutator/vitest-runner": "9.6.0"
+    "@stryker-mutator/vitest-runner": "9.6.0",
+    "@skiesjs/eslint-plugin-node": "0.1.1"
   }
 }

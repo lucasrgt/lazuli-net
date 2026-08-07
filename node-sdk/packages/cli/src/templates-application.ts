@@ -45,7 +45,7 @@ export function applicationPackageSource(name: string): string {
       "@types/supertest": "^6.0.0",
       "@typescript-eslint/parser": "^8.0.0",
       eslint: "^9.0.0",
-      "eslint-plugin-skies-node": "^0.1.0",
+      "@skiesjs/eslint-plugin-node": "^0.1.1",
       supertest: "^7.0.0",
       typescript: "^5.7.0",
       vitest: "^4.0.0",
@@ -89,7 +89,7 @@ export function applicationTestTsconfigSource(): string {
 
 export function eslintConfigSource(): string {
   return `import tsParser from "@typescript-eslint/parser";
-import skiesNode from "eslint-plugin-skies-node";
+import skiesNode from "@skiesjs/eslint-plugin-node";
 
 export default [
   {

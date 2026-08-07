@@ -1,4 +1,4 @@
-# skies-react
+# @skiesjs/react
 
 The frontend **spine** of [Skies](https://github.com/lucasrgt/skies) —
 platform- and design-system-agnostic React primitives the app composes into MVVM screens. It ships the shapes
@@ -15,11 +15,11 @@ Stranger-maintainable, doctor-removable: plain React you can read, with no runti
 peer dependency is `react` (>=18).
 
 ```bash
-npm install skies-react
+npm install @skiesjs/react
 ```
 
 ```ts
-import { Resource, toSessionState, safeBack } from "skies-react";
+import { Resource, toSessionState, safeBack } from "@skiesjs/react";
 ```
 
 MIT © Lucas Tinoco

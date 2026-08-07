@@ -64,7 +64,7 @@ AMBIGUOUS items (IUserScoped, etc.) stay parked per the framework's own ≥3-pil
   `walk`/regex/`bucket`/`aggregateReport` inline; the framework already exposes the pure cores
   (`checkJourneyParity`, `checkE2e`, `aggregateReport`, `i18n-parity`, `error-code-coverage`).
   _FRAMEWORK-GAP (anti-drift)._ (resolved by the public `skies-*` package line)
-- [ ] **Publish `skies-react`.** Unpublished → the pilot forks `AsyncState`/`Resource` locally and
+- [ ] **Publish `@skiesjs/react`.** Unpublished → the pilot forks `AsyncState`/`Resource` locally and
   they are drifting. _FRAMEWORK-GAP._ (npm publish is an outward release step — prepare, don't publish)
 - [x] **Harden the tenancy scaffold (`skies g auth`).** _Done:_ `ITenantScoped.OrgId` is now `{ get; }`
   (read-only); `TenantDbContext` stamps via EF property metadata (`entry.Property(...).CurrentValue`),
@@ -105,11 +105,11 @@ scaffold templates — the Skies way, app-owned by construction).
 `ScalarJsonConverter<TVo,TPrim>` (Abstractions) + automatic schema mirroring in `AddSkiesOpenApi`,
 dogfooded on the sample's `Money`. Postgres harness → `Skies.Framework.Testing.Postgres` (`PostgresTestDatabase`).
 Rate-limit bridge → `RejectAsSkiesError()` + the framework's `PlatformErrorCodes`. Session seam →
-`createSessionSeam` + `useSession` in `skies-react` (cache reset paired by construction). Error-copy
+`createSessionSeam` + `useSession` in `@skiesjs/react` (cache reset paired by construction). Error-copy
 bridge → `apiErrorCode`/`apiErrorCopy` in the spine (structural i18n). Mutator → `tools/client-scaffold.mjs`
 (mutator + orval config, SKYFE020-conformant). Pilot mirror rebased to plugin 0.4.0 with SKYFE021/022 adopted —
 zero new errors, full lint chain + typecheck + 125 tests green. Still open from the reverse-drift item: the
-app adopting the spine unions themselves (blocked on `skies-react` publish, tracked in P2).
+app adopting the spine unions themselves (blocked on `@skiesjs/react` publish, tracked in P2).
 
 ### Backend
 
@@ -144,7 +144,7 @@ app adopting the spine unions themselves (blocked on `skies-react` publish, trac
   (`hostpoint/clients/app-core/src/lib/session/*`) are the generic mechanics SKYFE016/017 *steer
   toward*, yet the spine ships only the read-side (`SessionState`). The write-side trio (token write
   paired with the correct identity/rotation cache reset by construction) belongs in
-  `skies-react` (storage injected as a port). _CLOSED — the spine now ships the seam._
+  `@skiesjs/react` (storage injected as a port). _CLOSED — the spine now ships the seam._
 - [x] **`apiErrorCopy()` — the error-code→copy bridge.**
   (`hostpoint/clients/app-core/src/lib/api-error.ts`) Reads `ErrorBody.code` off an axios error, looks
   up the `api-errors` i18n namespace, falls back to a generic key. It is the runtime half of the
@@ -154,11 +154,11 @@ app adopting the spine unions themselves (blocked on `skies-react` publish, trac
   base-URL port, `Result` envelope) + boot-time `configureClient()` exist only in the pilot; the SDK's
   `generate.mjs` scaffolds features against a client whose mutator nothing scaffolds. Folds into the
   app-owned stock client-generation path; listed here so the mutator template remains part of that contract.
-- [~] **Reverse drift (pilot behind framework).** The hostpoint `eslint-plugin-skies` mirror is
+- [~] **Reverse drift (pilot behind framework).** The hostpoint `@skiesjs/eslint-plugin` mirror is
   v0.3.0 — missing SKYFE021/022 and the hardened SKYFE002/011/013/016/018 — and the app forks
   `AsyncState` locally while not using the spine's `SessionState`/`requiredParam`/`combineAsyncStates`
   at all (guards still branch on a raw `session.ready` boolean — exactly what SKYFE017 exists to
-  prevent). Both are symptoms of the tracked "skies-react publish" gap; flagged so the next pilot
+  prevent). Both are symptoms of the tracked "@skiesjs/react publish" gap; flagged so the next pilot
   sync rebases the mirror + adopts the spine unions.
 
 ## Design dogfood 2026-06-09 — pauta (the Design SDK wave, `.specs/` 0007)
@@ -230,4 +230,4 @@ real screen; `window.confirm` replaced by the app-owned `Dialog`). Gate: lint 0 
 4. Tenancy scaffold hardening + OrderedLifecycle helper.
 5. E2E real-backend guard + unconditional execution in the gate.
 6. Foundation: `Skies.toml` scaffold + closed manifest reader + app-owned stock client generation.
-7. `skies-react` publish-readiness; then rewrite the pilot's 5 scripts as thin SDK CLIs.
+7. `@skiesjs/react` publish-readiness; then rewrite the pilot's 5 scripts as thin SDK CLIs.

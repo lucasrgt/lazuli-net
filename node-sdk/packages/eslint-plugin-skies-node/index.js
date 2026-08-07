@@ -33,7 +33,7 @@ const rules = {
 };
 
 const plugin = {
-  meta: { name: "eslint-plugin-skies-node", version },
+  meta: { name: "@skiesjs/eslint-plugin-node", version },
   ruleIds,
   rules,
   configs: {},

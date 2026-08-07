@@ -30,7 +30,7 @@ const NODE_PACKAGES = Object.freeze([
   ["testing", "@skiesjs/testing"],
   ["testing-postgres", "@skiesjs/testing-postgres"],
   ["doctor", "@skiesjs/doctor"],
-  ["eslint-plugin-skies-node", "eslint-plugin-skies-node"],
+  ["eslint-plugin-skies-node", "@skiesjs/eslint-plugin-node"],
   ["foundation", "@skiesjs/foundation"],
   ["framework", "@skiesjs/framework"],
   ["cli", "@skiesjs/cli"],
@@ -54,12 +54,12 @@ export const RELEASE_UNITS = Object.freeze([
     paths: ["src/Skies.Framework.Cli"],
   },
   {
-    name: "skies-react",
+    name: "@skiesjs/react",
     version: "frontend-sdk/packages/skies-react/package.json",
     paths: ["frontend-sdk/packages/skies-react/src", "frontend-sdk/packages/skies-react/package.json"],
   },
   {
-    name: "eslint-plugin-skies",
+    name: "@skiesjs/eslint-plugin",
     version: "frontend-sdk/packages/eslint-plugin/package.json",
     paths: [
       "frontend-sdk/packages/eslint-plugin/index.cjs",
@@ -68,7 +68,7 @@ export const RELEASE_UNITS = Object.freeze([
     ],
   },
   {
-    name: "skies-frontend-sdk",
+    name: "@skiesjs/frontend-sdk",
     version: "frontend-sdk/package.json",
     paths: ["frontend-sdk/tools", "frontend-sdk/README.md", "frontend-sdk/package.json"],
   },
@@ -92,16 +92,16 @@ export function violations(units) {
 
 // Where each canonical entry's own package.json lives (repo-root relative, like RELEASE_UNITS).
 const CANONICAL_MANIFESTS = Object.freeze({
-  "skies-frontend-sdk": "frontend-sdk/package.json",
+  "@skiesjs/frontend-sdk": "frontend-sdk/package.json",
   "assay-design": "frontend-sdk/node_modules/assay-design/package.json",
   "avp-assay": "frontend-sdk/node_modules/avp-assay/package.json",
-  "skies-react": "frontend-sdk/packages/skies-react/package.json",
-  "eslint-plugin-skies": "frontend-sdk/packages/eslint-plugin/package.json",
+  "@skiesjs/react": "frontend-sdk/packages/skies-react/package.json",
+  "@skiesjs/eslint-plugin": "frontend-sdk/packages/eslint-plugin/package.json",
 });
 
 /**
  * The canonical table must agree with the packages it describes: FRONTEND_PACKAGE_VERSIONS ships INSIDE
- * skies-frontend-sdk and is what the framework sync command holds every pilot to — a release where the
+ * @skiesjs/frontend-sdk and is what the framework sync command holds every pilot to — a release where the
  * table lags its own package (0.1.2 shipped saying "canonical is 0.1.1") turns the sync gate red in every
  * pilot for the wrong reason. Caught here, at publish time, where the fix is one line.
  * @param {ReadonlyArray<{name: string, version: string}>} canonical

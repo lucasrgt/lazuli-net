@@ -18,7 +18,7 @@ Use `skies-node new . --name invoices-api` to populate the current directory, or
 `skies-node new invoices-api --cwd ../services`. The starter contains:
 
 - a private package manifest and self-contained NodeNext build/test TypeScript configs;
-- the recommended `eslint-plugin-skies-node` flat config and a bounded Vitest config whose `SkiesProofReporter`
+- the recommended `@skiesjs/eslint-plugin-node` flat config and a bounded Vitest config whose `SkiesProofReporter`
   requires proof metadata and writes `.skies/foundation/vitest-receipt.json`;
 - explicit Express/OpenAPI composition in `src/app.ts` and runnable `src/server.ts` startup;
 - `src/modules.ts` plus a registered Health module, context, contract-backed slice, and co-located proof;

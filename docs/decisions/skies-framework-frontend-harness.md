@@ -52,7 +52,7 @@ the harness.
    predecessor-style "smart stubs" that
    pre-fill logic) is **out** — it is the source-gen vector.
 
-5. **The harness is a separate, optional, doctor-removable package** — an `eslint-plugin-skies`
+5. **The harness is a separate, optional, doctor-removable package** — an `@skiesjs/eslint-plugin`
    for in-file rules plus a thin `ts-morph` pass for cross-file shape, invoked alongside `skies
    doctor`. It never enters `Skies.Framework.Abstractions` or `Skies.Framework.Doctor` — the `skies`/`skies-dev`
    split, applied again. Initial rule catalog: `SKYFE001`–`SKYFE007` (see the convention).

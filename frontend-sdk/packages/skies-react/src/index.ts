@@ -1,4 +1,4 @@
-// skies-react — the framework's frontend spine (platform- and design-system-agnostic React primitives the app
+// @skiesjs/react — the framework's frontend spine (platform- and design-system-agnostic React primitives the app
 // composes; the front-side parallel of the .NET packages). The canonical unit a Skies screen is built from:
 // a ViewModel (data door) exposes its resource as AsyncState<T>; the View renders it through <Resource>. Auth/nav
 // primitives (SessionState, safeBack) graduate here from app pilots as they stabilize.

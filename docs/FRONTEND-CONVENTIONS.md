@@ -105,7 +105,7 @@ features/<zone>/<name>/
   **One ViewModel per screen, never per query.**
 - **Mandatory states.** A ViewModel exposing server data exposes `loading`, `error`, and `empty`
   as explicit state — never improvised in the View. This is the sad-path discipline of the back.
-  The spine (`skies-react`) carries the primitives: the ViewModel projects each query through
+  The spine (`@skiesjs/react`) carries the primitives: the ViewModel projects each query through
   `toAsyncState` into the closed `AsyncState<T>` union (a multi-query screen folds them with
   `combineAsyncStates` — precedence `error > loading > empty > ready`, combined retry), and the
   View renders it through `<Resource>` (`SKYFE010`). Routes project raw params through
@@ -568,7 +568,7 @@ behavior.
 
 ## The harness — rule catalog (`SKYFE*`)
 
-The frontend doctor is an **ESLint custom plugin** (`eslint-plugin-skies`) for in-file rules,
+The frontend doctor is an **ESLint custom plugin** (`@skiesjs/eslint-plugin`) for in-file rules,
 plus a thin `ts-morph` pass for the cross-file shape, invoked alongside `skies doctor`. ESLint
 is the mature path for custom semantic rules — hostpoint reached for Biome and had to hand-roll
 a `.mjs` scanner for exactly this, the tell that Biome's custom plugins are not yet there.

@@ -1,7 +1,7 @@
 import { useForm, type Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { submitOrReveal } from "skies-react";
+import { submitOrReveal } from "@skiesjs/react";
 import { useDeposit, type DepositOutput } from "@/client.gen/sample";
 import i18n from "@/i18n";
 

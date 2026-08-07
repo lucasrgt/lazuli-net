@@ -1,5 +1,5 @@
 import tsParser from "@typescript-eslint/parser";
-import skiesNode from "eslint-plugin-skies-node";
+import skiesNode from "@skiesjs/eslint-plugin-node";
 
 const selfHarnessRules = {
   "max-lines": ["error", { max: 500, skipBlankLines: true, skipComments: true }],

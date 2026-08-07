@@ -15,8 +15,8 @@ frontend/
   tsconfig.base.json  # strict TS config every package/sample extends
   vitest.config.ts    # jsdom + the @/… aliases that let the sample run wired (not mocked)
   packages/
-    skies-react/     # skies-react — the spine: AsyncState, Resource (+ guards, session as they graduate)
-    eslint-plugin/    # eslint-plugin-skies — the SKYFE harness (rules + RuleTester self-tests)
+    skies-react/     # @skiesjs/react — the spine: AsyncState, Resource (+ guards, session as they graduate)
+    eslint-plugin/    # @skiesjs/eslint-plugin — the SKYFE harness (rules + RuleTester self-tests)
   tools/              # generators + cross-file doctors used by skies doctor/skies gate
 ../examples/sample-app/frontend/
   core/               # canonical shared ViewModel/View/Assay feature units
@@ -31,11 +31,11 @@ Project-scoped architecture and design rules retain the file scopes and severiti
 being sprayed over every source file. The sample's tests mount data doors against the real generated-client shape
 — **wired, not mocked**.
 
-Apps (e.g. the Hostpoint dogfood) consume `skies-react` + the eslint plugin as packages; the `skies` .NET CLI
+Apps (e.g. the Hostpoint dogfood) consume `@skiesjs/react` + the eslint plugin as packages; the `skies` .NET CLI
 scaffolds them in and `skies doctor` shells out to `npm run lint` for the frontend slice (Roslyn in-proc for the
 backend slice — two native engines, one front door).
 
-## The spine — `skies-react`
+## The spine — `@skiesjs/react`
 
 The read-side analogue of `Result<T>`. A screen's **ViewModel** (the data door) exposes its resource as an
 `AsyncState<T>` discriminated union; the **View** renders it through `<Resource>`, so loading / error / empty are
@@ -71,7 +71,7 @@ runner is Playwright and the native runner is Maestro.
 
 ## The harness (the frontend self-audit)
 
-`eslint-plugin-skies` (the SKYFE rules) is the front-side parallel of the backend's Roslyn/`Skies.Framework.Doctor`
+`@skiesjs/eslint-plugin` (the SKYFE rules) is the front-side parallel of the backend's Roslyn/`Skies.Framework.Doctor`
 self-audit. It polices the unit: View renders only (SKYFE001), the ViewModel is the one data door (SKYFE002, with
 `lib/session` + `lib/guards` as the sanctioned infra doors), the ViewModel is platform-agnostic (SKYFE009), every
 ViewModel has a co-located test (SKYFE005), no mocks in production (SKYFE003). The plugin **self-proves** with

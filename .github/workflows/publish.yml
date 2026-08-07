@@ -130,6 +130,18 @@ jobs:
               ( cd "$dir" && npm publish )
             fi
           done
+      # The 4.1.6 release moved the Skies packages into the @skiesjs scope; the old unscoped names stay
+      # published (npm has no rename) and are deprecated so consumers find the new location.
+      - name: deprecate moved package names
+        working-directory: frontend-sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
+        run: |
+          npm deprecate skies-frontend-sdk@4.1.4 "Moved to @skiesjs/frontend-sdk" || true
+          npm deprecate skies-react@4.0.4 "Moved to @skiesjs/react" || true
+          npm deprecate eslint-plugin-skies@4.0.4 "Moved to @skiesjs/eslint-plugin" || true
+          npm deprecate eslint-plugin-skies-node@0.1.0 "Moved to @skiesjs/eslint-plugin-node" || true
 
   node-npm:
     name: publish Node.js packages to npm
@@ -203,7 +215,7 @@ jobs:
             "@skiesjs/auth-express", "@skiesjs/socketio", "@skiesjs/identity", "@skiesjs/mail", "@skiesjs/sms",
             "@skiesjs/storage", "@skiesjs/storage-express", "@skiesjs/rate-limit-express",
             "@skiesjs/drizzle-postgres", "@skiesjs/testing", "@skiesjs/testing-postgres",
-            "@skiesjs/doctor", "@skiesjs/foundation", "eslint-plugin-skies-node", "@skiesjs/cli",
+            "@skiesjs/doctor", "@skiesjs/foundation", "@skiesjs/eslint-plugin-node", "@skiesjs/cli",
           ].map((name) => import(name)))'
           npx --no-install skies-node --help
           npx --no-install skies-node-doctor --help

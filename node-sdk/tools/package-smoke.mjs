@@ -59,7 +59,7 @@ const packageDefinitions = [
   ], ["bin/skies-node-doctor.mjs"]) },
   {
     directory: "packages/eslint-plugin-skies-node",
-    name: "eslint-plugin-skies-node",
+    name: "@skiesjs/eslint-plugin-node",
     files: [
       "README.md", "index.d.ts", "index.js", "lib/ast.js", "package.json",
       "rules/error-code-registry.js", "rules/explicit-slice-contract.js", "rules/file-size.js",
@@ -159,7 +159,7 @@ import { startTestHost } from "@skiesjs/testing";
 import { PostgresTestHarness } from "@skiesjs/testing-postgres";
 import { inspectWorkspace } from "@skiesjs/doctor";
 import { buildInventory } from "@skiesjs/foundation";
-import skiesNode from "eslint-plugin-skies-node";
+import skiesNode from "@skiesjs/eslint-plugin-node";
 import { generateSlice, run } from "@skiesjs/cli";
 
 assert.deepEqual(Result.ok("ready"), { ok: true, value: "ready" });
@@ -191,7 +191,7 @@ import type { JourneyDefinition, TestHost } from "@skiesjs/testing";
 import type { PostgresTestHarness } from "@skiesjs/testing-postgres";
 import type { InspectionResult } from "@skiesjs/doctor";
 import type { FoundationConfig, GateReceipt } from "@skiesjs/foundation";
-import skiesNode from "eslint-plugin-skies-node";
+import skiesNode from "@skiesjs/eslint-plugin-node";
 import { generateSlice, type GenerateSliceOptions } from "@skiesjs/cli";
 
 const router: Router = express.Router();
@@ -230,7 +230,7 @@ void [config, body, generatorOptions, generateSlice, defineContract, types];
       2,
     )}\n`,
     "eslint.config.mjs": `import parser from "@typescript-eslint/parser";
-import skiesNode from "eslint-plugin-skies-node";
+import skiesNode from "@skiesjs/eslint-plugin-node";
 
 export default [
   { files: ["**/*.ts"], languageOptions: { parser } },

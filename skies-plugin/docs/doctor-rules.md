@@ -38,7 +38,7 @@ Never suppress. A firing rule means the shape is wrong; fix the shape.
 Self-harness (framework dev only): SKYSELF001 ≤500 lines · SKYSELF002 no TODO/FIXME/HACK ·
 CS1591 public members documented.
 
-## Frontend (eslint-plugin-skies + ts-morph)
+## Frontend (@skiesjs/eslint-plugin + ts-morph)
 
 - SKYFE001 View purity (no data layer in *.view.tsx; type-only contract imports OK)
 - SKYFE002 ViewModel data door (only VMs + lib/session + lib/guards import client.gen)

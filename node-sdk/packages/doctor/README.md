@@ -33,7 +33,7 @@ incomplete. Human and JSON findings use the same deterministic path/line/column/
 | `SKYN0032` | Tests/proofs/journeys do not use `.skip`, `.todo`, `skipIf(true)`, or `todoIf(true)`. |
 | `SKYN0033` | Journey evidence has the isolated, static, executable shape described below. |
 
-`SKYN0018` remains the local-syntax responsibility of `eslint-plugin-skies-node`: it rejects inline error-code
+`SKYN0018` remains the local-syntax responsibility of `@skiesjs/eslint-plugin-node`: it rejects inline error-code
 literals and malformed `defineErrorCodes` declarations. `SKYN0019` deliberately supplies the cross-file reverse
 join rather than duplicating that rule.
 

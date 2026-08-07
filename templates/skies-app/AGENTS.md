@@ -28,7 +28,7 @@ Topology is declared in `Skies.toml` (the single source of truth; `skies doctor`
 - **Backend** `src/Skies.Framework.Starter.Api` — .NET vertical slices; the `SKY*` Roslyn analyzers gate
   `Skies.Framework.Starter.slnx`.
 - **Frontend** — add a React client under `clients/` (`skies g`); the published
-  `eslint-plugin-skies` `SKYFE*` harness gates it.
+  `@skiesjs/eslint-plugin` `SKYFE*` harness gates it.
 - **Design system** `.design/contract.toml` — Assay Design makes Atomic Design tiers, component composition,
   tokens, semantics, and surface coverage executable; `npm run design:doctor` validates the contract from birth.
   Before editing UI, agents run `npm run design:recall` (see the `skies-design` skill).
@@ -132,7 +132,7 @@ molecules, organisms, and templates; product pages are verified as named surface
     the first invalid field so a tab/step shell can navigate to it — or pass `onInvalid` by hand.
   - **`SKYFE032`** — a `<Controller>` render must read `fieldState` and surface the field's error
     (`error={fieldState.error?.message}`); a render that only takes `{ field }` leaves the error invisible.
-  - The spine `skies-react` ships the primitives these steer toward: `SessionState`/`toSessionState`,
+  - The spine `@skiesjs/react` ships the primitives these steer toward: `SessionState`/`toSessionState`,
     `AsyncState`/`Resource`/`combineAsyncStates`, `safeBack`, `requiredParam`, `submitOrReveal`.
 - **Contract freshness** — the typed client is pinned to the spec it was generated from: the codegen tail stamps
   `client.gen/.spec-hash` and the doctor compares it against the live OpenAPI document. A moved contract is a

@@ -1,4 +1,4 @@
-# eslint-plugin-skies
+# @skiesjs/eslint-plugin
 
 The frontend harness — the front-side parallel of the backend's Roslyn analyzers (`Skies.Framework.Doctor`). It polices the
 MVVM seam of a Skies screen so React Native + web stays **wired, not mocked**. Doctor-removable: delete the
@@ -42,7 +42,7 @@ plugin and the app still builds; you only lose enforcement.
 
 ### Routing rules — both routers, one shape
 
-SKYFE015–019 are the **routing harness**: the front-side parallel of the backend's slice rules, born from the two app pilots (Pauta on TanStack Router, Hostpoint on expo-router) converging on the same navigation bugs — a freshly-registered user bounced to login, ghost screens on missing params, dead Back buttons, effect-driven redirect loops. They police a **shape** (declarative redirect, tri-state session, guarded param, guarded back), so they recognize each router's idiom (`<Redirect>`/`router.replace`/`useLocalSearchParams` ↔ `<Navigate>`/`useNavigate()`/`Route.useParams`) without depending on either runtime — "ship the standard, not the adapter". The tri-state `SessionState` and the `safeBack` helper they steer toward live in the spine (`skies-react`).
+SKYFE015–019 are the **routing harness**: the front-side parallel of the backend's slice rules, born from the two app pilots (Pauta on TanStack Router, Hostpoint on expo-router) converging on the same navigation bugs — a freshly-registered user bounced to login, ghost screens on missing params, dead Back buttons, effect-driven redirect loops. They police a **shape** (declarative redirect, tri-state session, guarded param, guarded back), so they recognize each router's idiom (`<Redirect>`/`router.replace`/`useLocalSearchParams` ↔ `<Navigate>`/`useNavigate()`/`Route.useParams`) without depending on either runtime — "ship the standard, not the adapter". The tri-state `SessionState` and the `safeBack` helper they steer toward live in the spine (`@skiesjs/react`).
 
 ## Self-proving
 

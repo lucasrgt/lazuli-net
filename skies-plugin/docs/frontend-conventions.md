@@ -30,7 +30,7 @@ compiler: an invented endpoint doesn't exist as an export.
 ## Async states
 
 ViewModels expose `loading`/`error`/`empty` explicitly (`toAsyncState`, `combineAsyncStates`
-from the skies-react spine). Views route all three through `<Resource>` (with retry).
+from the @skiesjs/react spine). Views route all three through `<Resource>` (with retry).
 
 ## Mutations & feedback
 

@@ -15,7 +15,7 @@ front-door shells out to these (the way `skies doctor` shells out to `npm run li
 | **E2E** | `SKYFE035` + **`feature-e2e-coverage.mjs`** (every ViewModel links flows whose `criteria` cover its AVP/Assay set; every UI-consumed backend slice is named) + **`e2e-doctor.mjs`** (every flow has an enabled case, terminal assertion, and runner) | eslint + workspace gate + surface gate |
 
 At the release boundary, `skies gate` invokes `skyfe-eslint-gate`. That wrapper reads the installed
-`eslint-plugin-skies` and forces the release-evidence rules (data door, no production mocks,
+`@skiesjs/eslint-plugin` and forces the release-evidence rules (data door, no production mocks,
 unit/integration/AVP/E2E obligations, and no disabled tests) as errors with `--no-inline-config`.
 A consumer config can add stricter architecture or design policy, but cannot omit proof required for done.
 

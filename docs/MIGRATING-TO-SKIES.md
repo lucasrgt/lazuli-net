@@ -16,9 +16,9 @@ features.
 | `AeroFortress.toml` | `Skies.toml` |
 | `.aerofortress/` | `.skies/` |
 | `dotnet new aerofortress` | `dotnet new skies` |
-| `@aerofortress/frontend-sdk` | `skies-frontend-sdk` |
-| `@aerofortress/react` | `skies-react` |
-| `eslint-plugin-aerofortress` | `eslint-plugin-skies` |
+| `@aerofortress/frontend-sdk` | `@skiesjs/frontend-sdk` |
+| `@aerofortress/react` | `@skiesjs/react` |
+| `eslint-plugin-aerofortress` | `@skiesjs/eslint-plugin` |
 | `@aerofortress/assay` | `avp-assay` |
 | `AF####` | `SKY####` |
 | `AFFE###` | `SKYFE###` |

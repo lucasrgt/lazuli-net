@@ -298,7 +298,7 @@ export function checkE2e(root) {
       qualityCheckedSpecs.add(specPath);
       if (!importsCanonicalPlaywrightTest(specSource)) {
         messages.push(
-          `${spec} must import test from skies-frontend-sdk/playwright so page errors and browser `
+          `${spec} must import test from @skiesjs/frontend-sdk/playwright so page errors and browser `
             + "warnings fail the E2E gate",
         );
         gaps++;
@@ -349,7 +349,7 @@ export function checkE2e(root) {
         `journey "${name}" names backendSlices but its own case is ${executionClass}; `
           + "collect and assert its exact OpenAPI operations with observeBackend and expectBackendSlices or "
           + "waitForBackendSlices from "
-          + "skies-frontend-sdk/playwright-backend in that case",
+          + "@skiesjs/frontend-sdk/playwright-backend in that case",
       );
       gaps++;
     }
@@ -427,7 +427,7 @@ function declaresFrontendSdk(root) {
       packageJson.devDependencies,
       packageJson.peerDependencies,
     ].some((dependencies) => dependencies
-      && typeof dependencies["skies-frontend-sdk"] === "string");
+      && typeof dependencies["@skiesjs/frontend-sdk"] === "string");
   } catch {
     return false;
   }
@@ -436,7 +436,7 @@ function declaresFrontendSdk(root) {
 function importsCanonicalPlaywrightTest(source) {
   const executable = stripComments(source);
   for (const match of executable.matchAll(
-    /\bimport\s*\{([^}]*)\}\s*from\s*["']skies-frontend-sdk\/playwright["']/g,
+    /\bimport\s*\{([^}]*)\}\s*from\s*["']@skiesjs\/frontend-sdk\/playwright["']/g,
   )) {
     const bindings = match[1].split(",").map((binding) => binding.trim());
     if (bindings.some((binding) => /^test(?:\s+as\s+[A-Za-z_$][\w$]*)?$/.test(binding))) return true;
@@ -599,14 +599,14 @@ function isWithin(root, path) {
 function canonicalBackendImport(source) {
   const executable = stripComments(source);
   return [...executable.matchAll(
-    /\bimport\s*\{([^}]*)\}\s*from\s*["']skies-frontend-sdk\/playwright-backend["']\s*;?/g,
+    /\bimport\s*\{([^}]*)\}\s*from\s*["']@skiesjs\/frontend-sdk\/playwright-backend["']\s*;?/g,
   )].map((match) => match[0]).join("\n");
 }
 
 function importsCanonicalBackendProof(source) {
   const identifiers = new Set();
   for (const match of source.matchAll(
-    /\bimport\s*\{([^}]*)\}\s*from\s*["']skies-frontend-sdk\/playwright-backend["']/g,
+    /\bimport\s*\{([^}]*)\}\s*from\s*["']@skiesjs\/frontend-sdk\/playwright-backend["']/g,
   )) {
     for (const raw of match[1].split(",")) {
       const name = raw.trim();

@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const { version } = require("./package.json");
 
-// eslint-plugin-skies — the frontend harness (SKYFE*). The front-side parallel of the backend's Roslyn analyzers
+// @skiesjs/eslint-plugin — the frontend harness (SKYFE*). The front-side parallel of the backend's Roslyn analyzers
 // (Skies.Framework.Doctor): it polices the MVVM seam so React Native + web screens stay wired, not mocked — the View
 // renders, the ViewModel is the only data door, and no fixture/mock leaks into production. Doctor-removable: delete
 // the plugin and the app still builds; you only lose enforcement. Canonical home: Skies/frontend-sdk.
@@ -1955,7 +1955,7 @@ const rules = {
 };
 
 const plugin = {
-  meta: { name: "eslint-plugin-skies", version },
+  meta: { name: "@skiesjs/eslint-plugin", version },
   rules,
   configs: {},
 };

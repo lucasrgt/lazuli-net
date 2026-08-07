@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Resource } from "skies-react";
+import { Resource } from "@skiesjs/react";
 import { Card, EmptyState, ErrorState, Screen, Stack, Text } from "@/ui";
 import { useItemsModel } from "./Items.viewModel";
 import type { Item } from "./Items.viewModel";

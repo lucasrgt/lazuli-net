@@ -1,6 +1,6 @@
 {
-  "name": "skies-react",
-  "version": "4.0.4",
+  "name": "@skiesjs/react",
+  "version": "4.0.5",
   "description": "Skies Framework frontend spine — platform/design-system-agnostic React primitives (AsyncState, Resource, session, paging, …) the app composes.",
   "license": "MIT",
   "author": "Lucas Tinoco",
@@ -12,7 +12,13 @@
   },
   "homepage": "https://skies.build",
   "bugs": "https://github.com/lucasrgt/skies/issues",
-  "keywords": ["react", "skies", "mvvm", "async-state", "hooks"],
+  "keywords": [
+    "react",
+    "skies",
+    "mvvm",
+    "async-state",
+    "hooks"
+  ],
   "sideEffects": false,
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -23,7 +29,10 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "publishConfig": {
     "access": "public"
   },

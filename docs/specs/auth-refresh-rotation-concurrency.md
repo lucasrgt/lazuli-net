@@ -15,7 +15,7 @@ new slot). That read-then-write has no concurrency guard, so two refreshes of th
 race are last-write-wins:
 
 - Trigger #1 — a single client double-firing (React StrictMode / double-bootstrap) — is already mitigated
-  upstream by `skies-react` 0.5.0 single-flight rotation (the two calls collapse into one).
+  upstream by `@skiesjs/react` 0.5.0 single-flight rotation (the two calls collapse into one).
 - The residual is a genuine **cross-tab** race: two tabs sharing the one httpOnly refresh cookie each
   present the same live token at the same instant. Today both can pass the `UsedAt == null` check and
   succeed, forking the family; the theft-detection (`UsedAt != null` ⇒ burn) is not atomic with the write.

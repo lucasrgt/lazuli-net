@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Frontend package sync — the npm half of the package-first law. The frontend framework is published:
-// pilots consume eslint-plugin-skies and skies-react as packages, never as in-repo mirrors.
+// pilots consume @skiesjs/eslint-plugin and @skiesjs/react as packages, never as in-repo mirrors.
 
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -28,7 +28,7 @@ export function checkPackages({ canonical, declarations, hasFrontend, vendoredMi
   if (vendoredMirror)
     messages.push(
       "framework-sync: clients/eslint-plugin-skies is a retired vendored plugin copy — delete it and "
-      + "consume eslint-plugin-skies from npm.",
+      + "consume @skiesjs/eslint-plugin from npm.",
     );
   if (!hasFrontend) return { status: messages.length ? "drifted" : "ok", messages };
 

@@ -1,6 +1,6 @@
 {
-  "name": "eslint-plugin-skies-node",
-  "version": "0.1.0",
+  "name": "@skiesjs/eslint-plugin-node",
+  "version": "0.1.1",
   "description": "The removable SKYN doctor for Skies Node.js backend slices.",
   "type": "module",
   "license": "MIT",

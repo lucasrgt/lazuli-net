@@ -923,4 +923,4 @@ ruleTester.run("feature-has-e2e-flow", plugin.rules["feature-has-e2e-flow"], {
 });
 
 // eslint-disable-next-line no-console
-console.log("eslint-plugin-skies: all SKYFE rule tests passed");
+console.log("@skiesjs/eslint-plugin: all SKYFE rule tests passed");

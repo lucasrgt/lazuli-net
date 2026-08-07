@@ -71,7 +71,7 @@ npm run check
 npx skies-node g slice Billing CreateInvoice --method post --route /invoices
 ```
 
-Its runtime packages are `@skiesjs/core` and `@skiesjs/express`; `eslint-plugin-skies-node` is the removable
+Its runtime packages are `@skiesjs/core` and `@skiesjs/express`; `@skiesjs/eslint-plugin-node` is the removable
 `SKYN####` doctor, and `@skiesjs/cli` ships the non-conflicting `skies-node` generator. See
 [`docs/NODE-CONVENTIONS.md`](docs/NODE-CONVENTIONS.md).
 
@@ -175,7 +175,7 @@ The focused packages are à la carte; the `Skies.Framework` meta is the front do
 |---|---|
 | `@skiesjs/core` | HTTP-agnostic `Result<T>` and structured expected errors. |
 | `@skiesjs/express` | Explicit Express 5 result-to-HTTP boundary. |
-| `eslint-plugin-skies-node` | The removable `SKYN####` slice doctor. |
+| `@skiesjs/eslint-plugin-node` | The removable `SKYN####` slice doctor. |
 | `@skiesjs/cli` | The `skies-node` slice generator. |
 
 These packages start at `0.1.0` while the conventions are proven in a real Node.js pilot.

@@ -3,9 +3,9 @@ import { canonicalDrift, RELEASE_UNITS, violations } from "./release-guard.mjs";
 
 describe("release-guard", () => {
   it("flags a unit that changed without a version bump", () => {
-    const result = violations([{ name: "eslint-plugin-skies", changed: true, versionBumped: false }]);
+    const result = violations([{ name: "@skiesjs/eslint-plugin", changed: true, versionBumped: false }]);
     expect(result).toHaveLength(1);
-    expect(result[0]).toContain("eslint-plugin-skies");
+    expect(result[0]).toContain("@skiesjs/eslint-plugin");
   });
 
   it("passes a unit that changed and was bumped", () => {
@@ -20,9 +20,9 @@ describe("release-guard", () => {
     expect(RELEASE_UNITS.map((u) => u.name)).toEqual([
       "Skies.Framework.* (nuget)",
       "skies-framework-cli",
-      "skies-react",
-      "eslint-plugin-skies",
-      "skies-frontend-sdk",
+      "@skiesjs/react",
+      "@skiesjs/eslint-plugin",
+      "@skiesjs/frontend-sdk",
       "@skiesjs/core",
       "@skiesjs/openapi",
       "@skiesjs/express",
@@ -39,7 +39,7 @@ describe("release-guard", () => {
       "@skiesjs/testing",
       "@skiesjs/testing-postgres",
       "@skiesjs/doctor",
-      "eslint-plugin-skies-node",
+      "@skiesjs/eslint-plugin-node",
       "@skiesjs/foundation",
       "@skiesjs/framework",
       "@skiesjs/cli",

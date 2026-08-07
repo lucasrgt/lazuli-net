@@ -73,7 +73,7 @@ internal static class FrameworkSync
     }
 
     // The frontend half is enforced self-contained on the npm side by the Skies packages and ESLint plugin.
-    // version parity ships in skies-frontend-sdk's framework-sync and runs through the client lint chain,
+    // version parity ships in @skiesjs/frontend-sdk's framework-sync and runs through the client lint chain,
     // so it is not duplicated here. What stays is the filesystem tell that the retired vendored model was revived.
     private static void CheckVendoredFrontendCopies(string root, List<string> messages)
     {
@@ -81,7 +81,7 @@ internal static class FrameworkSync
         if (Directory.Exists(vendoredPlugin))
             messages.Add(
                 "framework-sync: clients/eslint-plugin-skies is a retired vendored plugin copy — delete it "
-                + "and consume eslint-plugin-skies from npm");
+                + "and consume @skiesjs/eslint-plugin from npm");
     }
 
     // Filter before descent rather than after a recursive enumeration. Workspace dependencies may be symbolic

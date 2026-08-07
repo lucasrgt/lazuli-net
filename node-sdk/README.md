@@ -20,7 +20,7 @@ directory discovery, generated behavior, or hidden DI container.
 | `@skiesjs/drizzle-postgres` | Tenant/filter policy, bounded unique-order paging, versioned writes, and audited raw SQL. |
 | `@skiesjs/testing` / `@skiesjs/testing-postgres` | Proof vocabulary, real host lifecycle, and PostgreSQL 17 template clones. |
 | `@skiesjs/socketio` | Opt-in explicit Socket.IO contracts and authenticated event mapping. |
-| `eslint-plugin-skies-node` | Removable single-file `SKYN####` rules with no filesystem joins. |
+| `@skiesjs/eslint-plugin-node` | Removable single-file `SKYN####` rules with no filesystem joins. |
 | `@skiesjs/doctor` | Authoritative deterministic cross-file topology, journey, error, auth, and proof checks. |
 | `@skiesjs/foundation` | Closed proof inventory, affected/base/full gates, receipts, and local CSM foundations. |
 | `@skiesjs/cli` | Transactional starter and slice/module/domain/auth/storage/data/realtime generators. |

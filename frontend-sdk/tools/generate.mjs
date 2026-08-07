@@ -62,7 +62,7 @@ defineVerification(...productVerification(
   },
 ));`).join("\n\n");
 
-  const viewModel = `import { toAsyncState, type AsyncState } from "skies-react";
+  const viewModel = `import { toAsyncState, type AsyncState } from "@skiesjs/react";
 // The orval-generated typed hook for the \`list_${lower}\` slice — the ONLY data the door touches.
 import { useList${Plural} } from "@/client.gen/${lower}";
 import i18n from "@/i18n";
@@ -103,7 +103,7 @@ export function use${Plural}Model(): ${Plural}Model {
 `;
 
   const view = `import { useTranslation } from "react-i18next";
-import { Resource } from "skies-react";
+import { Resource } from "@skiesjs/react";
 // The design system — the View reaches it through these names only (never react-native directly).
 import { Screen, Stack, Text, EmptyState } from "@/ui";
 import { use${Plural}Model } from "./${Plural}.viewModel";
@@ -170,7 +170,7 @@ describe("${Plural}", () => {
 });
 `;
 
-  const assay = `import { productVerification } from "skies-frontend-sdk/product-verification";
+  const assay = `import { productVerification } from "@skiesjs/frontend-sdk/product-verification";
 import { defineVerification } from "avp-assay/react/vitest";
 
 // AVP PROOFS — deliberately red until every declared product outcome is proven by a concrete assertion.

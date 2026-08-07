@@ -5,7 +5,7 @@ namespace Skies.Framework.Cli;
 /// commands (<c>skies gate</c>) can run the same legs without duplicating them. The backend leg is the
 /// build-time Roslyn analyzers (a clean build = a clean bill of health; an SKY#### error fails it). The
 /// frontend leg, for each manifest-selected Skies harness package, is
-/// the TS-world harness: eslint (eslint-plugin-skies, the SKYFE* rules) + tsc (the "wired" gate against
+/// the TS-world harness: eslint (@skiesjs/eslint-plugin, the SKYFE* rules) + tsc (the "wired" gate against
 /// the generated client). One command, both sides — so nothing is left loose in either direction.
 /// </summary>
 internal static class DoctorCommand

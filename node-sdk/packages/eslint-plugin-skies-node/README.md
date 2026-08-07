@@ -1,11 +1,11 @@
-# eslint-plugin-skies-node
+# @skiesjs/eslint-plugin-node
 
 The removable Skies doctor for plain TypeScript backend slices. Rules inspect the current syntax tree and normalized
 local filename only; the plugin performs no synchronous filesystem reads and does not join workspace facts.
 
 ```js
 import tsParser from "@typescript-eslint/parser";
-import skiesNode from "eslint-plugin-skies-node";
+import skiesNode from "@skiesjs/eslint-plugin-node";
 
 export default [
   {

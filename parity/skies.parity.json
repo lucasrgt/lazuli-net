@@ -963,6 +963,38 @@
       "reason": "Starter template package references and the CLI baked-version SSOT follow the 4.1.2 framework bump for the 4.1.5 release; the Node generator templates ship unchanged at 0.1.0 in the same release.",
       "owner": "lucasrgt",
       "expires": "2026-08-21"
+    },
+    {
+      "id": "rename-416-gates-foundations",
+      "capability": "proof.gates-foundations",
+      "side": "node",
+      "reason": "The .NET doctor framework-sync messages now name the @skiesjs packages; the Node foundation surface is unchanged in this rename.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-28"
+    },
+    {
+      "id": "rename-416-omakase",
+      "capability": "packaging.omakase",
+      "side": "dotnet",
+      "reason": "Lockfile regeneration after the @skiesjs scope rename; .NET packaging is unchanged.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-28"
+    },
+    {
+      "id": "rename-416-public-graphs",
+      "capability": "packaging.public-graphs",
+      "side": "dotnet",
+      "reason": "The npm package names moved into the @skiesjs scope (eslint-plugin-skies-node -> @skiesjs/eslint-plugin-node) with matching dependency bumps; the .NET package graph is unchanged in this rename.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-28"
+    },
+    {
+      "id": "rename-416-surface-sync",
+      "capability": "tooling.surface-sync",
+      "side": "node",
+      "reason": "The .NET doctor and template messages name the moved @skiesjs packages; the Node CLI surface is unchanged in this rename.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-28"
     }
   ],
   "diagnostics": [
