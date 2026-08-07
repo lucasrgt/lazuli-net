@@ -44,7 +44,7 @@ ruleTester.run("tests-under-source", plugin.rules["tests-under-source"], {
       errors: [{ messageId: "detached" }],
     },
     {
-      filename: "C:\app\proofs\wallet.proof.ts",
+      filename: "C:\\app\\proofs\\wallet.proof.ts",
       code: `export const proof = true;`,
       errors: [{ messageId: "detached" }],
     },
