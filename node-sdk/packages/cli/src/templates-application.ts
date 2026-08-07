@@ -37,7 +37,7 @@ export function applicationPackageSource(name: string): string {
       zod: "^4.0.0",
     },
     devDependencies: {
-      "@skiesjs/doctor": "0.1.0",
+      "@skiesjs/doctor": "^0.1.1",
       "@skiesjs/foundation": "0.1.0",
       "@skiesjs/testing": "0.1.0",
       "@types/express": "^5.0.0",

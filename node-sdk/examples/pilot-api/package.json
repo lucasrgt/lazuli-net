@@ -38,7 +38,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@skiesjs/doctor": "0.1.0",
+    "@skiesjs/doctor": "0.1.1",
     "@skiesjs/testing": "0.1.0",
     "@types/express": "5.0.6",
     "@types/node": "24.13.3",
