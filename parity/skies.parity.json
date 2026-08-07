@@ -909,6 +909,14 @@
       "expires": "2026-08-21"
     },
     {
+      "id": "node-delivery-tooling-windows-shell",
+      "capability": "delivery.packages-release",
+      "side": "dotnet",
+      "reason": "Node package-smoke delivery tooling gained Windows .cmd shell handling for the CI matrix; the .NET delivery tooling (NuGet pack/publish) already runs on Windows without changes.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-21"
+    },
+    {
       "id": "node-doctor-bin-entry",
       "capability": "doctor.enforcement",
       "side": "dotnet",
