@@ -3,9 +3,10 @@ import assert from "node:assert/strict";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { spawnSync } from "node:child_process";
 import {
   matchesGlob, expandGlob, validateManifest, validateInventory,
-  checkDrift, explainPath, walkFiles, bootstrapChangedPaths
+  checkDrift, explainPath, walkFiles, bootstrapChangedPaths, discoverChangedPaths
 } from "./parity-guard.mjs";
 
 const fileNames = [
@@ -137,6 +138,33 @@ test("a base without a parity manifest bootstraps without runtime drift", () => 
   );
   assert.deepEqual(bootstrapChangedPaths(["n/src/api.js", "d/src/api.cs"], true), ["d/src/api.cs", "n/src/api.js"]);
 });
+
+test("a base that predates the manifest anchors at its introduction instead of bootstrapping", async t => {
+  const root = await fixture(t, ["n/src/api.js", "d/src/api.cs"]);
+  await writeFile(join(root, "n/src/api.js"), "before\n");
+  await writeFile(join(root, "d/src/api.cs"), "before\n");
+  git(root, ["init", "-q"]);
+  git(root, ["config", "user.email", "test@example.test"]);
+  git(root, ["config", "user.name", "Test"]);
+  git(root, ["add", "-A"]);
+  git(root, ["commit", "-q", "-m", "base"]);
+  const base = git(root, ["rev-parse", "HEAD"]);
+  await mkdir(join(root, "parity"), { recursive: true });
+  await writeFile(join(root, "parity/skies.parity.json"), JSON.stringify(manifest()));
+  await writeFile(join(root, "n/src/api.js"), "after\n");
+  git(root, ["add", "-A"]);
+  git(root, ["commit", "-q", "-m", "add manifest and node change"]);
+  const changed = discoverChangedPaths(root, { base });
+  assert.deepEqual(changed, ["n/src/api.js", "parity/skies.parity.json"]);
+  // The anchored change set is validated: the node-only edit is real unilateral drift, not bootstrapped away.
+  assert.match(checkDrift(manifest(), changed).join("\n"), /missing dotnet change/);
+});
+
+function git(root, args) {
+  const result = spawnSync("git", args, { cwd: root, encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr || `git ${args.join(" ")} failed`);
+  return result.stdout.trim();
+}
 
 test("walkFiles returns repository-relative paths", async t => {
   const root = await fixture(t);

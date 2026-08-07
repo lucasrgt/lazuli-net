@@ -245,7 +245,21 @@ function gitObjectExists(root, object) {
 }
 function changesFromBase(root, base, tripleDot = false) {
   const hasManifest = gitObjectExists(root, `${base}:parity/skies.parity.json`);
-  if (!hasManifest) return bootstrapChangedPaths([], false);
+  if (!hasManifest) {
+    // The base predates the contract. When HEAD already carries the manifest, anchor the change set at the
+    // commit that introduced it, so every post-contract change is validated instead of being bootstrapped
+    // away. Only a history without the manifest anywhere keeps the pure bootstrap semantics.
+    if (gitObjectExists(root, "HEAD:parity/skies.parity.json")) {
+      const intro = git(root, ["log", "--diff-filter=A", "--format=%H", "--", "parity/skies.parity.json"], true);
+      if (intro.length > 0) {
+        const anchor = `${intro[0]}^`;
+        if (gitObjectExists(root, anchor)) {
+          return bootstrapChangedPaths(git(root, ["diff", "--name-only", `${anchor}...HEAD`], true), true);
+        }
+      }
+    }
+    return bootstrapChangedPaths([], false);
+  }
   const range = tripleDot ? `${base}...HEAD` : [base, "HEAD"];
   const args = ["diff", "--name-only", ...(Array.isArray(range) ? range : [range])];
   return bootstrapChangedPaths(git(root, args, true), true);

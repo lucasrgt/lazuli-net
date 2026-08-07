@@ -901,6 +901,14 @@
   ],
   "deferments": [
     {
+      "id": "node-doctor-bin-entry",
+      "capability": "doctor.enforcement",
+      "side": "dotnet",
+      "reason": "The Node doctor's CLI entry (bin/skies-node-doctor.mjs) was added with the parity manifest; the .NET doctor's equivalent entry point is the existing skies CLI, which already ships, so no .NET change is required.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-21"
+    },
+    {
       "id": "node-foundation-gate-alignment",
       "capability": "proof.gates-foundations",
       "side": "dotnet",

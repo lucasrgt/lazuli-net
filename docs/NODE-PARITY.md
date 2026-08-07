@@ -34,6 +34,9 @@ node tools/parity-guard.mjs explain <path>
 ```
 
 CI fetches full history, validates the inventory and schema, and compares the current change with the event base.
+When the event base predates the manifest but the reviewed head carries it, the guard anchors the change set at the
+commit that introduced the manifest, so every post-contract change is validated instead of being bootstrapped away;
+only a history with no manifest anywhere keeps the pure bootstrap semantics.
 This mechanism is deliberately **annotation-free**: it does not add TypeScript decorators, JSDoc tags, reflection,
 or runtime metadata. Plain TypeScript stays plain; the external manifest, shared fixtures, tests, and CI own parity.
 
