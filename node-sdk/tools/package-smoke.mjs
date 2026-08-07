@@ -111,6 +111,8 @@ async function run(file, args, cwd, expectedExitCode = 0) {
       encoding: "utf8",
       env: childEnvironment,
       maxBuffer: 10 * 1024 * 1024,
+      // Windows resolves npm only as a .cmd script, which requires a shell.
+      shell: process.platform === "win32",
     });
     assert.equal(
       expectedExitCode,
