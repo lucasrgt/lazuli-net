@@ -947,6 +947,14 @@
       "reason": "The pilot-api scripts and CSM assets now use the shared staged/base/fast gate vocabulary already exercised by the .NET sample app; no .NET pilot change is required.",
       "owner": "lucasrgt",
       "expires": "2026-08-21"
+    },
+    {
+      "id": "release-412-framework-bump",
+      "capability": "delivery.packages-release",
+      "side": "node",
+      "reason": "Coordinated release version bump of the .NET framework packages (4.1.0 -> 4.1.2 after the 4.1.0/4.1.1 rollback); the Node package graph ships at 0.1.0 in the same release and its packaging tooling is unchanged.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-21"
     }
   ],
   "diagnostics": [
