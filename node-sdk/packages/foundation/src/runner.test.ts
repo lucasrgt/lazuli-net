@@ -34,6 +34,12 @@ describe("process runner", () => {
     const result = await defaultCommandRunner({
       command: ["definitely-not-a-skies-executable"], cwd: process.cwd(), env: {}, timeoutMs: 500, forwardOutput: false,
     });
+    if (process.platform === "win32") {
+      // cmd.exe reports the missing command as a plain exit-1 without a spawn error.
+      expect(result.exitCode).not.toBeNull();
+      expect(result.error).toBeUndefined();
+      return;
+    }
     expect(result.exitCode).toBeNull();
     expect(result.error).toMatch(/ENOENT|not found/iu);
   });
