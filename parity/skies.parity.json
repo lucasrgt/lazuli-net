@@ -899,7 +899,32 @@
       "sharedContracts": []
     }
   ],
-  "deferments": [],
+  "deferments": [
+    {
+      "id": "node-foundation-gate-alignment",
+      "capability": "proof.gates-foundations",
+      "side": "dotnet",
+      "reason": "Node foundation gate modes (--affected [--base <revision>], --staged, --full, --fast), csm.toml storage, and instruction/skill assets were aligned to the .NET/CSM contract that already ships these semantics; the .NET implementation is unchanged because it already conforms.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-21"
+    },
+    {
+      "id": "node-generator-gate-alignment",
+      "capability": "tooling.generators",
+      "side": "dotnet",
+      "reason": "Generated Node apps now emit the same verification boundaries (affected CI, full release, staged pre-commit, base+fast pre-push) the .NET template already emits; the .NET template is unchanged because it already conforms.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-21"
+    },
+    {
+      "id": "node-pilot-gate-alignment",
+      "capability": "pilot.nontrivial",
+      "side": "dotnet",
+      "reason": "The pilot-api scripts and CSM assets now use the shared staged/base/fast gate vocabulary already exercised by the .NET sample app; no .NET pilot change is required.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-21"
+    }
+  ],
   "diagnostics": [
     {
       "dotnet": "SKY0001",
