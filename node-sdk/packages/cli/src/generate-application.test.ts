@@ -13,7 +13,9 @@ import {
   generateValueObject,
 } from "./index.js";
 
-const execute = promisify(execFile);
+// Windows cannot spawn .cmd scripts without a shell; Git Bash executables and npm.cmd both resolve through it.
+const execute = (file: string, args: readonly string[], options: { cwd?: string; maxBuffer?: number } = {}) =>
+  promisify(execFile)(file, [...args], { ...options, shell: process.platform === "win32" });
 const temporaryDirectories: string[] = [];
 
 async function temporaryDirectory(): Promise<string> {

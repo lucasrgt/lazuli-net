@@ -901,6 +901,14 @@
   ],
   "deferments": [
     {
+      "id": "cli-version-bump-412",
+      "capability": "packaging.public-graphs",
+      "side": "node",
+      "reason": "CLI version bump 4.1.1 -> 4.1.2 because 4.1.0/4.1.1 were removed from nuget.org and cannot be re-published; the Node package graph stays at 0.1.0 until the coordinated release.",
+      "owner": "lucasrgt",
+      "expires": "2026-08-21"
+    },
+    {
       "id": "node-doctor-bin-entry",
       "capability": "doctor.enforcement",
       "side": "dotnet",

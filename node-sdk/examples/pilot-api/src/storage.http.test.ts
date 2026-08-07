@@ -35,7 +35,7 @@ integration("the explicitly mapped local adapter uploads and serves a byte range
     expect(download.status).toBe(206);
     expect(download.headers["content-range"]).toBe("bytes 2-5/10");
     expect(download.text).toBe("2345");
-    expect(mode & 0o077).toBe(0);
+    if (process.platform !== "win32") expect(mode & 0o077).toBe(0);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
