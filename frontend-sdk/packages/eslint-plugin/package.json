@@ -31,5 +31,8 @@
   "scripts": {
     "test": "node index.test.cjs",
     "prepublishOnly": "node index.test.cjs"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
