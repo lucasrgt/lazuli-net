@@ -1,6 +1,6 @@
 {
   "name": "@skiesjs/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The explicit scaffolding CLI for Skies Node.js applications.",
   "type": "module",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "@skiesjs/doctor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Deterministic workspace convention checks for Skies Node.js applications.",
   "type": "module",
   "license": "MIT",
