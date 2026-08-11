@@ -25,10 +25,10 @@ export function eslintGateArguments(sourcePaths, ruleNames) {
     "--quiet",
     "--no-inline-config",
     "--plugin",
-    "skies",
+    "@skiesjs",
   ];
   for (const rule of [...ruleNames].sort()) {
-    arguments_.push("--rule", `skies/${rule}:error`);
+    arguments_.push("--rule", `@skiesjs/${rule}:error`);
   }
   return arguments_;
 }
