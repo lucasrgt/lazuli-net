@@ -372,6 +372,21 @@ internal static class GateImpact
             return;
         }
 
+        if (IsViewSource(file))
+        {
+            SelectViewTests(impact, absolute);
+            if (FrontendScriptContract.HasScript(impact.Package.Path, "design:rendered"))
+                impact.RenderedDesign = true;
+
+            if (impact.Tests.Count > 0 || impact.Assays.Count > 0)
+            {
+                reasons.Add($"frontend: {change} maps to its feature tests"
+                            + (impact.RenderedDesign ? " and rendered-design proof" : "")
+                            + " without widening every runtime proof");
+                return;
+            }
+        }
+
         if (TryViewModelName(file, out var directFeature))
         {
             features.Add(directFeature);
@@ -399,6 +414,35 @@ internal static class GateImpact
         || local.StartsWith("design-e2e/", StringComparison.OrdinalIgnoreCase)
         || local.Equals("playwright.design.config.ts", StringComparison.OrdinalIgnoreCase)
         || local.Equals("playwright.design.config.js", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsViewSource(string file) =>
+        file.Contains(".view.", StringComparison.OrdinalIgnoreCase);
+
+    private static void SelectViewTests(FrontendImpact impact, string absolute)
+    {
+        var source = Path.Combine(impact.Package.Path, "src");
+        var features = Path.Combine(source, "features");
+        var directory = Path.GetDirectoryName(absolute)!;
+
+        while (IsWithinDirectory(directory, source) && !SameDirectory(directory, features))
+        {
+            SelectSiblingTests(impact, Path.Combine(directory, Path.GetFileName(absolute)));
+            directory = Path.GetDirectoryName(directory)!;
+        }
+    }
+
+    private static bool IsWithinDirectory(string path, string parent)
+    {
+        var relative = Path.GetRelativePath(parent, path);
+        return relative != ".."
+               && !relative.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+               && !Path.IsPathRooted(relative);
+    }
+
+    private static bool SameDirectory(string left, string right) =>
+        string.Equals(Path.GetFullPath(left).TrimEnd(Path.DirectorySeparatorChar),
+            Path.GetFullPath(right).TrimEnd(Path.DirectorySeparatorChar),
+            OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 
     private static void SelectSiblingTests(FrontendImpact impact, string absolute)
     {

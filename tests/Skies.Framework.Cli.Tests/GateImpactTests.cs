@@ -140,6 +140,65 @@ public sealed class GateImpactTests
     }
 
     [Fact]
+    public void A_nested_view_change_selects_feature_tests_and_rendered_design_without_full_widening()
+    {
+        var root = Workspace();
+        try
+        {
+            var packageRoot = Path.Combine(root, "clients/web");
+            var feature = Path.Combine(packageRoot, "src/features/host/onboarding");
+            var steps = Path.Combine(feature, "steps");
+            Directory.CreateDirectory(steps);
+            File.WriteAllText(Path.Combine(steps, "AddressStep.view.tsx"), "export {};\n");
+            File.WriteAllText(Path.Combine(steps, "TermsStep.test.tsx"), "export {};\n");
+            File.WriteAllText(Path.Combine(feature, "HostOnboarding.test.tsx"), "export {};\n");
+            File.WriteAllText(Path.Combine(packageRoot, "package.json"),
+                "{\"scripts\":{\"design:rendered\":\"playwright test\"}}");
+            var package = new FrontendPackage(packageRoot, FrontendPackageRole.Surface);
+
+            var plan = GateImpact.Build(
+                root,
+                ["clients/web/src/features/host/onboarding/steps/AddressStep.view.tsx"],
+                [], [], [], [], [package]);
+
+            var frontend = Assert.Single(plan.Frontends);
+            Assert.False(frontend.Full);
+            Assert.True(frontend.RenderedDesign);
+            Assert.Contains("src/features/host/onboarding/steps/TermsStep.test.tsx", frontend.Tests);
+            Assert.Contains("src/features/host/onboarding/HostOnboarding.test.tsx", frontend.Tests);
+            Assert.Contains(plan.Reasons, reason => reason.Contains("without widening every runtime proof"));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void A_view_without_a_feature_proof_remains_fail_closed()
+    {
+        var root = Workspace();
+        try
+        {
+            var feature = Path.Combine(root, "clients/web/src/features/profile");
+            Directory.CreateDirectory(feature);
+            File.WriteAllText(Path.Combine(feature, "Profile.view.tsx"), "export {};\n");
+            var package = new FrontendPackage(Path.Combine(root, "clients/web"), FrontendPackageRole.Surface);
+
+            var plan = GateImpact.Build(
+                root,
+                ["clients/web/src/features/profile/Profile.view.tsx"],
+                [], [], [], [], [package]);
+
+            Assert.True(Assert.Single(plan.Frontends).Full);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void A_generated_client_fallback_keeps_directly_changed_frontend_proofs_mapped()
     {
         var root = Workspace();
