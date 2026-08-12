@@ -15,7 +15,7 @@ internal enum GateMode
 
 /// <summary>The gate-owned options, separated from arguments forwarded to the .NET solution.</summary>
 /// <param name="Mode">How changed files are discovered.</param>
-/// <param name="Fast">Whether exhaustive fallbacks and browser/device execution are deferred to authoritative CI.</param>
+/// <param name="Fast">Whether exhaustive fallbacks and browser/device execution are deferred to the selected authority boundary.</param>
 /// <param name="BaseRevision">The revision compared with <c>HEAD</c> in affected mode; when explicit, local-only files are excluded.</param>
 /// <param name="ToolArguments">Arguments forwarded to <c>dotnet build/test</c>.</param>
 internal sealed record GateOptions(

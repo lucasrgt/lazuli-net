@@ -264,7 +264,7 @@ public class SkiesManifestTests
         var outcome = SkiesManifest.Validate(root);
 
         Assert.False(outcome.Valid);
-        Assert.Contains(outcome.Messages, message => message.Contains("skies gate") && message.Contains("workflow"));
+        Assert.Contains(outcome.Messages, message => message.Contains("skies gate") && message.Contains("checked boundary"));
     }
 
     [Fact]
@@ -282,7 +282,7 @@ public class SkiesManifestTests
         var outcome = SkiesManifest.Validate(root);
 
         Assert.False(outcome.Valid);
-        Assert.Contains(outcome.Messages, message => message.Contains("skies gate") && message.Contains("workflow"));
+        Assert.Contains(outcome.Messages, message => message.Contains("skies gate") && message.Contains("checked boundary"));
     }
 
     [Theory]
@@ -303,7 +303,66 @@ public class SkiesManifestTests
         var outcome = SkiesManifest.Validate(root);
 
         Assert.False(outcome.Valid);
-        Assert.Contains(outcome.Messages, message => message.Contains("skies gate") && message.Contains("workflow"));
+        Assert.Contains(outcome.Messages, message => message.Contains("skies gate") && message.Contains("checked boundary"));
+    }
+
+    [Fact]
+    public void A_local_authority_repo_needs_no_github_workflow()
+    {
+        var root = NewDir(withGateWorkflow: false);
+        File.WriteAllText(Path.Combine(root, "lefthook.yml"), """
+            pre-push:
+              commands:
+                foundation-check:
+                  run: dotnet tool run skies check --task 'pre-push review' --base origin/main
+            """);
+        File.WriteAllText(Path.Combine(root, "package.json"), """
+            { "scripts": { "verify:full": "dotnet tool run skies check --task 'release' --full" } }
+            """);
+        File.WriteAllText(Path.Combine(root, "Skies.toml"), "[workspace]\nname=\"MyApp\"\n");
+
+        var outcome = SkiesManifest.Validate(root);
+
+        Assert.True(outcome.Valid, string.Join(Environment.NewLine, outcome.Messages));
+    }
+
+    [Fact]
+    public void A_repo_cannot_claim_both_ci_and_local_affected_authority()
+    {
+        var root = NewDir();
+        File.WriteAllText(Path.Combine(root, "lefthook.yml"), """
+            pre-push:
+              commands:
+                foundation-check:
+                  run: dotnet tool run skies check --task 'pre-push review' --base origin/main
+            """);
+        File.WriteAllText(Path.Combine(root, "Skies.toml"), "[workspace]\nname=\"MyApp\"\n");
+
+        var outcome = SkiesManifest.Validate(root);
+
+        Assert.False(outcome.Valid);
+        Assert.Contains(outcome.Messages, message => message.Contains("choose exactly one authority"));
+    }
+
+    [Fact]
+    public void A_local_authority_pre_push_requires_a_base_revision_value()
+    {
+        var root = NewDir(withGateWorkflow: false);
+        File.WriteAllText(Path.Combine(root, "lefthook.yml"), """
+            pre-push:
+              commands:
+                foundation-check:
+                  run: dotnet tool run skies check --task 'pre-push review' --base
+            """);
+        File.WriteAllText(Path.Combine(root, "package.json"), """
+            { "scripts": { "verify:full": "dotnet tool run skies check --task 'release' --full" } }
+            """);
+        File.WriteAllText(Path.Combine(root, "Skies.toml"), "[workspace]\nname=\"MyApp\"\n");
+
+        var outcome = SkiesManifest.Validate(root);
+
+        Assert.False(outcome.Valid);
+        Assert.Contains(outcome.Messages, message => message.Contains("checked boundary"));
     }
 
     [Fact]

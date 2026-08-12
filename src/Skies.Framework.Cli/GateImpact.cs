@@ -43,8 +43,11 @@ internal sealed class FrontendImpact(FrontendPackage package)
     /// <summary>E2E flows selected by a changed ViewModel, spec, or backend slice.</summary>
     public List<FrontendFlow> Flows { get; } = [];
 
+    /// <summary>Whether the package's rendered design proof was selected by Storybook source.</summary>
+    public bool RenderedDesign { get; set; }
+
     /// <summary>Whether any runtime proof was selected.</summary>
-    public bool Selected => Full || Tests.Count > 0 || Assays.Count > 0 || Flows.Count > 0;
+    public bool Selected => Full || Tests.Count > 0 || Assays.Count > 0 || Flows.Count > 0 || RenderedDesign;
 }
 
 /// <summary>A normalized executable frontend flow from <c>e2e/flows.json</c>.</summary>
@@ -302,7 +305,8 @@ internal static class GateImpact
             reasons.Add(impact.Full
                 ? $"frontend: {Path.GetFileName(impact.Package.Path)} widened to its full proof surface"
                 : $"frontend: {Path.GetFileName(impact.Package.Path)} selected tests={impact.Tests.Count}, "
-                  + $"assays={impact.Assays.Count}, flows={impact.Flows.Count}");
+                  + $"assays={impact.Assays.Count}, rendered={(impact.RenderedDesign ? 1 : 0)}, "
+                  + $"flows={impact.Flows.Count}");
         }
     }
 
@@ -353,6 +357,14 @@ internal static class GateImpact
         if (directTest)
             return;
 
+        if (local.StartsWith("src/storybook/", StringComparison.OrdinalIgnoreCase))
+        {
+            impact.RenderedDesign = true;
+            SelectSiblingTests(impact, absolute);
+            reasons.Add($"frontend: {change} maps to the package rendered-design proof without widening runtime tests");
+            return;
+        }
+
         if (TryViewModelName(file, out var directFeature))
         {
             features.Add(directFeature);
@@ -373,6 +385,22 @@ internal static class GateImpact
         foreach (var viewModel in viewModels)
             if (TryViewModelName(viewModel!, out var feature))
                 features.Add(feature);
+    }
+
+    private static void SelectSiblingTests(FrontendImpact impact, string absolute)
+    {
+        var directory = Path.GetDirectoryName(absolute)!;
+        if (!Directory.Exists(directory))
+            return;
+
+        foreach (var test in Directory.EnumerateFiles(directory, "*.test.*", SearchOption.TopDirectoryOnly))
+        {
+            var relative = Normalize(Path.GetRelativePath(impact.Package.Path, test));
+            if (Path.GetFileName(test).Contains(".assay.test.", StringComparison.OrdinalIgnoreCase))
+                impact.Assays.Add(relative);
+            else
+                impact.Tests.Add(relative);
+        }
     }
 
     private static void SelectFeatureProofs(IReadOnlyList<FrontendImpact> impacts, string feature)

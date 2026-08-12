@@ -55,6 +55,28 @@ internal static class FrontendScriptContract
             : "test";
     }
 
+    /// <summary>Whether a package declares a non-empty script with the supplied name.</summary>
+    internal static bool HasScript(string packageRoot, string script)
+    {
+        var path = Path.Combine(packageRoot, "package.json");
+        if (!File.Exists(path))
+            return false;
+
+        try
+        {
+            using var document = JsonDocument.Parse(File.ReadAllText(path));
+            return document.RootElement.TryGetProperty("scripts", out var scripts)
+                && scripts.ValueKind == JsonValueKind.Object
+                && scripts.TryGetProperty(script, out var value)
+                && value.ValueKind == JsonValueKind.String
+                && !string.IsNullOrWhiteSpace(value.GetString());
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
     /// <summary>Return a precise contract error, or <see langword="null"/> when the script is executable.</summary>
     public static string? Validate(string packageRoot, string script)
     {

@@ -445,7 +445,8 @@ internal static class FoundationWorkflowCommand
 
             Runs the AVP gate plus WTW, RTW, NYA, and NWC checks as one fail-closed
             receipt. Staged checks are always bounded and defer exhaustive/browser fallbacks
-            to authoritative CI. Exit 1 means findings; exit 2 or greater means incomplete validation.
+            to the repository's selected authority boundary. Exit 1 means findings; exit 2 or greater means
+            incomplete validation.
             """);
         return error ? 2 : 0;
     }

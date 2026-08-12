@@ -64,7 +64,7 @@ public class GateReportTests
             DateTimeOffset.UnixEpoch);
 
         Assert.Contains("exit codes (`0` = pass)", markdown);
-        Assert.Contains("| Tests exit | AVP exit | Feature E2E exit |", markdown);
+        Assert.Contains("| Tests exit | AVP exit | Rendered exit | Feature E2E exit |", markdown);
         Assert.Contains("| web | surface · full |", markdown);
     }
 

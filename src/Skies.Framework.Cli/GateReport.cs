@@ -65,7 +65,8 @@ internal static class GateReport
             writer.WriteLine($"  malformed: {broken.Path} — {broken.Error}");
         foreach (var frontend in legs.FrontendRuns)
             writer.WriteLine($"  frontend {frontend.Client} ({Role(frontend)}, {frontend.Scope}) exits: tests={Exit(frontend.Tests)} "
-                           + $"avp={Exit(frontend.Avp)} feature-e2e={frontend.FeatureE2e} e2e-shape={Exit(frontend.E2eShape)} "
+                           + $"avp={Exit(frontend.Avp)} rendered={Exit(frontend.RenderedDesign)} "
+                           + $"feature-e2e={frontend.FeatureE2e} e2e-shape={Exit(frontend.E2eShape)} "
                            + $"e2e={Exit(frontend.E2e)} (0 = pass)");
         if (legs.SkippedTests > 0)
             writer.WriteLine($"  skipped: {legs.SkippedTests} .NET test(s) did not execute");
@@ -92,11 +93,12 @@ internal static class GateReport
             md.AppendLine();
             md.AppendLine("Frontend leg exit codes (`0` = pass):");
             md.AppendLine();
-            md.AppendLine("| Frontend | Role | Tests exit | AVP exit | Feature E2E exit | E2E shape exit | E2E run exit |");
-            md.AppendLine("|---|---|---:|---:|---:|---:|---:|");
+            md.AppendLine("| Frontend | Role | Tests exit | AVP exit | Rendered exit | Feature E2E exit | E2E shape exit | E2E run exit |");
+            md.AppendLine("|---|---|---:|---:|---:|---:|---:|---:|");
             foreach (var frontend in legs.FrontendRuns)
                 md.AppendLine(CultureInfo.InvariantCulture,
-                    $"| {frontend.Client} | {Role(frontend)} · {frontend.Scope} | {Exit(frontend.Tests)} | {Exit(frontend.Avp)} | {frontend.FeatureE2e} | "
+                    $"| {frontend.Client} | {Role(frontend)} · {frontend.Scope} | {Exit(frontend.Tests)} | {Exit(frontend.Avp)} | "
+                  + $"{Exit(frontend.RenderedDesign)} | {frontend.FeatureE2e} | "
                   + $"{Exit(frontend.E2eShape)} | {Exit(frontend.E2e)} |");
         }
 

@@ -392,10 +392,7 @@ internal static class SkiesManifest
         }
     }
 
-    /// <summary>
-    /// Require the non-bypassable release entry point in CI. Local hooks remain useful feedback, but only a
-    /// checked workflow can supply a required status to branch protection after an agent changes the code.
-    /// </summary>
+    /// <summary>Require one checked affected-verification authority and one explicit exhaustive boundary.</summary>
     private static void CheckGateWorkflow(string root, List<string> messages)
     {
         var workflows = Path.Combine(root, ".github", "workflows");
@@ -403,18 +400,84 @@ internal static class SkiesManifest
             ? Directory.EnumerateFiles(workflows, "*.yml").Concat(Directory.EnumerateFiles(workflows, "*.yaml"))
             : [];
         var definitions = files.Select(File.ReadAllText).ToList();
-        if (!definitions.Any(WorkflowRunsAuthoritativeGate))
+        var ciAuthority = definitions.Any(WorkflowRunsAuthoritativeGate);
+        var localAuthority = LocalPrePushRunsAuthoritativeGate(root);
+        if (!ciAuthority && !localAuthority)
         {
             messages.Add(
-                $"{FileName}: no pull-request workflow directly runs an authoritative `skies gate`/`skies check` "
-              + "without `--fast` — branch protection needs the complete affected verdict.");
+                $"{FileName}: no checked boundary runs authoritative affected `skies gate`/`skies check` without "
+              + "`--fast` — use pull-request CI or a base-relative local pre-push hook.");
         }
-        if (!definitions.Any(WorkflowRunsFullGate))
+        else if (ciAuthority && localAuthority)
         {
             messages.Add(
-                $"{FileName}: no release, reusable, or manual workflow directly runs `skies gate --full` or "
-              + "`skies check --full` — exhaustive release verification cannot depend on agent recall.");
+                $"{FileName}: both pull-request CI and the local pre-push hook claim authoritative affected "
+              + "verification — choose exactly one authority boundary.");
         }
+
+        if (!definitions.Any(WorkflowRunsFullGate) && !PackageRunsFullGate(root))
+        {
+            messages.Add(
+                $"{FileName}: no explicit package command or release/manual workflow directly runs "
+              + "`skies gate --full` or `skies check --full`.");
+        }
+    }
+
+    private static bool LocalPrePushRunsAuthoritativeGate(string root)
+    {
+        var path = Path.Combine(root, "lefthook.yml");
+        if (!File.Exists(path))
+            return false;
+
+        var yaml = WithoutComments(File.ReadAllText(path));
+        var match = Regex.Match(
+            yaml,
+            @"(?ims)^pre-push\s*:\s*(?<block>.*?)(?=^[^\s][^:\r\n]*:\s*$|\z)");
+        if (!match.Success || VerdictCanBeIgnored(match.Groups["block"].Value))
+            return false;
+
+        return GateInvocations(match.Groups["block"].Value).Any(command =>
+            Regex.IsMatch(command, @"(?:^|\s)--base(?:=|\s+)(?:""[^""]+""|'[^']+'|[^\s]+)")
+            && !command.Contains("--fast", StringComparison.Ordinal)
+            && !command.Contains("--staged", StringComparison.Ordinal)
+            && !command.Contains("--full", StringComparison.Ordinal));
+    }
+
+    private static bool PackageRunsFullGate(string root)
+    {
+        var path = Path.Combine(root, "package.json");
+        if (!File.Exists(path))
+            return false;
+
+        try
+        {
+            using var document = JsonDocument.Parse(File.ReadAllText(path));
+            if (!document.RootElement.TryGetProperty("scripts", out var scripts)
+                || scripts.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            return scripts.EnumerateObject().Any(script =>
+                script.Value.ValueKind == JsonValueKind.String
+                && DirectGateInvocation(script.Value.GetString()!) is { } command
+                && command.Contains("--full", StringComparison.Ordinal));
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    private static string? DirectGateInvocation(string command)
+    {
+        if (Regex.IsMatch(command, @"(?:&&|\|\||;|\s\|\s)"))
+            return null;
+
+        var match = Regex.Match(
+            command,
+            @"(?i)^\s*(?:skies(?:\.exe)?|dotnet\s+tool\s+run\s+skies)\s+(?:gate|check)\b.*$");
+        return match.Success ? match.Value : null;
     }
 
     private static bool WorkflowRunsAuthoritativeGate(string yaml)

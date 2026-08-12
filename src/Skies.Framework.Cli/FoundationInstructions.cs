@@ -31,15 +31,16 @@ internal static class FoundationInstructions
            decisions for WTW, proven patterns for RTW, corrected failures for NYA, or evidence-backed
            conditional deferments for NWC. Never record hypothetical guidance.
         4. Run focused repository tests and linters during implementation.
-        5. Before commit, stage the exact intended paths and run
-           `dotnet tool run skies check --task "<completed work>" --staged`. Staged checks are always bounded:
-           mapped proofs run, while exhaustive fallbacks and browser/device execution wait for authoritative CI.
-        6. Before push, run `dotnet tool run skies check --task "<review>" --base <target-revision> --fast`.
-           The pre-push hook repeats this bounded committed-diff review.
-        7. Never replace the automation-owned depth gates: pull-request CI runs affected without `--fast`, and
-           release automation runs `--full`. Do not report an external delivery complete until its required status
-           is green. Bare `skies check --task ...` is intentionally invalid so an ambiguous scope cannot start a
-           surprise exhaustive run.
+        5. Before commit, stage the exact intended paths. The checked pre-commit hook runs
+           `dotnet tool run skies check --task "<completed work>" --staged`; invoke it manually only when validating
+           without committing. Staged checks remain bounded while every directly mapped proof runs.
+        6. Follow the repository's single checked authority boundary. With CI authority, pre-push is
+           `--base <target-revision> --fast` and pull-request CI runs affected verification without `--fast`.
+           With local authority, the pre-push hook itself runs `--base <target-revision>` without `--fast`, and no
+           pull-request workflow is required. Never configure both as authoritative.
+        7. Run the repository's explicit `--full` release command at its release boundary, locally or in release
+           automation. Bare `skies check --task ...` is intentionally invalid so an ambiguous scope cannot start a
+           surprise exhaustive run. Do not report delivery complete until its selected checked boundary is green.
         8. Rerun the same check after every fix. Exit code 1 means findings remain. Exit code 2 or greater
            means validation was incomplete. Neither is a pass.
 
@@ -83,8 +84,9 @@ internal static class FoundationInstructions
         return block.Contains("dotnet tool run skies context", StringComparison.Ordinal)
             && block.Contains("dotnet tool run skies check", StringComparison.Ordinal)
             && block.Contains("--staged", StringComparison.Ordinal)
-            && block.Contains("--base <target-revision> --fast", StringComparison.Ordinal)
-            && block.Contains("release automation runs `--full`", StringComparison.Ordinal);
+            && block.Contains("single checked authority boundary", StringComparison.Ordinal)
+            && block.Contains("With local authority", StringComparison.Ordinal)
+            && block.Contains("explicit `--full` release command", StringComparison.Ordinal);
     }
 
     private static string RemoveBlock(string content, string startMarker, string endMarker)

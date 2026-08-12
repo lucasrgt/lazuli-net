@@ -1,7 +1,7 @@
 schema = 1
 id = "pre-push-check-is-base-relative-fast"
 kind = "invariant"
-status = "active"
+status = "superseded"
 title = "Pre-push verification is base-relative and bounded"
 statement = 'Before push, the checked hook runs `skies check --task "<review>" --base <target-revision> --fast` against the committed diff.'
 violation = "The pre-push hook omits the base revision or `--fast`, validates an ambiguous scope, or does not repeat the bounded committed-diff review."

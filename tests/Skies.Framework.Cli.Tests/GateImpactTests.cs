@@ -84,6 +84,36 @@ public sealed class GateImpactTests
     }
 
     [Fact]
+    public void A_storybook_source_change_selects_rendered_design_and_neighbor_tests_without_full_runtime_widening()
+    {
+        var root = Workspace();
+        try
+        {
+            var storybook = Path.Combine(root, "clients/web/src/storybook");
+            Directory.CreateDirectory(storybook);
+            File.WriteAllText(Path.Combine(storybook, "designHarness.ts"), "export {};\n");
+            File.WriteAllText(Path.Combine(storybook, "designHarness.test.ts"), "export {};\n");
+            var package = new FrontendPackage(Path.Combine(root, "clients/web"), FrontendPackageRole.Surface);
+
+            var plan = GateImpact.Build(
+                root,
+                ["clients/web/src/storybook/designHarness.ts"],
+                [], [], [], [], [package]);
+
+            var frontend = Assert.Single(plan.Frontends);
+            Assert.False(frontend.Full);
+            Assert.True(frontend.RenderedDesign);
+            Assert.Contains("src/storybook/designHarness.test.ts", frontend.Tests);
+            Assert.Empty(frontend.Flows);
+            Assert.Contains(plan.Reasons, reason => reason.Contains("without widening runtime tests"));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void A_generated_client_fallback_keeps_directly_changed_frontend_proofs_mapped()
     {
         var root = Workspace();

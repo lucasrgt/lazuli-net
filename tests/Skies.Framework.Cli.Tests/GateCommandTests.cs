@@ -111,6 +111,7 @@ public class GateCommandTests
         };
         frontend.Tests.Add("src/features/login/Login.test.ts");
         frontend.Assays.Add("src/features/login/Login.assay.test.ts");
+        frontend.RenderedDesign = true;
         frontend.Flows.Add(new FrontendFlow(
             "login-happy",
             "web",
@@ -128,6 +129,7 @@ public class GateCommandTests
         Assert.False(selected.Full);
         Assert.Contains("src/features/login/Login.test.ts", selected.Tests);
         Assert.Contains("src/features/login/Login.assay.test.ts", selected.Assays);
+        Assert.True(selected.RenderedDesign);
         Assert.Equal("login-happy", Assert.Single(selected.Flows).Id);
     }
 

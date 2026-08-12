@@ -32,8 +32,9 @@ public class FoundationInstructionsTests
         Assert.Contains("dotnet tool run skies context", result);
         Assert.Contains("dotnet tool run skies check", result);
         Assert.Contains("--staged", result);
-        Assert.Contains("--base <target-revision> --fast", result);
-        Assert.Contains("release automation runs `--full`", result);
+        Assert.Contains("single checked authority boundary", result);
+        Assert.Contains("With local authority", result);
+        Assert.Contains("explicit `--full` release command", result);
         Assert.Contains("intentionally invalid", result);
         Assert.Contains("Never create or", result);
     }

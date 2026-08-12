@@ -220,11 +220,11 @@ internal static class GateCommand
 
         var reasons = new List<string>(impact.Reasons);
         if (impact.Backend.Full)
-            reasons.Add($"backend: exhaustive fallback {FastDeferralMarker}; affected CI or an explicit --full audit executes it");
+            reasons.Add($"backend: exhaustive fallback {FastDeferralMarker}; the authoritative affected boundary or an explicit --full audit executes it");
         if (oversized)
-            reasons.Add($"backend: oversized transitive proof closure {FastDeferralMarker}; direct mappings still execute and affected CI executes the complete closure");
+            reasons.Add($"backend: oversized transitive proof closure {FastDeferralMarker}; direct mappings still execute and the authoritative affected boundary executes the complete closure");
         if (exhaustiveFrontend)
-            reasons.Add($"frontend: exhaustive runtime closure {FastDeferralMarker}; affected CI executes every test and Assay");
+            reasons.Add($"frontend: exhaustive runtime closure {FastDeferralMarker}; the authoritative affected boundary executes every test and Assay");
 
         return impact with
         {
@@ -245,6 +245,7 @@ internal static class GateCommand
         bounded.Tests.UnionWith(source.Tests);
         bounded.Assays.UnionWith(source.Assays);
         bounded.Flows.AddRange(source.Flows);
+        bounded.RenderedDesign = source.RenderedDesign;
         return bounded;
     }
 

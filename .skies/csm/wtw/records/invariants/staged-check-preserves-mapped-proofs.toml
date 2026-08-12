@@ -1,7 +1,7 @@
 schema = 1
 id = "staged-check-preserves-mapped-proofs"
 kind = "invariant"
-status = "active"
+status = "superseded"
 title = "Staged checks preserve directly mapped proofs"
 statement = "Before commit, `skies check --staged` is bounded but runs every directly mapped proof, deferring only exhaustive fallbacks and browser or device execution."
 violation = "A staged check omits a directly mapped test, Assay, or flow, or executes an exhaustive fallback or browser/device inventory."

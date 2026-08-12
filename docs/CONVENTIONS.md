@@ -559,9 +559,9 @@ Execution modes are closed and framework-owned:
 - `skies gate` — complete transitive proof closure for committed and local working-tree changes;
 - `skies gate --affected --base <revision>` — push/PR closure frozen to `<revision>...HEAD`, excluding local-only and untracked files that cannot enter that review;
 - `skies gate --staged --fast` — index-rooted pre-commit feedback; exhaustive fallbacks and browser/device execution
-  are deferred to authoritative CI;
-- `skies gate --affected --base <revision> --fast` — bounded local pre-push feedback over the commits being sent;
-  mapped backend filters still execute, while any full widening is explicitly reported as deferred;
+  are deferred to the repository's selected authority boundary;
+- `skies gate --affected --base <revision> [--fast]` — pre-push review over the commits being sent. CI-authority
+  repositories use `--fast`; local-authority repositories omit it and own the authoritative affected verdict;
 - `skies gate --full` — exhaustive audit, mandatory before release and optionally configured for main/manual/nightly.
 
 If Git ancestry is missing, a changed production file cannot be mapped, or runtime-wide build/test infrastructure
@@ -587,11 +587,10 @@ the push. So the wiring is part of the supply, not an exercise for each app:
   and CI.
 - An app is **born gated** exactly as it is born with slices, modules and the doctor: red work
   cannot reach `main` unnoticed. Retrofitting an existing app is the same three files.
-- Manifest validation requires a checked pull-request workflow that directly invokes authoritative affected
-  `skies gate`/`skies check` without `--fast`, plus a release/reusable/manual workflow that directly invokes
-  `--full`. Configure branch rules once to require the stable gate status and disallow bypasses. That external rule
-  is the authority an implementing LLM cannot edit in the same code change; local hooks and prompts are only
-  feedback.
+- Manifest validation requires exactly one authoritative affected boundary without `--fast`: either a checked
+  pull-request workflow or a base-relative local pre-push hook. It also requires an explicit `--full` package
+  command or release/reusable/manual workflow. CI authority is the scaffold default; local authority avoids a
+  duplicated remote run when one development machine is also the delivery boundary.
 
 ### Semantic memory travels with the scaffold
 

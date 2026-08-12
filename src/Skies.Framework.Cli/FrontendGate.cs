@@ -8,6 +8,7 @@ namespace Skies.Framework.Cli;
 /// <param name="FeatureE2e">The workspace feature-to-executable-flow coverage exit code.</param>
 /// <param name="E2eShape">The E2E contract exit code, or null for a non-executable package.</param>
 /// <param name="E2e">The real E2E runner exit code, or null for a non-executable package.</param>
+/// <param name="RenderedDesign">The rendered design/Storybook proof exit code.</param>
 internal sealed record FrontendGateLeg(
     string Client,
     FrontendPackageRole Role,
@@ -16,10 +17,11 @@ internal sealed record FrontendGateLeg(
     int FeatureE2e,
     int? E2eShape,
     int? E2e,
-    string Scope = "full")
+    string Scope = "full",
+    int? RenderedDesign = null)
 {
-    /// <summary>Whether every frontend verification leg ran successfully.</summary>
-    public bool Green => Tests is null or 0 && Avp is null or 0 && FeatureE2e == 0
+    /// <summary>Whether every selected frontend verification leg ran successfully.</summary>
+    public bool Green => Tests is null or 0 && Avp is null or 0 && RenderedDesign is null or 0 && FeatureE2e == 0
         && (Role != FrontendPackageRole.Surface || E2eShape == 0)
         && E2e is null or 0;
 }
@@ -68,6 +70,15 @@ internal static class FrontendGate
             if (impact.Full || impact.Assays.Count > 0)
                 avp = RunAssay(client, name, impact.Full ? null : impact.Assays.Order().ToArray());
 
+            int? renderedDesign = null;
+            if (!fast && (impact.RenderedDesign
+                          || impact.Full && FrontendScriptContract.HasScript(client, "design:rendered")))
+            {
+                Console.WriteLine($"skies gate — rendered design ({name}, "
+                    + (impact.Full ? "full" : "affected Storybook surface") + ")...");
+                renderedDesign = FrontendScriptContract.Run(client, "design:rendered");
+            }
+
             int? e2eShape = null;
             int? e2e = null;
             if (target.Role == FrontendPackageRole.Surface)
@@ -93,7 +104,8 @@ internal static class FrontendGate
             }
 
             var scope = impact.Full ? "full" : impact.Selected ? (fast ? "affected-fast" : "affected") : "not-affected";
-            legs.Add(new FrontendGateLeg(name, target.Role, tests, avp, featureCoverage, e2eShape, e2e, scope));
+            legs.Add(new FrontendGateLeg(
+                name, target.Role, tests, avp, featureCoverage, e2eShape, e2e, scope, renderedDesign));
         }
 
         return legs;

@@ -90,6 +90,21 @@ public class FrontendScriptContractTests
         }
     }
 
+    [Fact]
+    public void An_optional_rendered_design_script_is_detected_without_executing_it()
+    {
+        var root = Package("""{ "scripts": { "design:rendered": "playwright test -c playwright.design.config.ts" } }""");
+        try
+        {
+            Assert.True(FrontendScriptContract.HasScript(root, "design:rendered"));
+            Assert.False(FrontendScriptContract.HasScript(root, "design:missing"));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     [Theory]
     [InlineData("playwright test")]
     [InlineData("tsc --noEmit -p e2e/tsconfig.json && playwright test")]

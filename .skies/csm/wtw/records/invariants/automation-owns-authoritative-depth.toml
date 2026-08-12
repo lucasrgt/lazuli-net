@@ -1,7 +1,7 @@
 schema = 1
 id = "automation-owns-authoritative-depth"
 kind = "invariant"
-status = "active"
+status = "superseded"
 title = "Automation owns authoritative verification depth"
 statement = "Pull-request CI runs authoritative affected verification without `--fast`, and release automation runs exhaustive verification with `--full`."
 violation = "A pull-request workflow uses `--fast` as its authoritative verdict, a release boundary lacks `--full`, or local agent verification replaces either automation-owned gate."

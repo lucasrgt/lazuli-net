@@ -1,7 +1,7 @@
 schema = 1
 id = "explicit-local-verification-boundaries"
 kind = "decision"
-status = "active"
+status = "superseded"
 title = "Explicit local verification boundaries"
 statement = "Local Skies checks require an explicit scope: pre-commit verification uses bounded `--staged`, pre-push verification uses base-relative `--fast`, pull-request CI owns authoritative affected verification, and release automation owns `--full`."
 rationale = "Unscoped local checks could widen a small change into the repository's complete backend and browser inventory, making frequent verification impractical; bounded local feedback preserves iteration speed while checked hooks and CI guarantee authoritative depth at the appropriate lifecycle boundaries."

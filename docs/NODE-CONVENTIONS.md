@@ -109,7 +109,8 @@ APIs and live PostgreSQL tests rather than unsafe generic name matching.
 `skies.node.json` is the closed criterion/lane/proof/source-scope graph. `skies-node-foundation` validates it, rejects
 unknown or missing facts, scans enforcement suppressions, computes explainable dependency closure, and runs
 `--affected [--base <revision>]`, `--staged`, or `--full` with an optional `--fast` bound without a shell. Staged
-checks are always bounded; `--fast` defers exhaustive fallbacks to authoritative CI and conflicts with `--full`.
+checks are always bounded; `--fast` defers exhaustive fallbacks to the selected authoritative boundary and conflicts
+with `--full`.
 Full writes `VERIFICATION.json` and `VERIFICATION.md`; skipped, not-run, timed-out, unknown-impact, and missing
 proofs cannot become green.
 
