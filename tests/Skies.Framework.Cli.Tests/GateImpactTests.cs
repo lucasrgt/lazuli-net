@@ -113,6 +113,32 @@ public sealed class GateImpactTests
         }
     }
 
+    [Theory]
+    [InlineData("clients/web/.storybook/main.ts")]
+    [InlineData("clients/web/.storybook/smoke.mjs")]
+    [InlineData("clients/web/design-e2e/product-design-contract.spec.ts")]
+    [InlineData("clients/web/playwright.design.config.ts")]
+    public void Rendered_design_infrastructure_changes_do_not_widen_runtime_tests(string change)
+    {
+        var root = Workspace();
+        try
+        {
+            var package = new FrontendPackage(Path.Combine(root, "clients/web"), FrontendPackageRole.Surface);
+
+            var plan = GateImpact.Build(root, [change], [], [], [], [], [package]);
+
+            var frontend = Assert.Single(plan.Frontends);
+            Assert.False(frontend.Full);
+            Assert.True(frontend.RenderedDesign);
+            Assert.Empty(frontend.Flows);
+            Assert.Contains(plan.Reasons, reason => reason.Contains("without widening runtime tests"));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     [Fact]
     public void A_generated_client_fallback_keeps_directly_changed_frontend_proofs_mapped()
     {

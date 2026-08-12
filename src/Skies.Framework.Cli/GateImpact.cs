@@ -319,6 +319,13 @@ internal static class GateImpact
         List<string> reasons)
     {
         var local = change[packageRelative.Length..].TrimStart('/');
+        if (IsRenderedDesignInfrastructure(local))
+        {
+            impact.RenderedDesign = true;
+            reasons.Add($"frontend: {change} maps to the package rendered-design proof without widening runtime tests");
+            return;
+        }
+
         if (local is "package.json" or "tsconfig.json" || local.EndsWith("config.ts", StringComparison.OrdinalIgnoreCase)
             || local.EndsWith("config.js", StringComparison.OrdinalIgnoreCase) || local == "e2e/flows.json")
         {
@@ -386,6 +393,12 @@ internal static class GateImpact
             if (TryViewModelName(viewModel!, out var feature))
                 features.Add(feature);
     }
+
+    private static bool IsRenderedDesignInfrastructure(string local) =>
+        local.StartsWith(".storybook/", StringComparison.OrdinalIgnoreCase)
+        || local.StartsWith("design-e2e/", StringComparison.OrdinalIgnoreCase)
+        || local.Equals("playwright.design.config.ts", StringComparison.OrdinalIgnoreCase)
+        || local.Equals("playwright.design.config.js", StringComparison.OrdinalIgnoreCase);
 
     private static void SelectSiblingTests(FrontendImpact impact, string absolute)
     {
