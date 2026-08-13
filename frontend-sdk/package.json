@@ -1,6 +1,6 @@
 {
   "name": "@skiesjs/frontend-sdk",
-  "version": "4.1.13",
+  "version": "4.1.14",
   "type": "module",
   "description": "Canonical Skies frontend doctor and scaffolding tools.",
   "license": "MIT",
@@ -116,7 +116,7 @@
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "@vitest/eslint-plugin": "^1.1.43",
-    "assay-design": "https://github.com/lucasrgt/assay-design/releases/download/v0.7.1/assay-design-0.7.1.tgz",
+    "assay-design": "https://github.com/lucasrgt/assay-design/releases/download/v0.7.2/assay-design-0.7.2.tgz",
     "avp-assay": "^0.4.0",
     "esbuild": "^0.28.1",
     "eslint": "^9.17.0",
@@ -136,7 +136,7 @@
     "@skiesjs/eslint-plugin": "^4.0.5"
   },
   "overrides": {
-    "brace-expansion@<1.1.17": "1.1.17",
+    "brace-expansion@<1.1.18": "1.1.18",
     "brace-expansion@>=4.0.0 <5.0.9": "5.0.9"
   }
 }
