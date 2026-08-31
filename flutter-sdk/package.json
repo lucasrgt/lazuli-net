@@ -51,9 +51,10 @@
     "test": "node --test tools/*.test.mjs",
     "test:contract": "node tools/contract-smoke.mjs",
     "test:parity": "node tools/parity.mjs",
+    "restore:dart": "cd packages/skies_flutter && flutter pub get",
     "test:dart": "cd packages/skies_flutter && flutter test",
     "analyze:dart": "flutter analyze packages/skies_flutter",
-    "check": "npm test && npm run test:parity && npm run test:contract && npm run analyze:dart && npm run test:dart"
+    "check": "npm test && npm run test:parity && npm run test:contract && npm run restore:dart && npm run analyze:dart && npm run test:dart"
   },
   "dependencies": {
     "@openapitools/openapi-generator-cli": "2.41.0"
