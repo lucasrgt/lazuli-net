@@ -160,6 +160,30 @@ test("a base that predates the manifest anchors at its introduction instead of b
   assert.match(checkDrift(manifest(), changed).join("\n"), /missing dotnet change/);
 });
 
+test("a new release tag compares parity with the previous framework release", async t => {
+  const root = await fixture(t, ["n/src/api.js", "d/src/api.cs"]);
+  await mkdir(join(root, "parity"), { recursive: true });
+  await writeFile(join(root, "parity/skies.parity.json"), JSON.stringify(manifest()));
+  git(root, ["init", "-q"]);
+  git(root, ["config", "user.email", "test@example.test"]);
+  git(root, ["config", "user.name", "Test"]);
+  git(root, ["add", "-A"]);
+  git(root, ["commit", "-q", "-m", "base"]);
+  git(root, ["tag", "v1.0.0"]);
+  await writeFile(join(root, "n/src/api.js"), "after\n");
+  await writeFile(join(root, "d/src/api.cs"), "after\n");
+  git(root, ["add", "-A"]);
+  git(root, ["commit", "-q", "-m", "paired change"]);
+  git(root, ["tag", "v1.1.0"]);
+  const eventPath = join(root, "event.json");
+  await writeFile(eventPath, JSON.stringify({ before: "0".repeat(40), ref: "refs/tags/v1.1.0" }));
+
+  const changed = discoverChangedPaths(root, { ci: true, env: { GITHUB_EVENT_PATH: eventPath } });
+
+  assert.deepEqual(changed, ["d/src/api.cs", "n/src/api.js"]);
+  assert.deepEqual(checkDrift(manifest(), changed), []);
+});
+
 function git(root, args) {
   const result = spawnSync("git", args, { cwd: root, encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr || `git ${args.join(" ")} failed`);

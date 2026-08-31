@@ -270,7 +270,11 @@ export function discoverChangedPaths(root, { changed = [], base, ci = false, env
   if (ci && !base && env.GITHUB_EVENT_PATH) {
     try {
       const event = JSON.parse(requireRead(env.GITHUB_EVENT_PATH));
-      base = event.pull_request?.base?.sha ?? event.before;
+      base = event.pull_request?.base?.sha;
+      if (!base && event.before && !/^0+$/.test(event.before)) base = event.before;
+      if (!base && /^refs\/tags\/v\d/.test(event.ref ?? "")) {
+        base = git(root, ["describe", "--tags", "--match", "v[0-9]*", "--abbrev=0", "HEAD^"], true)[0];
+      }
     } catch { /* use fallback */ }
   }
   if (base) return changesFromBase(root, base, true);
