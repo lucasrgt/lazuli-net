@@ -1,6 +1,6 @@
 {
   "name": "skies-flutter",
-  "version": "4.1.22",
+  "version": "4.1.23",
   "type": "module",
   "description": "Skies Flutter client generation, MVVM scaffolding, and removable doctor.",
   "sideEffects": false,
