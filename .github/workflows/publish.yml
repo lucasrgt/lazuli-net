@@ -1,8 +1,8 @@
 name: publish
 
 # Publishes the Skies framework — all engines off ONE version tag (e.g. `v1.0.0`): the .NET backend to
-# nuget.org and the React frontend plus Node.js backend packages to npm. Bump each changed package version first,
-# then tag.
+# nuget.org, the React/Flutter tooling plus Node.js backend packages to npm, and the Flutter runtime to pub.dev.
+# Bump each changed package version first, then tag.
 # Auth: NuGet prefers Trusted Publishing and falls back to the repository's scoped NUGET_API_KEY when an
 # external trust policy is unavailable; npm uses NPM_TOKEN. The ecosystem jobs are independent — one
 # failing does not block the others. The nuget set below is
@@ -142,6 +142,103 @@ jobs:
           npm deprecate skies-react@4.0.4 "Moved to @skiesjs/react" || true
           npm deprecate eslint-plugin-skies@4.0.4 "Moved to @skiesjs/eslint-plugin" || true
           npm deprecate eslint-plugin-skies-node@0.1.0 "Moved to @skiesjs/eslint-plugin-node" || true
+
+  flutter-npm:
+    name: publish Flutter tooling to npm
+    needs: guard
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance attestations
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          cache: npm
+          cache-dependency-path: flutter-sdk/package-lock.json
+      - name: install
+        working-directory: flutter-sdk
+        run: npm ci
+      - name: publish public package (skip version already on npm)
+        working-directory: flutter-sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "NPM_TOKEN not set — Flutter tooling cannot be published."
+            exit 1
+          fi
+          name=$(node -p "require('./package.json').name")
+          ver=$(node -p "require('./package.json').version")
+          if npm view "$name@$ver" version >/dev/null 2>&1; then
+            echo "$name@$ver already on npm — skip"
+          else
+            npm publish --access public --provenance
+          fi
+      - name: verify exact package from npm
+        working-directory: flutter-sdk
+        run: |
+          name=$(node -p "require('./package.json').name")
+          ver=$(node -p "require('./package.json').version")
+          for poll in $(seq 1 45); do
+            npm view "$name@$ver" version >/dev/null 2>&1 && break
+            echo "waiting for $name@$ver registry visibility (poll $poll/45)"
+            sleep 20
+          done
+          npm view "$name@$ver" version >/dev/null 2>&1
+          receipt="$RUNNER_TEMP/skies-flutter-npm-receipt"
+          mkdir -p "$receipt"
+          cd "$receipt"
+          npm init -y >/dev/null
+          npm install --ignore-scripts --no-audit --no-fund --save-exact "$name@$ver"
+          node --input-type=module -e "await import('$name/package-versions')"
+
+  flutter-pub:
+    name: publish Flutter runtime to pub.dev
+    needs: guard
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # pub.dev automated publishing
+    defaults:
+      run:
+        working-directory: flutter-sdk/packages/skies_flutter
+    steps:
+      - uses: actions/checkout@v7
+      # setup-dart provisions the short-lived pub.dev OIDC token. Flutter is installed afterward because
+      # this package depends on the Flutter SDK and must be published through `flutter pub`.
+      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: publish matching release version
+        run: |
+          version=$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "skies_flutter@$version does not match release tag $GITHUB_REF_NAME — skip"
+            exit 0
+          fi
+          if curl --fail --silent --show-error "https://pub.dev/api/packages/skies_flutter/versions/$version" >/dev/null; then
+            echo "skies_flutter@$version already on pub.dev — skip"
+            exit 0
+          fi
+          flutter pub publish --dry-run
+          flutter pub publish --force
+      - name: verify exact package on pub.dev
+        run: |
+          version=$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml)
+          [ "v$version" = "$GITHUB_REF_NAME" ] || exit 0
+          for poll in $(seq 1 45); do
+            curl --fail --silent --show-error "https://pub.dev/api/packages/skies_flutter/versions/$version" >/dev/null && exit 0
+            echo "waiting for skies_flutter@$version registry visibility (poll $poll/45)"
+            sleep 20
+          done
+          echo "skies_flutter@$version did not become visible on pub.dev"
+          exit 1
 
   node-npm:
     name: publish Node.js packages to npm

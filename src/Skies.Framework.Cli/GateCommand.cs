@@ -209,12 +209,21 @@ internal static class GateCommand
     /// </summary>
     internal static GateImpactPlan ApplyFastFeedback(GateImpactPlan impact, bool fast)
     {
+        var exhaustiveFrontend = impact.Frontends.Any(frontend => frontend.Full || frontend.ExhaustiveFallback);
         if (!fast)
-            return impact;
+        {
+            if (!impact.Frontends.Any(frontend => frontend.ExhaustiveFallback))
+                return impact;
+            return impact with
+            {
+                Frontends = impact.Frontends
+                    .Select(frontend => frontend.ExhaustiveFallback ? FullFrontend(frontend) : frontend)
+                    .ToList(),
+            };
+        }
 
         var filter = ProofFilter(impact.Backend);
         var oversized = filter.Length > MaxInlineFilterLength;
-        var exhaustiveFrontend = impact.Frontends.Any(frontend => frontend.Full);
         if (!impact.Backend.Full && !oversized && !exhaustiveFrontend)
             return impact;
 
@@ -233,20 +242,24 @@ internal static class GateCommand
                 oversized ? impact.Backend.DirectFilters : impact.Backend.Filters,
                 oversized ? impact.Backend.DirectAffectedSlices : impact.Backend.AffectedSlices),
             Frontends = impact.Frontends
-                .Select(frontend => frontend.Full ? BoundedFrontend(frontend) : frontend)
+                .Select(frontend => frontend.Full || frontend.ExhaustiveFallback
+                    ? CopyFrontend(frontend, full: false)
+                    : frontend)
                 .ToList(),
             Reasons = reasons,
         };
     }
 
-    private static FrontendImpact BoundedFrontend(FrontendImpact source)
+    private static FrontendImpact FullFrontend(FrontendImpact source) => CopyFrontend(source, full: true);
+
+    private static FrontendImpact CopyFrontend(FrontendImpact source, bool full)
     {
-        var bounded = new FrontendImpact(source.Package);
-        bounded.Tests.UnionWith(source.Tests);
-        bounded.Assays.UnionWith(source.Assays);
-        bounded.Flows.AddRange(source.Flows);
-        bounded.RenderedDesign = source.RenderedDesign;
-        return bounded;
+        var copy = new FrontendImpact(source.Package) { Full = full };
+        copy.Tests.UnionWith(source.Tests);
+        copy.Assays.UnionWith(source.Assays);
+        copy.Flows.AddRange(source.Flows);
+        copy.RenderedDesign = source.RenderedDesign;
+        return copy;
     }
 
     /// <summary>Build the proof-run arguments, reusing a doctor build only when it actually passed.</summary>

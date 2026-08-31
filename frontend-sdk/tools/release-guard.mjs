@@ -10,6 +10,12 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { FRONTEND_PACKAGE_VERSIONS } from "./package-versions.mjs";
 
+/** Flutter versions mirrored here so the published release guard remains self-contained. */
+export const FLUTTER_RELEASE_VERSIONS = Object.freeze([
+  Object.freeze({ name: "skies-flutter", version: "4.1.22" }),
+  Object.freeze({ name: "skies_flutter", version: "4.1.22" }),
+]);
+
 // The publishable surface. A unit "changed" if any shipped path differs since the tag; `version` is the file
 // whose number must move when that happens. The NuGet packages share one number (the library props); each npm
 // package carries its own. SelfHarness is framework-dev-only and never shipped, so it is not a unit here.
@@ -72,6 +78,16 @@ export const RELEASE_UNITS = Object.freeze([
     version: "frontend-sdk/package.json",
     paths: ["frontend-sdk/tools", "frontend-sdk/README.md", "frontend-sdk/package.json"],
   },
+  {
+    name: "skies-flutter",
+    version: "flutter-sdk/package.json",
+    paths: ["flutter-sdk/tools", "flutter-sdk/parity", "flutter-sdk/README.md", "flutter-sdk/package.json"],
+  },
+  {
+    name: "skies_flutter",
+    version: "flutter-sdk/packages/skies_flutter/pubspec.yaml",
+    paths: ["flutter-sdk/packages/skies_flutter"],
+  },
   ...NODE_PACKAGES.map(nodeReleaseUnit),
 ]);
 
@@ -97,6 +113,8 @@ const CANONICAL_MANIFESTS = Object.freeze({
   "avp-assay": "frontend-sdk/node_modules/avp-assay/package.json",
   "@skiesjs/react": "frontend-sdk/packages/skies-react/package.json",
   "@skiesjs/eslint-plugin": "frontend-sdk/packages/eslint-plugin/package.json",
+  "skies-flutter": "flutter-sdk/package.json",
+  "skies_flutter": "flutter-sdk/packages/skies_flutter/pubspec.yaml",
 });
 
 /**
@@ -112,7 +130,8 @@ export function canonicalDrift(canonical, readManifest) {
   return canonical.flatMap(({ name, version }) => {
     const path = CANONICAL_MANIFESTS[name];
     if (!path) return [`release-guard: ${name} is in FRONTEND_PACKAGE_VERSIONS but has no known manifest path.`];
-    const actual = JSON.parse(readManifest(path)).version;
+    const content = readManifest(path);
+    const actual = path.endsWith(".yaml") ? versionOf(content, path) : JSON.parse(content).version;
     return actual === version
       ? []
       : [
@@ -125,6 +144,7 @@ export function canonicalDrift(canonical, readManifest) {
 /** @param {string} content @param {string} versionPath */
 function versionOf(content, versionPath) {
   if (/\.(?:props|csproj)$/.test(versionPath)) return content.match(/<Version>([^<]+)<\/Version>/)?.[1] ?? "";
+  if (/\.ya?ml$/.test(versionPath)) return content.match(/^version:\s*['"]?([^'"\s]+)['"]?\s*$/m)?.[1] ?? "";
   try {
     return JSON.parse(content).version ?? "";
   } catch {
@@ -176,7 +196,7 @@ if (invokedDirectly) {
 
   const messages = [
     ...violations(units),
-    ...canonicalDrift(FRONTEND_PACKAGE_VERSIONS, (path) => readFileSync(path, "utf8")),
+    ...canonicalDrift([...FRONTEND_PACKAGE_VERSIONS, ...FLUTTER_RELEASE_VERSIONS], (path) => readFileSync(path, "utf8")),
   ];
   for (const message of messages) console.error(message);
   if (messages.length === 0) console.log(`release-guard: every changed publishable unit was bumped since ${base}.`);

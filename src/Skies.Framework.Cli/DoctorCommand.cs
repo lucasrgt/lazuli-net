@@ -67,7 +67,7 @@ internal static class DoctorCommand
             });
             if (strictWarnings)
             {
-                legs.Add(() => FrontendWarningGate.RunLint(captured.Path));
+                legs.Add(() => FrontendWarningGate.RunLint(captured, root));
             }
         }
         if (strictWarnings)

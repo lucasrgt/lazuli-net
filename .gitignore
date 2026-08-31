@@ -37,6 +37,10 @@ local-feed/
 
 ## Node (template clients, if any)
 node_modules/
+## Dart and Flutter package-local output
+.dart_tool/
+flutter-sdk/packages/*/pubspec.lock
+flutter-sdk/packages/*/build/
 ## generator/doctor test scratch (written under cwd; cleaned up after)
 frontend/tools/.scaffold-tmp-*/
 frontend/tools/.e2e-doctor-tmp-*/

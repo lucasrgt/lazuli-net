@@ -29,7 +29,7 @@ internal sealed record FrontendGateLeg(
 /// <summary>Runs every frontend proof suite. Missing scripts/tools fail naturally; nothing is optional.</summary>
 internal static class FrontendGate
 {
-    private const string AssaySuiteGlob = "**/*.assay.test.*";
+    private const string ReactAssaySuiteGlob = "**/*.assay.test.*";
 
     /// <summary>
     /// Run the globally structural frontend checks and the runtime subset selected by <paramref name="impacts"/>.
@@ -55,20 +55,27 @@ internal static class FrontendGate
             int? avp = null;
             if (impact.Full || impact.Tests.Count > 0)
             {
-                Console.WriteLine($"skies gate — frontend tests ({name}, "
-                    + (impact.Full ? "full non-Assay partition" : $"{impact.Tests.Count} affected file(s)") + ")...");
-                var filters = impact.Full ? [] : impact.Tests.Order().ToArray();
-                var arguments = new List<string> { "--" };
-                arguments.AddRange(filters);
-                arguments.Add($"--exclude={AssaySuiteGlob}");
-                tests = FrontendScriptContract.Run(
-                    client,
-                    FrontendScriptContract.ResolveUnitTestScript(client),
-                    [.. arguments]);
+                if (target.Platform == FrontendPlatform.Flutter)
+                {
+                    tests = RunFlutterTests(client, impact);
+                }
+                else
+                {
+                    Console.WriteLine($"skies gate — frontend tests ({name}, "
+                        + (impact.Full ? "full non-Assay partition" : $"{impact.Tests.Count} affected file(s)") + ")...");
+                    var filters = impact.Full ? [] : impact.Tests.Order().ToArray();
+                    var arguments = new List<string> { "--" };
+                    arguments.AddRange(filters);
+                    arguments.Add($"--exclude={ReactAssaySuiteGlob}");
+                    tests = FrontendScriptContract.Run(
+                        client,
+                        FrontendScriptContract.ResolveUnitTestScript(client),
+                        [.. arguments]);
+                }
             }
 
             if (impact.Full || impact.Assays.Count > 0)
-                avp = RunAssay(client, name, impact.Full ? null : impact.Assays.Order().ToArray());
+                avp = RunAssay(target, name, impact.Full ? null : impact.Assays.Order().ToArray());
 
             int? renderedDesign = null;
             if (!fast && (impact.RenderedDesign
@@ -84,7 +91,10 @@ internal static class FrontendGate
             if (target.Role == FrontendPackageRole.Surface)
             {
                 Console.WriteLine($"skies gate — frontend E2E contract ({name})...");
-                var manifestShape = Tooling.Run("npx", ["--no-install", "skyfe-e2e-doctor", "."], client);
+                var doctor = target.Platform == FrontendPlatform.Flutter
+                    ? "skies-flutter-e2e-doctor"
+                    : "skyfe-e2e-doctor";
+                var manifestShape = Tooling.Run("npx", ["--no-install", doctor, "."], client);
                 e2eShape = manifestShape;
 
                 if (!fast && (impact.Full || impact.Flows.Count > 0))
@@ -98,7 +108,7 @@ internal static class FrontendGate
                     {
                         Console.WriteLine($"skies gate — frontend E2E execution ({name}, "
                             + (impact.Full ? "full" : $"{flows.Count} affected flow(s)") + ")...");
-                        e2e = RunE2e(client, flows);
+                        e2e = RunE2e(target, flows);
                     }
                 }
             }
@@ -112,8 +122,9 @@ internal static class FrontendGate
     }
 
     /// <summary>Run Assay whenever the package owns a ViewModel or an explicit Assay suite.</summary>
-    internal static int RunAssay(string client, string name, IReadOnlyList<string>? paths = null)
+    internal static int RunAssay(FrontendPackage package, string name, IReadOnlyList<string>? paths = null)
     {
+        var client = package.Path;
         if (!RequiresAssay(client))
         {
             Console.WriteLine($"skies gate — frontend AVP ({name}): not applicable (no ViewModel or Assay suite).");
@@ -121,6 +132,22 @@ internal static class FrontendGate
         }
 
         Console.WriteLine($"skies gate — frontend AVP ({name})...");
+        if (package.Platform == FrontendPlatform.Flutter)
+        {
+            var testRoot = Path.Combine(client, "test");
+            var assays = paths ?? (Directory.Exists(testRoot)
+                ? Directory.EnumerateFiles(testRoot, "*.assay_test.dart", SearchOption.AllDirectories)
+                    .Select(path => Path.GetRelativePath(client, path))
+                    .Order(StringComparer.OrdinalIgnoreCase)
+                    .ToArray()
+                : []);
+            if (assays.Count == 0)
+            {
+                Console.Error.WriteLine($"skies gate — frontend AVP ({name}): a Flutter ViewModel has no executable *.assay_test.dart proof.");
+                return 1;
+            }
+            return Tooling.Run("flutter", ["test", .. assays], client);
+        }
         // Invoke Assay directly: a package script is allowed to compose work, but must not be able to replace
         // the acceptance verifier with a placeholder that exits zero.
         var arguments = new List<string> { "--no-install", "assay", "verify" };
@@ -132,6 +159,15 @@ internal static class FrontendGate
     /// <summary>Decide whether the universal ViewModel-to-Assay obligation applies to this package.</summary>
     internal static bool RequiresAssay(string client)
     {
+        var flutterSource = Path.Combine(client, "lib");
+        var flutterTests = Path.Combine(client, "test");
+        if (File.Exists(Path.Combine(client, "pubspec.yaml")))
+        {
+            return Directory.Exists(flutterSource)
+                   && Directory.EnumerateFiles(flutterSource, "*_view_model.dart", SearchOption.AllDirectories).Any()
+                   || Directory.Exists(flutterTests)
+                   && Directory.EnumerateFiles(flutterTests, "*.assay_test.dart", SearchOption.AllDirectories).Any();
+        }
         var source = Path.Combine(client, "src");
         if (!Directory.Exists(source))
             return false;
@@ -150,16 +186,36 @@ internal static class FrontendGate
             return 0;
 
         Console.WriteLine("skies gate — frontend feature → E2E coverage...");
-        var arguments = new List<string> { "--no-install", "skyfe-feature-e2e", workspace };
-        arguments.AddRange(targets.Select(target =>
+        var reactTargets = targets.Where(target => target.Platform == FrontendPlatform.React).ToList();
+        var code = 0;
+        if (reactTargets.Count > 0)
+        {
+            var arguments = new List<string> { "--no-install", "skyfe-feature-e2e", workspace };
+            arguments.AddRange(reactTargets.Select(target =>
             $"{(target.Role == FrontendPackageRole.Surface ? "surface" : "core")}={target.Path}"));
-        var toolRoot = targets.FirstOrDefault(target => target.Role == FrontendPackageRole.Surface)?.Path
-            ?? targets[0].Path;
-        return Tooling.Run("npx", [.. arguments], toolRoot);
+            var toolRoot = reactTargets.FirstOrDefault(target => target.Role == FrontendPackageRole.Surface)?.Path
+                ?? reactTargets[0].Path;
+            code = Math.Max(code, Tooling.Run("npx", [.. arguments], toolRoot));
+        }
+        foreach (var target in targets.Where(target => target.Platform == FrontendPlatform.Flutter))
+            code = Math.Max(code, Tooling.Run(
+                "npx",
+                ["--no-install", "skies-flutter-feature-e2e", "."],
+                target.Path));
+        return code;
     }
 
-    private static int RunE2e(string client, IReadOnlyList<FrontendFlow> flows)
+    private static int RunE2e(FrontendPackage package, IReadOnlyList<FrontendFlow> flows)
     {
+        var client = package.Path;
+        if (package.Platform == FrontendPlatform.Flutter)
+        {
+            if (flows.Any(flow => flow.Target != "native"))
+                return 1;
+            var specs = flows.Select(flow => flow.Spec).Where(spec => spec.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase).Order().ToArray();
+            return specs.Length == 0 ? 0 : Tooling.Run("flutter", ["test", .. specs], client);
+        }
         var code = 0;
         // A release gate must never attach to an arbitrary dev server that merely answers the same health URL.
         // Playwright's standard `reuseExistingServer: !process.env.CI` convention therefore receives CI=true
@@ -190,6 +246,21 @@ internal static class FrontendGate
         if (native.Count > 0)
             code = Math.Max(code, Tooling.Run("maestro", ["test", .. native], client, gateEnvironment));
         return code;
+    }
+
+    private static int RunFlutterTests(string client, FrontendImpact impact)
+    {
+        var testRoot = Path.Combine(client, "test");
+        var tests = impact.Full && Directory.Exists(testRoot)
+            ? Directory.EnumerateFiles(testRoot, "*_test.dart", SearchOption.AllDirectories)
+                .Where(path => !path.EndsWith(".assay_test.dart", StringComparison.OrdinalIgnoreCase))
+                .Select(path => Path.GetRelativePath(client, path)).Order(StringComparer.OrdinalIgnoreCase).ToArray()
+            : impact.Full ? [] : impact.Tests.Order().ToArray();
+        if (tests.Length == 0)
+            return 0;
+        Console.WriteLine($"skies gate — Flutter tests ({Path.GetFileName(client)}, "
+            + (impact.Full ? "full non-Assay partition" : $"{tests.Length} affected file(s)") + ")...");
+        return Tooling.Run("flutter", ["test", .. tests], client);
     }
 
     private static bool SamePackage(FrontendPackage left, FrontendPackage right) =>

@@ -1,6 +1,6 @@
 # Monorepo architecture
 
-Skies treats a monorepo as explicit product topology plus independent, ordinary .NET and npm packages.
+Skies treats a monorepo as explicit product topology plus independent, ordinary .NET, npm, and Dart packages.
 `Skies.toml` names what exists; it does not define tasks, proof modes, dependencies, generators, or runner
 filters. Build behavior stays visible in project files, package scripts, and runner configuration.
 
@@ -103,10 +103,10 @@ attestation, even when an uncertain affected run widens its execution for safety
 
 ## Package-first framework updates
 
-Framework rules and shared primitives land in this repository first, are packed as versioned NuGet/npm packages,
+Framework rules and shared primitives land in this repository first, are packed as versioned NuGet/npm/pub packages,
 and are then consumed by applications. A pilot never keeps a private copy of a framework rule or frontend plugin.
 The framework-sync gate detects stale package versions and retired vendored copies.
 
-The canonical backend and frontend conventions remain in [CONVENTIONS.md](CONVENTIONS.md) and
-[FRONTEND-CONVENTIONS.md](FRONTEND-CONVENTIONS.md); this document only defines how their proof surfaces compose in
-a monorepo.
+The canonical backend and frontend conventions remain in [CONVENTIONS.md](CONVENTIONS.md),
+[FRONTEND-CONVENTIONS.md](FRONTEND-CONVENTIONS.md), and [FLUTTER-CONVENTIONS.md](FLUTTER-CONVENTIONS.md); this
+document only defines how their proof surfaces compose in a monorepo.

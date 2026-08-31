@@ -190,7 +190,7 @@ public sealed class GateImpactTests
                 ["clients/web/src/features/profile/Profile.view.tsx"],
                 [], [], [], [], [package]);
 
-            Assert.True(Assert.Single(plan.Frontends).Full);
+            Assert.True(Assert.Single(plan.Frontends).ExhaustiveFallback);
         }
         finally
         {
@@ -218,7 +218,7 @@ public sealed class GateImpactTests
                 [], [], [], [], [package]);
 
             var frontend = Assert.Single(plan.Frontends);
-            Assert.True(frontend.Full);
+            Assert.True(frontend.ExhaustiveFallback);
             Assert.Contains("src/features/login/Login.assay.test.ts", frontend.Assays);
         }
         finally
@@ -303,7 +303,7 @@ public sealed class GateImpactTests
                 ["clients/ui/src/Button.tsx"],
                 [], [], [], [], [library, surface]);
 
-            Assert.All(plan.Frontends, impact => Assert.True(impact.Full));
+            Assert.All(plan.Frontends, impact => Assert.True(impact.ExhaustiveFallback));
             Assert.Contains(plan.Reasons, reason => reason.Contains("every surface"));
         }
         finally
@@ -349,7 +349,7 @@ public sealed class GateImpactTests
             var plan = GateImpact.Build(root, [change], [], [], [], [], [package]);
 
             Assert.True(plan.Backend.Full);
-            Assert.True(Assert.Single(plan.Frontends).Full);
+            Assert.True(Assert.Single(plan.Frontends).ExhaustiveFallback);
         }
         finally
         {
@@ -375,7 +375,100 @@ public sealed class GateImpactTests
                 [package]);
 
             Assert.False(plan.Backend.RunsTests);
-            Assert.True(Assert.Single(plan.Frontends).Full);
+            Assert.True(Assert.Single(plan.Frontends).ExhaustiveFallback);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void A_flutter_viewmodel_selects_mirrored_dart_proofs_and_product_flows()
+    {
+        var root = Directory.CreateTempSubdirectory("skies-flutter-impact-").FullName;
+        try
+        {
+            var app = Path.Combine(root, "clients", "mobile");
+            var feature = Path.Combine(app, "lib", "features", "wallets");
+            var tests = Path.Combine(app, "test", "features", "wallets");
+            Directory.CreateDirectory(feature);
+            Directory.CreateDirectory(tests);
+            Directory.CreateDirectory(Path.Combine(app, "e2e"));
+            File.WriteAllText(Path.Combine(app, "package.json"), "{}");
+            File.WriteAllText(Path.Combine(app, "pubspec.yaml"), "name: mobile\n");
+            File.WriteAllText(Path.Combine(feature, "wallets_view_model.dart"), "final class WalletsViewModel {}\n");
+            File.WriteAllText(Path.Combine(tests, "wallets_view_model_test.dart"), "void main() {}\n");
+            File.WriteAllText(Path.Combine(tests, "wallets.assay_test.dart"), "void main() {}\n");
+            File.WriteAllText(Path.Combine(app, "e2e", "flows.json"),
+                "[{\"id\":\"wallets-happy\",\"target\":\"native\",\"spec\":\"integration_test/wallets_happy_test.dart\",\"features\":[\"Wallets\"],\"backendSlices\":[]},"
+              + "{\"id\":\"wallets-sad\",\"target\":\"native\",\"spec\":\"integration_test/wallets_sad_test.dart\",\"features\":[\"Wallets\"],\"backendSlices\":[]}]");
+            var package = new FrontendPackage(app, FrontendPackageRole.Surface, FrontendPlatform.Flutter);
+
+            var plan = GateImpact.Build(
+                root,
+                ["clients/mobile/lib/features/wallets/wallets_view_model.dart"],
+                [], [], [], [], [package]);
+            var impact = Assert.Single(plan.Frontends);
+
+            Assert.Contains("test/features/wallets/wallets_view_model_test.dart", impact.Tests);
+            Assert.Contains("test/features/wallets/wallets.assay_test.dart", impact.Assays);
+            Assert.Equal(2, impact.Flows.Count);
+            Assert.False(impact.Full);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void A_flutter_view_without_a_mirrored_widget_proof_widens_the_package()
+    {
+        var root = Directory.CreateTempSubdirectory("skies-flutter-impact-").FullName;
+        try
+        {
+            var app = Path.Combine(root, "clients", "mobile");
+            var feature = Path.Combine(app, "lib", "features", "wallets");
+            Directory.CreateDirectory(feature);
+            File.WriteAllText(Path.Combine(app, "pubspec.yaml"), "name: mobile\n");
+            File.WriteAllText(Path.Combine(feature, "wallets_view.dart"), "final class WalletsView {}\n");
+            var package = new FrontendPackage(app, FrontendPackageRole.Surface, FrontendPlatform.Flutter);
+
+            var plan = GateImpact.Build(
+                root,
+                ["clients/mobile/lib/features/wallets/wallets_view.dart"],
+                [], [], [], [], [package]);
+
+            Assert.True(Assert.Single(plan.Frontends).ExhaustiveFallback);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Flutter_storybook_source_still_selects_the_rendered_design_proof()
+    {
+        var root = Directory.CreateTempSubdirectory("skies-flutter-impact-").FullName;
+        try
+        {
+            var app = Path.Combine(root, "clients", "mobile");
+            var storybook = Path.Combine(app, "src", "storybook");
+            Directory.CreateDirectory(storybook);
+            File.WriteAllText(Path.Combine(app, "pubspec.yaml"), "name: mobile\n");
+            File.WriteAllText(Path.Combine(storybook, "design_harness.dart"), "final class DesignHarness {}\n");
+            var package = new FrontendPackage(app, FrontendPackageRole.Surface, FrontendPlatform.Flutter);
+
+            var plan = GateImpact.Build(
+                root,
+                ["clients/mobile/src/storybook/design_harness.dart"],
+                [], [], [], [], [package]);
+
+            var impact = Assert.Single(plan.Frontends);
+            Assert.True(impact.RenderedDesign);
+            Assert.False(impact.Full);
         }
         finally
         {

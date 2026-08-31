@@ -43,13 +43,16 @@ mechanism.
 <tr><td><b>Removable enforcement</b></td><td>Roslyn, ESLint, topology doctors, and proof gates enforce the convention without owning runtime behavior.</td></tr>
 <tr><td><b>Closed verification</b></td><td>Declared acceptance criteria, tests, journeys, and product flows form one inventory. Missing or unavailable proof cannot become green.</td></tr>
 <tr><td><b>Repository-owned context</b></td><td>Decisions, proven ways, corrected failures, and conditional obligations live in Git and are retrieved before editing.</td></tr>
-<tr><td><b>Package-first framework</b></td><td>Applications consume versioned NuGet and npm packages. Framework rules never hide as private copies inside a pilot.</td></tr>
+<tr><td><b>Package-first framework</b></td><td>Applications consume versioned NuGet, npm, and Dart packages. Framework rules never hide as private copies inside a pilot.</td></tr>
 </table>
 
 The established implementation targets .NET 10 and ASP.NET Core. The Node.js
 peer targets Node 24, strict TypeScript, and Express 5 while it advances through
 the explicit [parity ledger](docs/NODE-PARITY.md). The frontend convention is
 plain React and React Native with a shared, render-agnostic TypeScript core.
+Flutter carries the complete frontend contract in idiomatic Dart: pinned
+`dart-dio`, `ChangeNotifier` MVVM, the app-owned design vocabulary, all 35
+`SKYFL` rules, and real-backend `integration_test` evidence.
 
 ---
 
@@ -67,6 +70,8 @@ before changing it. Use the native backend that matches the repository:
   user-local or repository-local dotnet tool, then use the `skies` command.
 - Node 24 / TypeScript / Express 5: install the latest stable @skiesjs/cli,
   then use its `skies-node` command.
+- Flutter stable: install `skies_flutter` plus the latest stable
+  `skies-flutter`, then use its client and feature scaffolders.
 
 For a new application, use the matching `new` generator. For an existing
 application, preserve its behavior and migrate incrementally; do not replace
@@ -272,6 +277,41 @@ The design layer follows the same rule: Skies standardizes semantic token names
 and the kit shape, while the application owns token values, components, and
 styling technology.
 
+### Flutter
+
+Flutter keeps the generated wire and hand-owned behavior separate:
+
+```text
+lib/features/account/wallets/
+  wallets_view.dart
+  wallets_view_model.dart
+test/features/account/wallets/
+  wallets_view_test.dart
+  wallets_view_model_test.dart
+  wallets.assay_test.dart
+lib/l10n/features/
+  wallets_{pt_BR,en,es}.arb
+integration_test/
+  wallets_happy_test.dart
+  wallets_sad_test.dart
+```
+
+`skies-flutter` wraps stock OpenAPI Generator `dart-dio`, projects the
+app-client audience, scaffolds the mirrored MVVM unit, and runs the removable
+`SKYFL001–035` doctor. The `skies_flutter` Dart package supplies the matching
+runtime spine: async composition, session, guards, routing, form and mutation
+defaults, localized errors, pagination, injected auth, and the E2E backend ledger.
+
+```bash
+npx --yes --package skies-flutter skies-flutter-app .
+npm install
+flutter pub add skies_flutter
+```
+
+`Skies.toml` needs no Flutter-only topology key: a declared frontend package with
+`pubspec.yaml` is gated through Flutter analysis, `flutter_test`, `SKYFL`, and
+official `integration_test`; React Native keeps its Vitest/Assay/Maestro path.
+
 ---
 
 ## The convention model
@@ -291,13 +331,13 @@ business logic.
 
 ### One feature, one readable unit
 
-| Concern | .NET | Node.js | Frontend |
-| --- | --- | --- | --- |
-| Contract in/out | nested `Input` / `Output` records | exported `Input` / `Output` plus Zod contract | generated client types plus feature schema |
-| Behavior | static `Handle` returning `Task<Result<T>>` | `handle` returning `Promise<Result<T>>` | render-agnostic `use…Model` hook |
-| Boundary | thin `Map` using Minimal APIs | thin `map` using Express | thin View consuming one ViewModel |
-| Proof | co-located `.Tests.cs`, AVP tests, journeys | sibling `.slice.test.ts`, AVP metadata, journeys | sibling test, Assay verification, product flow |
-| Context | one `<Module>.ctx.md` | one `<module>.ctx.md` | feature naming, i18n, and proof metadata |
+| Concern | .NET | Node.js | React | Flutter |
+| --- | --- | --- | --- | --- |
+| Contract in/out | nested `Input` / `Output` records | exported `Input` / `Output` plus Zod contract | generated client types plus feature schema | generated `dart-dio` models |
+| Behavior | static `Handle` returning `Task<Result<T>>` | `handle` returning `Promise<Result<T>>` | render-agnostic `use…Model` hook | `ChangeNotifier` ViewModel |
+| Boundary | thin `Map` using Minimal APIs | thin `map` using Express | thin View consuming one ViewModel | thin Widget consuming one ViewModel |
+| Proof | co-located `.Tests.cs`, AVP tests, journeys | sibling `.slice.test.ts`, AVP metadata, journeys | sibling test, Assay verification, product flow | mirrored unit/widget/AVP tests plus real-backend `integration_test` flows |
+| Context | one `<Module>.ctx.md` | one `<module>.ctx.md` | feature naming, i18n, and proof metadata | feature naming, ARB, AVP/E2E metadata, and `SKYFL` structure |
 
 The convention favors direct dependencies and rich domain types. Handlers use
 the application's `DbContext` or explicit Node dependencies directly; there is
@@ -343,6 +383,7 @@ The doctor turns the written convention into a build contract:
 | `SKY####` | .NET Roslyn analyzers | slice shape, tests, module context, direct data access, write ownership, auth posture, error registries |
 | `SKYN####` | Node ESLint and topology doctor | slice contracts, explicit registration, tests, journeys, auth, errors, repository shape |
 | `SKYFE###` | React/TypeScript ESLint and workspace tools | View/ViewModel separation, async states, contract use, i18n, accessibility, design tokens, product flows |
+| `SKYFL###` | Flutter architecture, design, and proof doctor | 1:1 semantic slots with `SKYFE001–035`, expressed through Dart, Widgets, ARB, and `integration_test` |
 | `SKYSELF###` | framework development only | public documentation, file size, source hygiene; never shipped to applications |
 
 The gate closes proof around that structure. It inventories the complete
@@ -397,6 +438,13 @@ useful during implementation; none replaces the scoped `skies check` receipt.
 | `@skiesjs/eslint-plugin-node`, `@skiesjs/doctor`, `@skiesjs/foundation` | Removable Node enforcement and proof gates |
 | `@skiesjs/cli` | The transactional `skies-node` generator |
 | `@skiesjs/react`, `@skiesjs/eslint-plugin`, `@skiesjs/frontend-sdk` | Frontend spine, `SKYFE###` rules, and workspace doctors |
+| `skies-flutter` | Pinned `dart-dio`, MVVM/design scaffolds, full-stack doctors, and executable Flutter↔React parity manifest |
+
+### pub.dev
+
+| Package | Purpose |
+| --- | --- |
+| `skies_flutter` | Async/session/routing/form/mutation/paging spine, typed Dio failures/auth, and test-only backend journey ledger |
 
 Use the meta-packages as the front doors and focused packages when the
 application needs an à-la-carte dependency graph.
@@ -417,6 +465,10 @@ frontend-sdk/
   packages/skies-react/      render-agnostic React spine
   packages/eslint-plugin/    SKYFE### rules
   tools/                     workspace and product-flow doctors
+flutter-sdk/
+  packages/skies_flutter/    Flutter runtime spine and integration-test ledger
+  tools/                     dart-dio, MVVM/design scaffolds, SKYFL and full-stack gates
+  parity/                    executable Flutter↔React capability contract
 examples/sample-app/         canonical .NET backend and frontend
 templates/skies-app/         source for `skies new`
 parity/                      cross-runtime capability contract
@@ -458,6 +510,7 @@ application. A proposal that breaks that property is outside the framework.
 - [Node.js conventions and `SKYN####` catalog](docs/NODE-CONVENTIONS.md)
 - [Node.js parity ledger](docs/NODE-PARITY.md)
 - [Frontend conventions and `SKYFE###` catalog](docs/FRONTEND-CONVENTIONS.md)
+- [Flutter conventions and `SKYFL###` structural band](docs/FLUTTER-CONVENTIONS.md)
 - [Design conventions and token/kit contract](docs/DESIGN-CONVENTIONS.md)
 - [Monorepo architecture](docs/MONOREPO-ARCHITECTURE.md)
 - [Migration to Skies 4](docs/MIGRATING-TO-SKIES.md)
@@ -468,8 +521,8 @@ application. A proposal that breaks that property is outside the framework.
 
 ## Build and contribute
 
-Requirements: .NET 10 SDK, Node.js 24, npm, and Docker for the PostgreSQL
-integration proofs.
+Requirements: .NET 10 SDK, Node.js 24, npm, Flutter stable, Java 21 for OpenAPI
+Generator, and Docker for the PostgreSQL integration proofs.
 
 ```bash
 dotnet build Skies.Framework.slnx
@@ -477,6 +530,9 @@ dotnet test Skies.Framework.slnx
 
 npm --prefix frontend-sdk ci
 npm --prefix frontend-sdk run check
+
+npm --prefix flutter-sdk ci
+npm --prefix flutter-sdk run check
 
 npm --prefix node-sdk ci
 npm --prefix node-sdk run check

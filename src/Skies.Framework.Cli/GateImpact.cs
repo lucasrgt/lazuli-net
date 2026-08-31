@@ -34,6 +34,9 @@ internal sealed class FrontendImpact(FrontendPackage package)
     /// <summary>Whether every runtime proof in this package must run.</summary>
     public bool Full { get; set; }
 
+    /// <summary>Whether ambiguous impact requires an exhaustive fallback at an authoritative boundary.</summary>
+    public bool ExhaustiveFallback { get; set; }
+
     /// <summary>Vitest files selected outside the Assay partition.</summary>
     public HashSet<string> Tests { get; } = new(StringComparer.OrdinalIgnoreCase);
 
@@ -47,13 +50,14 @@ internal sealed class FrontendImpact(FrontendPackage package)
     public bool RenderedDesign { get; set; }
 
     /// <summary>Whether any runtime proof was selected.</summary>
-    public bool Selected => Full || Tests.Count > 0 || Assays.Count > 0 || Flows.Count > 0 || RenderedDesign;
+    public bool Selected => Full || ExhaustiveFallback || Tests.Count > 0 || Assays.Count > 0 || Flows.Count > 0
+        || RenderedDesign;
 }
 
 /// <summary>A normalized executable frontend flow from <c>e2e/flows.json</c>.</summary>
 /// <param name="Id">Stable flow identifier.</param>
 /// <param name="Target">Canonical execution target (<c>web</c> or <c>native</c>).</param>
-/// <param name="Spec">Package-relative Playwright or Maestro spec.</param>
+/// <param name="Spec">Package-relative Playwright, Maestro, or Flutter integration-test spec.</param>
 /// <param name="Features">ViewModel subjects proven by the flow.</param>
 /// <param name="BackendSlices">Backend subjects observed by the flow.</param>
 internal sealed record FrontendFlow(
@@ -242,7 +246,7 @@ internal static class GateImpact
         if (global || changes.Any(IsRootFrontendContract))
         {
             foreach (var impact in impacts)
-                impact.Full = true;
+                impact.ExhaustiveFallback = true;
             if (impacts.Count > 0)
                 reasons.Add("frontend: shared workspace/gate dependency changed; selecting every frontend proof");
         }
@@ -251,7 +255,7 @@ internal static class GateImpact
                                   || change.Contains("/generated/", StringComparison.OrdinalIgnoreCase)))
         {
             foreach (var impact in impacts)
-                impact.Full = true;
+                impact.ExhaustiveFallback = true;
             if (impacts.Count > 0)
                 reasons.Add("frontend: generated client changed; selecting every consumer surface");
         }
@@ -264,10 +268,11 @@ internal static class GateImpact
                 SelectPackageChange(root, impact, packageRelative, change, affectedFeatures, reasons);
         }
 
-        if (impacts.Any(impact => impact.Package.Role != FrontendPackageRole.Surface && impact.Full))
+        if (impacts.Any(impact => impact.Package.Role != FrontendPackageRole.Surface
+                                  && impact.ExhaustiveFallback))
         {
             foreach (var impact in impacts)
-                impact.Full = true;
+                impact.ExhaustiveFallback = true;
             reasons.Add("frontend: an unmapped shared core/library change can reach every surface; selecting all packages");
         }
 
@@ -282,7 +287,7 @@ internal static class GateImpact
             var flows = ReadFrontendFlows(impact.Package.Path);
             if (flows is null)
             {
-                impact.Full = true;
+                impact.ExhaustiveFallback = true;
                 continue;
             }
 
@@ -302,7 +307,7 @@ internal static class GateImpact
 
         foreach (var impact in impacts.Where(impact => impact.Selected))
         {
-            reasons.Add(impact.Full
+            reasons.Add(impact.ExhaustiveFallback
                 ? $"frontend: {Path.GetFileName(impact.Package.Path)} widened to its full proof surface"
                 : $"frontend: {Path.GetFileName(impact.Package.Path)} selected tests={impact.Tests.Count}, "
                   + $"assays={impact.Assays.Count}, rendered={(impact.RenderedDesign ? 1 : 0)}, "
@@ -326,10 +331,28 @@ internal static class GateImpact
             return;
         }
 
+        if (local.StartsWith("src/storybook/", StringComparison.OrdinalIgnoreCase))
+        {
+            impact.RenderedDesign = true;
+            var source = Path.Combine(impact.Package.Path, local.Replace('/', Path.DirectorySeparatorChar));
+            if (impact.Package.Platform == FrontendPlatform.Flutter)
+                SelectFlutterSiblingTests(impact, local);
+            else
+                SelectSiblingTests(impact, source);
+            reasons.Add($"frontend: {change} maps to the package rendered-design proof without widening runtime tests");
+            return;
+        }
+
+        if (impact.Package.Platform == FrontendPlatform.Flutter)
+        {
+            SelectFlutterPackageChange(impact, local, change, features, reasons);
+            return;
+        }
+
         if (local is "package.json" or "tsconfig.json" || local.EndsWith("config.ts", StringComparison.OrdinalIgnoreCase)
             || local.EndsWith("config.js", StringComparison.OrdinalIgnoreCase) || local == "e2e/flows.json")
         {
-            impact.Full = true;
+            impact.ExhaustiveFallback = true;
             return;
         }
 
@@ -337,7 +360,7 @@ internal static class GateImpact
         {
             var flow = ReadFrontendFlows(impact.Package.Path)?.Where(flow => SamePath(flow.Spec, local)).ToList() ?? [];
             if (flow.Count == 0)
-                impact.Full = true;
+                impact.ExhaustiveFallback = true;
             else
                 flow.ForEach(item => AddFlow(impact, item));
             return;
@@ -363,14 +386,6 @@ internal static class GateImpact
 
         if (directTest)
             return;
-
-        if (local.StartsWith("src/storybook/", StringComparison.OrdinalIgnoreCase))
-        {
-            impact.RenderedDesign = true;
-            SelectSiblingTests(impact, absolute);
-            reasons.Add($"frontend: {change} maps to the package rendered-design proof without widening runtime tests");
-            return;
-        }
 
         if (IsViewSource(file))
         {
@@ -400,13 +415,108 @@ internal static class GateImpact
             : [];
         if (viewModels.Count == 0)
         {
-            impact.Full = true;
+            impact.ExhaustiveFallback = true;
             return;
         }
 
         foreach (var viewModel in viewModels)
             if (TryViewModelName(viewModel!, out var feature))
                 features.Add(feature);
+    }
+
+    private static void SelectFlutterPackageChange(
+        FrontendImpact impact,
+        string local,
+        string change,
+        HashSet<string> features,
+        List<string> reasons)
+    {
+        if (local is "package.json" or "pubspec.yaml" or "analysis_options.yaml" or "e2e/flows.json"
+            || local.EndsWith("config.dart", StringComparison.OrdinalIgnoreCase))
+        {
+            impact.ExhaustiveFallback = true;
+            return;
+        }
+
+        if (local.StartsWith("integration_test/", StringComparison.OrdinalIgnoreCase))
+        {
+            var flows = ReadFrontendFlows(impact.Package.Path)?.Where(flow => SamePath(flow.Spec, local)).ToList() ?? [];
+            if (flows.Count == 0)
+                impact.ExhaustiveFallback = true;
+            else
+                flows.ForEach(flow => AddFlow(impact, flow));
+            return;
+        }
+
+        if (local.StartsWith("test/", StringComparison.OrdinalIgnoreCase))
+        {
+            if (local.EndsWith(".assay_test.dart", StringComparison.OrdinalIgnoreCase))
+                impact.Assays.Add(local);
+            else if (local.EndsWith("_test.dart", StringComparison.OrdinalIgnoreCase))
+                impact.Tests.Add(local);
+            return;
+        }
+
+        if (!local.StartsWith("lib/", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        var file = Path.GetFileName(local);
+        if (TryFlutterViewModelName(file, out var feature))
+        {
+            features.Add(feature);
+            SelectFlutterSiblingTests(impact, local);
+            reasons.Add($"frontend: {change} maps to its Flutter feature tests without widening every runtime proof");
+            return;
+        }
+        if (file.EndsWith("_view.dart", StringComparison.OrdinalIgnoreCase))
+        {
+            var selectedBefore = impact.Tests.Count + impact.Assays.Count;
+            SelectFlutterSiblingTests(impact, local);
+            if (impact.Tests.Count + impact.Assays.Count == selectedBefore)
+            {
+                impact.ExhaustiveFallback = true;
+                reasons.Add($"frontend: {change} has no mirrored Flutter widget proof; selecting the full package");
+                return;
+            }
+            reasons.Add($"frontend: {change} maps to its Flutter widget proof without widening every runtime proof");
+            return;
+        }
+
+        var absolute = Path.Combine(impact.Package.Path, local.Replace('/', Path.DirectorySeparatorChar));
+        var directory = Path.GetDirectoryName(absolute)!;
+        var viewModels = Directory.Exists(directory)
+            ? Directory.EnumerateFiles(directory, "*_view_model.dart", SearchOption.TopDirectoryOnly).ToList()
+            : [];
+        if (viewModels.Count == 0)
+        {
+            impact.ExhaustiveFallback = true;
+            return;
+        }
+        foreach (var viewModel in viewModels)
+        {
+            if (TryFlutterViewModelName(Path.GetFileName(viewModel), out var adjacentFeature))
+                features.Add(adjacentFeature);
+            SelectFlutterSiblingTests(
+                impact,
+                Normalize(Path.GetRelativePath(impact.Package.Path, viewModel)));
+        }
+    }
+
+    private static void SelectFlutterSiblingTests(FrontendImpact impact, string sourceRelative)
+    {
+        var sourceDirectory = Path.GetDirectoryName(sourceRelative.Replace('/', Path.DirectorySeparatorChar)) ?? "lib";
+        var relativeDirectory = Path.GetRelativePath("lib", sourceDirectory);
+        var testDirectory = Path.Combine(impact.Package.Path, "test", relativeDirectory);
+        if (!Directory.Exists(testDirectory))
+            return;
+        foreach (var test in Directory.EnumerateFiles(testDirectory, "*_test.dart", SearchOption.TopDirectoryOnly))
+        {
+            var relative = Normalize(Path.GetRelativePath(impact.Package.Path, test));
+            if (test.EndsWith(".assay_test.dart", StringComparison.OrdinalIgnoreCase))
+                impact.Assays.Add(relative);
+            else
+                impact.Tests.Add(relative);
+        }
     }
 
     private static bool IsRenderedDesignInfrastructure(string local) =>
@@ -464,6 +574,24 @@ internal static class GateImpact
     {
         foreach (var impact in impacts)
         {
+            if (impact.Package.Platform == FrontendPlatform.Flutter)
+            {
+                var flutterSource = Path.Combine(impact.Package.Path, "lib", "features");
+                if (!Directory.Exists(flutterSource))
+                    continue;
+                foreach (var viewModel in Directory.EnumerateFiles(
+                             flutterSource,
+                             "*_view_model.dart",
+                             SearchOption.AllDirectories).Where(path =>
+                             TryFlutterViewModelName(Path.GetFileName(path), out var candidate)
+                             && candidate.Equals(feature, StringComparison.OrdinalIgnoreCase)))
+                {
+                    SelectFlutterSiblingTests(
+                        impact,
+                        Normalize(Path.GetRelativePath(impact.Package.Path, viewModel)));
+                }
+                continue;
+            }
             var source = Path.Combine(impact.Package.Path, "src");
             if (!Directory.Exists(source))
                 continue;
@@ -548,6 +676,19 @@ internal static class GateImpact
         feature = index > 0 ? file[..index] : "";
         return feature.Length > 0;
     }
+
+    private static bool TryFlutterViewModelName(string file, out string feature)
+    {
+        const string marker = "_view_model.dart";
+        feature = file.EndsWith(marker, StringComparison.OrdinalIgnoreCase)
+            ? PascalCase(file[..^marker.Length])
+            : "";
+        return feature.Length > 0;
+    }
+
+    private static string PascalCase(string value) => string.Concat(
+        value.Split('_', StringSplitOptions.RemoveEmptyEntries)
+            .Select(part => char.ToUpperInvariant(part[0]) + part[1..]));
 
     private static bool IsRuntimeWideInfrastructure(string path) =>
         path.Equals(SkiesManifest.FileName, StringComparison.OrdinalIgnoreCase)

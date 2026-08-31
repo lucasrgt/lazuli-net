@@ -134,6 +134,49 @@ public class GateCommandTests
     }
 
     [Fact]
+    public void Authoritative_feedback_promotes_an_impact_fallback_to_the_full_frontend_surface()
+    {
+        var frontend = new FrontendImpact(new FrontendPackage("clients/mobile", FrontendPackageRole.Surface))
+        {
+            ExhaustiveFallback = true,
+        };
+        frontend.Tests.Add("test/features/wallets/wallets_view_test.dart");
+        var impact = new GateImpactPlan(
+            new BackendImpact(false, new HashSet<string>(), new HashSet<string>()),
+            [frontend],
+            ["Flutter view has no mirrored proof"]);
+
+        var authoritative = GateCommand.ApplyFastFeedback(impact, fast: false);
+
+        var selected = Assert.Single(authoritative.Frontends);
+        Assert.True(selected.Full);
+        Assert.False(selected.ExhaustiveFallback);
+        Assert.Contains("test/features/wallets/wallets_view_test.dart", selected.Tests);
+    }
+
+    [Fact]
+    public void Fast_feedback_defers_an_impact_fallback_but_preserves_its_direct_frontend_proofs()
+    {
+        var frontend = new FrontendImpact(new FrontendPackage("clients/mobile", FrontendPackageRole.Surface))
+        {
+            ExhaustiveFallback = true,
+        };
+        frontend.Tests.Add("test/features/wallets/wallets_view_test.dart");
+        var impact = new GateImpactPlan(
+            new BackendImpact(false, new HashSet<string>(), new HashSet<string>()),
+            [frontend],
+            ["Flutter view has no mirrored proof"]);
+
+        var bounded = GateCommand.ApplyFastFeedback(impact, fast: true);
+
+        var selected = Assert.Single(bounded.Frontends);
+        Assert.False(selected.Full);
+        Assert.False(selected.ExhaustiveFallback);
+        Assert.Contains("test/features/wallets/wallets_view_test.dart", selected.Tests);
+        Assert.Contains(bounded.Reasons, reason => reason.Contains("deferred by --fast"));
+    }
+
+    [Fact]
     public void Fast_feedback_keeps_every_mapped_backend_proof_selected()
     {
         var impact = new GateImpactPlan(

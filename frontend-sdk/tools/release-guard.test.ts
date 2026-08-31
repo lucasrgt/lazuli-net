@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { canonicalDrift, RELEASE_UNITS, violations } from "./release-guard.mjs";
+import { FLUTTER_RELEASE_VERSIONS, canonicalDrift, RELEASE_UNITS, violations } from "./release-guard.mjs";
+import { FLUTTER_PACKAGE_VERSIONS } from "../../flutter-sdk/tools/package-versions.mjs";
 
 describe("release-guard", () => {
+  it("keeps the self-contained release table equal to the Flutter sync table", () => {
+    expect(FLUTTER_RELEASE_VERSIONS).toEqual(
+      FLUTTER_PACKAGE_VERSIONS.map(({ name, version }) => ({ name, version })),
+    );
+  });
   it("flags a unit that changed without a version bump", () => {
     const result = violations([{ name: "@skiesjs/eslint-plugin", changed: true, versionBumped: false }]);
     expect(result).toHaveLength(1);
@@ -16,13 +22,15 @@ describe("release-guard", () => {
     expect(violations([{ name: "x", changed: false, versionBumped: false }])).toEqual([]);
   });
 
-  it("covers every publishable package across .NET, frontend, and Node.js", () => {
+  it("covers every publishable package across .NET, frontend, Flutter, and Node.js", () => {
     expect(RELEASE_UNITS.map((u) => u.name)).toEqual([
       "Skies.Framework.* (nuget)",
       "skies-framework-cli",
       "@skiesjs/react",
       "@skiesjs/eslint-plugin",
       "@skiesjs/frontend-sdk",
+      "skies-flutter",
+      "skies_flutter",
       "@skiesjs/core",
       "@skiesjs/openapi",
       "@skiesjs/express",
@@ -44,6 +52,16 @@ describe("release-guard", () => {
       "@skiesjs/framework",
       "@skiesjs/cli",
     ]);
+  });
+
+  it("compares the canonical Flutter runtime with its pubspec", () => {
+    expect(canonicalDrift(
+      [{ name: "skies_flutter", version: "4.1.22" }],
+      (path) => {
+        expect(path).toBe("flutter-sdk/packages/skies_flutter/pubspec.yaml");
+        return "name: skies_flutter\nversion: 4.1.22\n";
+      },
+    )).toEqual([]);
   });
 
   it("treats every npm manifest as immutable published content", () => {

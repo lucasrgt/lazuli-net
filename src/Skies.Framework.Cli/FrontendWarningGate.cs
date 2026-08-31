@@ -8,9 +8,31 @@ namespace Skies.Framework.Cli;
 internal static class FrontendWarningGate
 {
     /// <summary>Run strict ESLint for one manifest-selected package.</summary>
-    internal static int RunLint(string packageRoot)
+    internal static int RunLint(FrontendPackage package, string workspace)
     {
+        var packageRoot = package.Path;
         var name = Path.GetFileName(packageRoot);
+        if (package.Platform == FrontendPlatform.Flutter)
+        {
+            if (!Directory.Exists(Path.Combine(packageRoot, "lib")))
+            {
+                Console.Error.WriteLine($"skies gate — Flutter warnings ({name}): package has no lib directory.");
+                return 1;
+            }
+            Console.WriteLine($"skies gate — Flutter evidence ({name}): SKYFL rules are forced at the strict boundary...");
+            var arguments = new List<string> { "--no-install", "skies-flutter-doctor", ".", "--strict" };
+            if (package.Role != FrontendPackageRole.Surface)
+                arguments.Add("--structure-only");
+            foreach (var backend in SkiesManifest.BackendPathsForFrontend(workspace, packageRoot))
+            {
+                arguments.Add("--backend-root");
+                arguments.Add(backend);
+            }
+            return Tooling.Run(
+                "npx",
+                [.. arguments],
+                packageRoot);
+        }
         var source = Path.Combine(packageRoot, "src");
         if (!Directory.Exists(source))
         {

@@ -1,13 +1,13 @@
 # Skies — Operating manual for AI agents
 
-Skies is the **opinionated convention bundle for .NET and Node.js**: standardized vertical-slice
+Skies is the **opinionated convention bundle for .NET, Node.js, React, and Flutter**: standardized vertical-slice
 architecture + removable build-time doctors + an ai-context discipline, so an LLM has less to decide
 and what it writes is enforced. It is the **Rails mindset** — the mentality (convention over configuration,
 quality control, semantic density), **not** the mechanism (no runtime metaprogramming, no language).
 Reference codebase: `rails/rails`.
 
 > This is **not** the Skies language (the Rust project — parked). Same name, same soul
-> (semantic density for the AI + CoC), different bodies: plain, idiomatic C# and TypeScript. The detailed
+> (semantic density for the AI + CoC), different bodies: plain, idiomatic C#, TypeScript, and Dart. The detailed
 > guidance below describes the established .NET engine; `node-sdk/AGENTS.md` specializes it for Node.js.
 
 Mirrored verbatim at `AGENTS.md` for tooling that loads it (Codex, Aider, etc.).
@@ -40,17 +40,20 @@ src/Skies.Framework.Cli/               `skies` — scaffolders (module/slice/ent
 analyzers/Skies.Framework.Doctor/      SHIPPED harness. SKY* rules + the CA* security-floor globalconfig — run on the USER's code.
 analyzers/Skies.Framework.SelfHarness/ FRAMEWORK-DEV ONLY. SKYSELF* rules — run on OUR code. Never shipped.
 frontend-sdk/                 The front half: @skiesjs/react (the spine), @skiesjs/eslint-plugin (SKYFE* rules), tools/ (doctors).
+flutter-sdk/                  The Flutter body: skies_flutter spine, pinned dart-dio wrapper, MVVM scaffolder, and SKYFL doctor.
 node-sdk/                     The Node.js backend: @skiesjs/core, Express adapter, SKYN doctor, CLI, and sample API.
 examples/sample-app/          The reference .NET app + canonical slice (backend/Sample.Api, Sample.Tests, frontend/).
 templates/skies-app/         The `skies new` starter the CLI scaffolds from.
 build/Skies.Framework.Library.props    The library standard, declared once.
 docs/CONVENTIONS.md           The backend constitution + slice shape + full SKY* rule catalog.
 docs/FRONTEND-CONVENTIONS.md  The frontend constitution + MVVM shape + full SKYFE* rule catalog.
+docs/FLUTTER-CONVENTIONS.md   The Flutter specialization + dart-dio wire + SKYFL structural band.
 docs/DESIGN-CONVENTIONS.md    The design constitution: token taxonomy + closed kit shape + the SKYFE design band.
 ```
 
 Ground every convention fact in `docs/CONVENTIONS.md` / `docs/NODE-CONVENTIONS.md` /
 `docs/FRONTEND-CONVENTIONS.md` / `docs/DESIGN-CONVENTIONS.md`, never memory.
+Include `docs/FLUTTER-CONVENTIONS.md` for Flutter work.
 
 ---
 
@@ -76,6 +79,7 @@ target is source a Microsoft .NET MVP would read and be proud of.
 dotnet build Skies.Framework.slnx     # the .NET doctor + self-harness
 dotnet test  Skies.Framework.slnx     # the .NET slice tests
 npm --prefix node-sdk run check       # the Node.js doctor, typecheck, and tests
+npm --prefix flutter-sdk run check    # dart-dio smoke, Flutter analyze, and tests
 ```
 
 Green platform gates mean the conventions are held. Never leave an affected workspace red.

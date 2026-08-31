@@ -4,9 +4,9 @@ using System.Text.RegularExpressions;
 namespace Skies.Framework.Cli;
 
 /// <summary>
-/// Refuses missing and placeholder npm scripts before executing a frontend gate leg. An E2E target selects its
-/// canonical runner—Playwright for web, Maestro for native—so neither a second engine nor a filtered command can
-/// manufacture executable evidence.
+/// Refuses missing and placeholder npm scripts before executing a frontend gate leg. A React E2E target selects
+/// Playwright for web or Maestro for React Native, so neither a second engine nor a filtered command can manufacture
+/// executable evidence. Flutter's platform gate validates the official <c>integration_test</c> runner separately.
 /// </summary>
 internal static class FrontendScriptContract
 {

@@ -467,6 +467,30 @@ public class SkiesManifestTests
     }
 
     [Fact]
+    public void A_declared_flutter_surface_selects_the_flutter_proof_platform()
+    {
+        var root = NewDir();
+        var app = Path.Combine(root, "clients", "mobile");
+        var backend = Path.Combine(root, "src", "App.Api");
+        Directory.CreateDirectory(backend);
+        WriteLaunchSettings(backend, environment: "Development", applicationUrl: "http://localhost:8080");
+        Directory.CreateDirectory(Path.Combine(app, "lib", "features", "wallets"));
+        File.WriteAllText(Path.Combine(app, "package.json"), "{}");
+        File.WriteAllText(Path.Combine(app, "pubspec.yaml"), "name: mobile\n");
+        File.WriteAllText(Path.Combine(app, "lib", "features", "wallets", "wallets_view_model.dart"), "final class WalletsViewModel {}\n");
+        File.WriteAllText(Path.Combine(root, "Skies.toml"),
+            "[workspace]\nname=\"MyApp\"\n[products.mobile]\nbackend=\"src/App.Api\"\nfrontend=\"clients/mobile\"\n");
+
+        var outcome = SkiesManifest.Validate(root);
+        var package = Assert.Single(SkiesManifest.FrontendPackages(root));
+
+        Assert.True(outcome.Valid);
+        Assert.Equal(FrontendPlatform.Flutter, package.Platform);
+        Assert.Empty(SkiesManifest.EndpointCoverageTargets(root));
+        Assert.Equal(Path.GetFullPath(backend), Assert.Single(SkiesManifest.BackendPathsForFrontend(root, app)));
+    }
+
+    [Fact]
     public void Endpoint_coverage_follows_the_configured_product_topology()
     {
         var root = NewDir();

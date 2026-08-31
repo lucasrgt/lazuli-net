@@ -18,10 +18,24 @@ internal enum FrontendPackageRole
     Surface,
 }
 
+/// <summary>The native framework that owns one frontend package's source and proof runners.</summary>
+internal enum FrontendPlatform
+{
+    /// <summary>React or React Native with TypeScript, Vitest, Playwright, and optional Maestro.</summary>
+    React,
+
+    /// <summary>Flutter with Dart, flutter_test, and the official integration_test runner.</summary>
+    Flutter,
+}
+
 /// <summary>A frontend package selected from the workspace manifest and the proof depth it owes.</summary>
 /// <param name="Path">The absolute package root.</param>
 /// <param name="Role">Whether the package is an application core, reusable library, or executable surface.</param>
-internal sealed record FrontendPackage(string Path, FrontendPackageRole Role);
+/// <param name="Platform">The ecosystem-specific source and proof runner.</param>
+internal sealed record FrontendPackage(
+    string Path,
+    FrontendPackageRole Role,
+    FrontendPlatform Platform = FrontendPlatform.React);
 
 /// <summary>A generated app client and every product source root legally allowed to consume it.</summary>
 /// <param name="ClientPath">The absolute conventional <c>src/client.gen</c> directory.</param>
@@ -130,7 +144,8 @@ internal static class SkiesManifest
                 .GroupBy(package => package.Path!, StringComparer.OrdinalIgnoreCase)
                 .Select(group => new FrontendPackage(
                     group.Key,
-                    group.Max(package => package.Role)))
+                    group.Max(package => package.Role),
+                    PlatformFor(group.Key)))
                 .ToList();
             return declared;
         }
@@ -155,6 +170,7 @@ internal static class SkiesManifest
                 .Select(declaration => OwningPackage(root, declaration.RelativePath))
                 .Where(path => path is not null)
                 .Select(path => path!)
+                .Where(path => PlatformFor(path) == FrontendPlatform.React)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
             var sources = packages
@@ -200,6 +216,35 @@ internal static class SkiesManifest
             .ToList();
     }
 
+    /// <summary>Return the backend roots in the same product sections as one frontend package.</summary>
+    public static IReadOnlyList<string> BackendPathsForFrontend(string root, string frontendPath)
+    {
+        var manifestPath = Path.Combine(root, FileName);
+        if (!File.Exists(manifestPath))
+            return [];
+
+        var expected = Path.GetFullPath(frontendPath);
+        var backends = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (Match section in ProductSections(File.ReadAllText(manifestPath)))
+        {
+            var body = section.Groups["body"].Value;
+            var ownsFrontend = FrontendDeclarations(body)
+                .Select(declaration => OwningPackage(root, declaration.RelativePath))
+                .Any(package => package is not null
+                    && string.Equals(Path.GetFullPath(package), expected, StringComparison.OrdinalIgnoreCase));
+            if (!ownsFrontend)
+                continue;
+            foreach (Match backend in Regex.Matches(
+                         body,
+                         @"^\s*backend\s*=\s*""([^""]+)""",
+                         RegexOptions.Multiline))
+            {
+                backends.Add(Path.GetFullPath(Path.Combine(root, backend.Groups[1].Value)));
+            }
+        }
+        return backends.Order(StringComparer.OrdinalIgnoreCase).ToList();
+    }
+
     private static string? OwningPackage(string root, string relativePath)
     {
         var workspace = Path.GetFullPath(root);
@@ -217,6 +262,11 @@ internal static class SkiesManifest
 
         return null;
     }
+
+    private static FrontendPlatform PlatformFor(string package) =>
+        File.Exists(Path.Combine(package, "pubspec.yaml"))
+            ? FrontendPlatform.Flutter
+            : FrontendPlatform.React;
 
     private sealed record FrontendDeclaration(string Kind, string RelativePath);
 
@@ -361,6 +411,9 @@ internal static class SkiesManifest
             var source = Path.Combine(package, "src");
             var hasViewModel = Directory.Exists(source)
                 && EnumerateFiles(source, "*.viewModel.ts").Concat(EnumerateFiles(source, "*.viewModel.tsx")).Any();
+            var flutterSource = Path.Combine(package, "lib");
+            hasViewModel = hasViewModel || Directory.Exists(flutterSource)
+                && EnumerateFiles(flutterSource, "*_view_model.dart").Any();
             if (hasRegistry || hasViewModel)
                 packages.Add(package);
         }
