@@ -995,6 +995,14 @@
       "reason": "The .NET doctor and template messages name the moved @skiesjs packages; the Node CLI surface is unchanged in this rename.",
       "owner": "lucasrgt",
       "expires": "2026-08-28"
+    },
+    {
+      "id": "flutter-tooling-release-4123",
+      "capability": "delivery.packages-release",
+      "side": "node",
+      "reason": "The shared release guard records skies-flutter 4.1.23 after a Flutter-only CI restore fix; Node package content and delivery behavior are unchanged.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-07"
     }
   ],
   "diagnostics": [
