@@ -8,7 +8,7 @@ namespace Skies.Framework.AspNetCore;
 
 /// <summary>
 /// The platform-tier error codes the framework itself can emit — a `*ErrorCodes` registry like every module's,
-/// so the OpenAPI wiring (<see cref="OpenApiExtensions.AddSkiesOpenApi"/>) enumerates these into the
+/// so the OpenAPI wiring (<see cref="OpenApiExtensions.AddSkiesOpenApi(Microsoft.Extensions.DependencyInjection.IServiceCollection)"/>) enumerates these into the
 /// <c>ErrorBody.code</c> contract alongside the app's and the frontend's i18n catalog covers them too.
 /// </summary>
 public static class PlatformErrorCodes

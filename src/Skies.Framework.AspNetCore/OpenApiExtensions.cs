@@ -6,6 +6,7 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi;
 
 namespace Skies.Framework.AspNetCore;
@@ -33,6 +34,21 @@ public static class OpenApiExtensions
     /// </code>
     /// </example>
     public static IServiceCollection AddSkiesOpenApi(this IServiceCollection services) =>
+        ConfigureOpenApi(services, []);
+
+    /// <summary>Add Skies's document conventions and include error registries from explicitly owned module
+    /// assemblies. The hosted application's assembly and platform errors are always included; unrelated
+    /// dependencies are never scanned merely because they are loaded in the process.</summary>
+    /// <param name="services">The application's service collection.</param>
+    /// <param name="errorCodeAssembly">An assembly containing additional application error registries.</param>
+    /// <param name="additionalErrorCodeAssemblies">Further application-owned registry assemblies.</param>
+    /// <returns>The service collection for continued application registration.</returns>
+    public static IServiceCollection AddSkiesOpenApi(this IServiceCollection services,
+        Assembly errorCodeAssembly, params Assembly[] additionalErrorCodeAssemblies) =>
+        ConfigureOpenApi(services, [errorCodeAssembly, .. additionalErrorCodeAssemblies]);
+
+    private static IServiceCollection ConfigureOpenApi(IServiceCollection services,
+        IReadOnlyCollection<Assembly> additionalErrorCodeAssemblies) =>
         services.AddOpenApi(options =>
         {
             // The same qualification, extended to the canonical page: Page<T>'s default reference id uses
@@ -89,7 +105,7 @@ public static class OpenApiExtensions
                 return Task.CompletedTask;
             });
 
-            // Enumerate the error codes (every *ErrorCodes registry constant, gathered by reflection) into the
+            // Enumerate application-owned *ErrorCodes registry constants into the
             // ErrorBody.Code schema, so the generated client is typed on the closed set and the frontend can be
             // checked for an exhaustive translation of each. SKY0018 guarantees every code is such a constant, so
             // this set is the whole contract.
@@ -100,7 +116,12 @@ public static class OpenApiExtensions
                     && properties.TryGetValue("code", out var codeSchema)
                     && codeSchema is OpenApiSchema concreteCode)
                 {
-                    var codes = ErrorCodes();
+                    // ApplicationName identifies the hosted app even under test hosts and build-time
+                    // document generation, where the process entry assembly belongs to tooling.
+                    var environment = context.ApplicationServices.GetRequiredService<IHostEnvironment>();
+                    var applicationAssembly = Assembly.Load(new AssemblyName(environment.ApplicationName));
+                    var codes = ErrorCodes([applicationAssembly, typeof(PlatformErrorCodes).Assembly,
+                        .. additionalErrorCodeAssemblies]);
                     if (codes.Count > 0)
                         concreteCode.Enum = codes.Select(code => (JsonNode)JsonValue.Create(code)!).ToList();
                 }
@@ -187,10 +208,10 @@ public static class OpenApiExtensions
             _ => (JsonSchemaType.String, null),
         };
 
-    // Every error code in the app: the public string constants on classes named *ErrorCodes, across the loaded
-    // assemblies. SKY0018 enforces that this registry set is the complete set of codes the app can emit.
-    private static IReadOnlyList<string> ErrorCodes() =>
-        AppDomain.CurrentDomain.GetAssemblies()
+    // Only owned assemblies contribute to the public contract. Vendor registries (for example database
+    // SQLSTATE constants) are implementation details, not errors the application promises to emit.
+    private static IReadOnlyList<string> ErrorCodes(IEnumerable<Assembly> assemblies) =>
+        assemblies.Distinct()
             .Where(assembly => !assembly.IsDynamic)
             .SelectMany(SafeTypes)
             .Where(type => type is { IsClass: true, IsAbstract: true, IsSealed: true }

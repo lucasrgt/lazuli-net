@@ -909,6 +909,46 @@
       "expires": "2026-08-21"
     },
     {
+      "id": "dotnet-openapi-414-contract",
+      "capability": "http.contract-openapi",
+      "side": "node",
+      "reason": "The .NET adapter replaces AppDomain-wide registry reflection with hosted-app and explicitly owned assembly discovery. Node OpenApiRegistry.registerErrorCodes already requires explicit registration, and index.test.ts proves document-time registration; there is no ambient dependency scan to remove in Node. Review this adapter-specific alignment at the next contract change.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-11"
+    },
+    {
+      "id": "dotnet-openapi-414-generators",
+      "capability": "tooling.generators",
+      "side": "node",
+      "reason": "The .NET CLI baked package version and starter NuGet references move together to framework 4.1.4. Node generator package references do not depend on NuGet and remain unchanged; review the next coordinated generator release.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-11"
+    },
+    {
+      "id": "dotnet-openapi-414-packaging",
+      "capability": "packaging.public-graphs",
+      "side": "node",
+      "reason": "NuGet libraries move to 4.1.4 and their CLI to 4.1.9 so the fixed contract and baked framework version ship as immutable packages. Node package content and dependency graph are unchanged; review at the next coordinated package release.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-11"
+    },
+    {
+      "id": "dotnet-openapi-414-pilot",
+      "capability": "pilot.nontrivial",
+      "side": "node",
+      "reason": "The .NET sample adds regressions for an unrelated loaded test assembly and explicit module inclusion, reproducing the CLR-only reflection defect. Node has no loaded-assembly reflection and its OpenAPI tests already prove explicit registration; review when shared error-contract fixtures are next extended.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-11"
+    },
+    {
+      "id": "dotnet-openapi-414-rate-docs",
+      "capability": "http.rate-limit",
+      "side": "node",
+      "reason": "RateLimitingExtensions.cs only qualifies an XML documentation cref after AddSkiesOpenApi gained an overload. No rate-limit behavior or wire error changed in either adapter; review with the next rate-limit implementation change.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-11"
+    },
+    {
       "id": "flutter-tooling-release-4123",
       "capability": "delivery.packages-release",
       "side": "node",

@@ -9,7 +9,7 @@ namespace Skies.Framework.AspNetCore;
 /// <summary>
 /// The framework's composition-root wiring in one pair of calls, so an app's <c>Program.cs</c> reads as a thin
 /// index rather than re-deriving Skies's conventions every time. <see cref="AddSkies"/> registers what every
-/// Skies app shares — the slice-aware OpenAPI document (<see cref="OpenApiExtensions.AddSkiesOpenApi"/>) and
+/// Skies app shares — the slice-aware OpenAPI document (<see cref="OpenApiExtensions.AddSkiesOpenApi(IServiceCollection)"/>) and
 /// the enum-as-name JSON convention; <see cref="UseSkies"/> serves the contract. Auth, persistence, and vendor
 /// adapters stay the app's own calls — the framework ships the conventions, not the app's choices.
 /// </summary>

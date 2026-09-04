@@ -1,5 +1,7 @@
 using System.Linq;
 using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
+using Skies.Framework.AspNetCore;
 
 namespace Sample.Tests;
 
@@ -27,5 +29,32 @@ public class OpenApiErrorCodes
         Assert.Contains("wallets.insufficient_funds", codes);
         Assert.Contains("wallet.id.required", codes);
         Assert.Contains("money.negative", codes);
+        Assert.Contains(PlatformErrorCodes.RateLimited, codes);
+        Assert.DoesNotContain(DependencyErrorCodes.UniqueViolation, codes);
+    }
+
+    [Fact]
+    public async Task Additional_registry_assemblies_require_explicit_registration()
+    {
+        await using var app = new TestApp();
+        await using var modularApp = app.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+            services.AddSkiesOpenApi(typeof(DependencyErrorCodes).Assembly)));
+        using var client = modularApp.CreateClient();
+        using var document = JsonDocument.Parse(await client.GetStringAsync("/openapi/v1.json"));
+        var codes = document.RootElement.GetProperty("components").GetProperty("schemas")
+            .GetProperty("ErrorBody").GetProperty("properties").GetProperty("code").GetProperty("enum")
+            .EnumerateArray().Select(value => value.GetString()).ToList();
+
+        Assert.Contains(DependencyErrorCodes.UniqueViolation, codes);
+        Assert.Contains("wallets.not_found", codes);
+        Assert.Contains(PlatformErrorCodes.RateLimited, codes);
+        Assert.Equal(codes.Count, codes.Distinct().Count());
+    }
+
+    // Loaded with the test process, but not owned by the hosted application. A vendor such as
+    // Npgsql also exposes *ErrorCodes constants; loading that library must not widen the API.
+    internal static class DependencyErrorCodes
+    {
+        public const string UniqueViolation = "23505";
     }
 }
