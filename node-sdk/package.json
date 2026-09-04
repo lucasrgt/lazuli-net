@@ -37,7 +37,7 @@
     "@hey-api/openapi-ts": "0.97.3"
   },
   "overrides": {
-    "qs": "6.15.3",
+    "qs": "6.16.0",
     "@hey-api/json-schema-ref-parser": "1.4.1",
     "nanoid": "3.3.18"
   }
