@@ -5,6 +5,25 @@ namespace Skies.Framework.Cli.Tests;
 public sealed class FrontendGateTests
 {
     [Fact]
+    public void A_full_flutter_library_gate_cannot_pass_without_any_executable_proof()
+    {
+        var workspace = Directory.CreateTempSubdirectory("skies-empty-flutter-").FullName;
+        try
+        {
+            Write(workspace, "pubspec.yaml", "name: empty_library\n");
+            Write(workspace, "lib/value.dart", "const value = 1;\n");
+            var package = new FrontendPackage(workspace, FrontendPackageRole.Library, FrontendPlatform.Flutter);
+            Assert.Equal(1, FrontendGate.RunFlutterTests(workspace, new FrontendImpact(package) { Full = true }));
+            Write(workspace, "test/value.assay_test.dart", "void main() {}\n");
+            Assert.Equal(0, FrontendGate.RunFlutterTests(workspace, new FrontendImpact(package) { Full = true }));
+        }
+        finally
+        {
+            Directory.Delete(workspace, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Static_surface_without_viewmodels_does_not_require_assay()
     {
         var workspace = Directory.CreateTempSubdirectory("skies-frontend-gate-").FullName;

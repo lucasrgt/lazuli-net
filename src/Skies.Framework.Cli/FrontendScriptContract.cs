@@ -55,6 +55,14 @@ internal static class FrontendScriptContract
             : "test";
     }
 
+    internal static bool UsesNativeNodeTests(string packageRoot, string script)
+    {
+        using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(packageRoot, "package.json")));
+        var command = document.RootElement.GetProperty("scripts").GetProperty(script).GetString() ?? "";
+        return command.TrimStart().StartsWith("node ", StringComparison.Ordinal)
+            && Regex.IsMatch(command, @"(?:^|\s)--test(?:\s|$)");
+    }
+
     /// <summary>Whether a package declares a non-empty script with the supplied name.</summary>
     internal static bool HasScript(string packageRoot, string script)
     {

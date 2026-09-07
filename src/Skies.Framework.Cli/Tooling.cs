@@ -11,6 +11,12 @@ internal static class Tooling
     {
         var info = new ProcessStartInfo("dotnet") { UseShellExecute = false };
         info.ArgumentList.Add(command);
+        if (command is "build" or "test" && !args.Any(argument =>
+                argument.StartsWith("-m:", StringComparison.OrdinalIgnoreCase)
+                || argument.StartsWith("-maxcpucount", StringComparison.OrdinalIgnoreCase)
+                || argument.StartsWith("/m:", StringComparison.OrdinalIgnoreCase)
+                || argument.StartsWith("/maxcpucount", StringComparison.OrdinalIgnoreCase)))
+            info.ArgumentList.Add("-maxcpucount:2");
         foreach (var arg in args)
             info.ArgumentList.Add(arg);
 
@@ -34,7 +40,7 @@ internal static class Tooling
         string workingDirectory,
         IReadOnlyDictionary<string, string?>? environment = null)
     {
-        var windows = OperatingSystem.IsWindows();
+        var windows = OperatingSystem.IsWindows() && exe != "node";
         var info = new ProcessStartInfo(windows ? "cmd.exe" : exe)
         {
             UseShellExecute = false,

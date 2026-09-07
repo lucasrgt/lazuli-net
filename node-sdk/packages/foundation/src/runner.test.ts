@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, writeFile, access } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -9,7 +9,7 @@ import { DefaultGitClient, defaultCommandRunner } from "./runner.js";
 const execute = promisify(execFile);
 
 describe("process runner", () => {
-  it.skipIf(process.platform === "win32")("uses argv without shell interpolation on POSIX hosts", async () => {
+  it("uses argv without shell interpolation on native executables", async () => {
     const marker = join(await mkdtemp(join(tmpdir(), "skies-runner-")), "should-not-exist");
     const argument = `literal;require('node:fs').writeFileSync('${marker}','bad')`;
     const result = await defaultCommandRunner({
@@ -34,14 +34,26 @@ describe("process runner", () => {
     const result = await defaultCommandRunner({
       command: ["definitely-not-a-skies-executable"], cwd: process.cwd(), env: {}, timeoutMs: 500, forwardOutput: false,
     });
-    if (process.platform === "win32") {
-      // cmd.exe reports the missing command as a plain exit-1 without a spawn error.
-      expect(result.exitCode).not.toBeNull();
-      expect(result.error).toBeUndefined();
-      return;
-    }
     expect(result.exitCode).toBeNull();
     expect(result.error).toMatch(/ENOENT|not found/iu);
+  });
+
+  it("terminates descendants on timeout instead of leaving work and inherited pipes alive", async () => {
+    const root = await mkdtemp(join(tmpdir(), "skies-runner-tree-"));
+    const marker = join(root, "descendant-survived");
+    const script = join(root, "tree.cjs");
+    await writeFile(script, `
+      const { spawn } = require('node:child_process');
+      const child = "setTimeout(() => require('node:fs').writeFileSync('descendant-survived', 'bad'), 1500)";
+      spawn(process.execPath, ['-e', child], { stdio: 'inherit' });
+      setTimeout(() => process.exit(0), 3000);
+    `);
+    const run = await defaultCommandRunner({
+      command: [process.execPath, script], cwd: root, env: {}, timeoutMs: 500, forwardOutput: false,
+    });
+    expect(run.timedOut).toBe(true);
+    expect(run.durationMs).toBeLessThan(1_500);
+    await expect(access(marker)).rejects.toThrow();
   });
 });
 

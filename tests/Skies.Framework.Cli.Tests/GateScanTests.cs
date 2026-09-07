@@ -163,6 +163,14 @@ public class GateScanTests
     }
 
     [Fact]
+    public void ParseTrxDirectory_rejects_a_truncated_receipt_instead_of_ignoring_it()
+    {
+        var dir = NewDir();
+        Write(dir, "broken.trx", "<TestRun><Results>");
+        Assert.Throws<InvalidDataException>(() => GateScan.ParseTrxDirectory(dir));
+    }
+
+    [Fact]
     public void ParseTrxDirectory_joins_definitions_to_results()
     {
         var dir = NewDir();

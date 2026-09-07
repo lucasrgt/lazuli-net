@@ -583,7 +583,9 @@
           "src/Skies.Framework.Cli/RtwCommand.cs",
           "src/Skies.Framework.Cli/SkiesManifest.cs",
           "src/Skies.Framework.Cli/SuppressionGate.cs",
-          "src/Skies.Framework.Cli/WtwCommand.cs"
+          "src/Skies.Framework.Cli/WtwCommand.cs",
+          "src/Skies.Framework.Cli/GeneratedClientImpact.cs",
+          "src/Skies.Framework.Cli/Tools/*.mjs"
         ],
         "proofs": [
           {
@@ -621,6 +623,22 @@
           {
             "kind": "test",
             "path": "tests/Skies.Framework.Cli.Tests/SuppressionGateTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/CSharpImpactGraphTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "frontend-sdk/tests/cli-generated-impact.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "frontend-sdk/tests/cli-playwright-selection.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "frontend-sdk/tests/cli-node-selection.test.ts"
           }
         ]
       },
@@ -901,6 +919,14 @@
   ],
   "deferments": [
     {
+      "id": "bounded-gates-4110-tooling-surface-sync",
+      "capability": "tooling.surface-sync",
+      "side": "node",
+      "reason": "The .NET CLI frontend runner now launches its packaged Node helper directly on Windows for native Playwright case selection. The Node CLI already runs natively and has no cmd.exe adapter to correct.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-14"
+    },
+    {
       "id": "cli-version-bump-412",
       "capability": "packaging.public-graphs",
       "side": "node",
@@ -955,6 +981,22 @@
       "reason": "The shared release guard records skies-flutter 4.1.23 after a Flutter-only CI restore fix; Node package content and delivery behavior are unchanged.",
       "owner": "lucasrgt",
       "expires": "2026-09-07"
+    },
+    {
+      "id": "gate-audit-4110-pilot-nontrivial",
+      "capability": "pilot.nontrivial",
+      "side": "dotnet",
+      "reason": "The Node pilot consumes foundation 0.1.1 to exercise the corrected Git and bounded-selection behavior. The .NET sample already consumes the corrected CLI gate from the framework checkout and needs no package manifest change.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-14"
+    },
+    {
+      "id": "gate-audit-4110-tooling-generators",
+      "capability": "tooling.generators",
+      "side": "dotnet",
+      "reason": "The Node application template now consumes the corrected foundation package 0.1.1. The .NET generator has no dependency on that npm package; its runtime templates are unchanged.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-14"
     },
     {
       "id": "node-delivery-tooling-windows-shell",

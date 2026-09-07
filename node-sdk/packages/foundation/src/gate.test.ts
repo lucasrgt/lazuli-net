@@ -75,9 +75,34 @@ describe("affected/staged/full selection", () => {
     expect([...selectProofs(config(), "affected", ["src/unit/a.ts"]).selected]).toEqual(["p-unit"]);
     expect([...selectProofs(config(), "affected", ["src/unit/deep/a.ts"]).selected]).toEqual(["p-unit"]);
   });
+
+  it("preserves direct proofs and dependencies when their path is also force-full in fast mode", () => {
+    const overlap = parseConfig(JSON.stringify({ ...topology, forceFullScopes: ["src/shared/**"] }),
+      "/repo/skies.node.json", "/repo");
+    expect([...selectProofs(overlap, "staged", ["src/shared/adapter.ts"], true).selected])
+      .toEqual(["p-integration", "p-unit"]);
+  });
 });
 
 describe("gate execution and receipts", () => {
+  it.each([
+    { mode: "staged" as const },
+    { mode: "affected" as const },
+    { mode: "affected" as const, fast: true },
+    { mode: "affected" as const, baseRevision: "missing" },
+    { mode: "affected" as const, baseRevision: "missing", fast: true },
+  ])("does not execute any lane when Git discovery is unavailable: %j", async (options) => {
+    const root = await workspace();
+    let executions = 0;
+    const missing = async (): Promise<readonly string[]> => { throw new Error("missing ancestry"); };
+    const run = await runGate({ root, ...options, reportPath: false }, {
+      runner: async () => { executions++; return result(); },
+      git: { changedPaths: missing, stagedPaths: missing, baseDiffPaths: missing },
+    });
+    expect(executions).toBe(0);
+    expect(run.exitCode).not.toBe(0);
+    expect(run.receipt.verdict).toBe("red");
+  });
   it("runs each selected lane once with an argv array and maps success to selected proofs", async () => {
     const root = await workspace();
     const requests: CommandRequest[] = [];
@@ -101,7 +126,7 @@ describe("gate execution and receipts", () => {
     expect(run.human).toContain("Gate verdict: RED");
   });
 
-  it("uses injected Git discovery and fail-closed full widening when Git is unavailable", async () => {
+  it("uses injected Git discovery and rejects unavailable ancestry without executing unrelated lanes", async () => {
     const root = await workspace();
     const calls: string[] = [];
     const runner: CommandRunner = async (request) => { calls.push(request.command[1]!); return result(); };
@@ -115,9 +140,10 @@ describe("gate execution and receipts", () => {
     const widened = await runGate({ root, mode: "affected", reportPath: false }, {
       runner, git: { changedPaths: async () => { throw new Error("no ancestry"); }, stagedPaths: async () => [], baseDiffPaths: async () => [] },
     });
-    expect(widened.receipt.selectedProofs).toHaveLength(3);
-    expect(widened.receipt.selectionReasons[0]).toContain("fail-closed widening");
-    expect(calls).toContain("journey.js");
+    expect(widened.receipt.selectedProofs).toHaveLength(0);
+    expect(widened.receipt.selectionReasons[0]).toContain("no proof run started");
+    expect(widened.exitCode).not.toBe(0);
+    expect(calls).toEqual(["unit.js"]);
   });
 
   it("uses staged index discovery and records the bounded fast receipt", async () => {

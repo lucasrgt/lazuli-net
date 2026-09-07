@@ -564,10 +564,27 @@ Execution modes are closed and framework-owned:
   repositories use `--fast`; local-authority repositories omit it and own the authoritative affected verdict;
 - `skies gate --full` — exhaustive audit, mandatory before release and optionally configured for main/manual/nightly.
 
-If Git ancestry is missing, a changed production file cannot be mapped, or runtime-wide build/test infrastructure
-changes, the selector widens to full. Gate-control files (`.config/dotnet-tools.json`, `lefthook.yml`, and checked
+Missing Git ancestry makes a scoped gate incomplete (exit 2); restore the comparison before retrying, or request
+an explicit full audit at the release boundary. If production impact cannot be mapped or runtime-wide build/test
+infrastructure changes, the selector widens to full. Gate-control files (`.config/dotnet-tools.json`, `lefthook.yml`, and checked
 workflows) are different: the doctor validates their contract, but changing the fiscal does not execute unrelated
 application proofs. Application annotations and arbitrary test filters never participate.
+
+The C# dependency graph resolves top-level types and qualified references: nested `Input`/`Output` names and
+namespace segments never join unrelated slices. A module specification selects that module; a transitive proof
+selects its own test class without recursively selecting every other proof of every subject it mentions.
+Long backend selections use one standard runsettings filter, never an unfiltered run or overlapping batches.
+Generated TypeScript clients propagate changed runtime exports through actual imports; erased type changes
+remain covered by the universal typecheck. Shared client imports cross declared package boundaries using each
+package's TypeScript configuration. Uncertain generated impact falls back to the owning package.
+Feature-local translations select their feature and locale proofs. Flow matching uses the original affected
+features, and Playwright executes a deduplicated native test list containing the mapped cases, one worker.
+Doctor concurrency and Vitest workers are capped at two; .NET build/test defaults to two MSBuild nodes.
+Affected console output summarizes passing and
+unaffected rows while preserving every finding; full audits retain the complete matrix.
+Native Node unit scripts receive Node file selection and concurrency arguments, with executable JUnit evidence,
+instead of Vitest flags. Selected backend runs require valid non-empty receipts, and a full Flutter library
+requires an executable unit or Assay suite. A process exit of zero without evidence is not a passed proof.
 
 An explicit `--full` audit writes the canonical artifacts at the workspace root: **`VERIFICATION.md`**
 (human — commit it; a reviewer reads the exhaustive proof state without running anything) and

@@ -38,9 +38,13 @@ internal static class GateCommand
         }
 
         var changes = GitChanges.Read(root, options);
-        var effectiveFull = options.Mode == GateMode.Full || !changes.Reliable;
-        if (!changes.Reliable)
-            Console.Error.WriteLine($"skies gate: impact discovery is uncertain ({changes.Message}); widening to full.");
+        if (!changes.Reliable || options.Mode != GateMode.Full && changes.Comparison is null)
+        {
+            Console.Error.WriteLine($"skies gate: Git scope is unavailable ({changes.Message}); no proof run started. "
+                + "Fetch the comparison revision and retry the same scoped check, or request --full explicitly.");
+            return 2;
+        }
+        var effectiveFull = options.Mode == GateMode.Full;
 
         var manifests = GateScan.DiscoverManifests(root);
         var proofs = GateScan.ScanProofs(root);
@@ -64,7 +68,8 @@ internal static class GateCommand
                 proofs,
                 journeys,
                 GateScan.ScanTestClasses(root),
-                targets);
+                targets,
+                changes.Comparison);
         }
         impact = ApplyFastFeedback(impact, options.Fast);
 
@@ -88,7 +93,20 @@ internal static class GateCommand
         {
             Console.WriteLine("skies gate — backend proofs (dotnet test)...");
             tests = Tooling.Dotnet("test", ProofArguments(forwarded, doctor, results, impact.Backend));
-            verdicts = GateScan.ParseTrxDirectory(results);
+            try
+            {
+                verdicts = GateScan.ParseTrxDirectory(results);
+            }
+            catch (InvalidDataException exception)
+            {
+                Console.Error.WriteLine($"skies gate: incomplete test evidence: {exception.Message}");
+                tests = Math.Max(tests, 2);
+            }
+            if (verdicts.Count == 0)
+            {
+                Console.Error.WriteLine("skies gate: the selected backend run produced no executable test evidence.");
+                tests = Math.Max(tests, 2);
+            }
         }
         else
         {
@@ -159,7 +177,7 @@ internal static class GateCommand
         if (options.Fast && frontend.Any(leg => leg.Role == FrontendPackageRole.Surface))
             notices.Add(
                 "browser/device E2E execution — --fast runs the E2E contract check only; no flow was driven. "
-                + "Run `skies gate --full` before pushing a slice, or rely on affected CI.");
+                + "Run the repository's authoritative affected check before pushing; reserve --full for release audits.");
 
         notices.AddRange(impact.Reasons
             .Where(reason => reason.Contains(FastDeferralMarker, StringComparison.Ordinal))
@@ -222,16 +240,12 @@ internal static class GateCommand
             };
         }
 
-        var filter = ProofFilter(impact.Backend);
-        var oversized = filter.Length > MaxInlineFilterLength;
-        if (!impact.Backend.Full && !oversized && !exhaustiveFrontend)
+        if (!impact.Backend.Full && !exhaustiveFrontend)
             return impact;
 
         var reasons = new List<string>(impact.Reasons);
         if (impact.Backend.Full)
             reasons.Add($"backend: exhaustive fallback {FastDeferralMarker}; the authoritative affected boundary or an explicit --full audit executes it");
-        if (oversized)
-            reasons.Add($"backend: oversized transitive proof closure {FastDeferralMarker}; direct mappings still execute and the authoritative affected boundary executes the complete closure");
         if (exhaustiveFrontend)
             reasons.Add($"frontend: exhaustive runtime closure {FastDeferralMarker}; the authoritative affected boundary executes every test and Assay");
 
@@ -239,8 +253,8 @@ internal static class GateCommand
         {
             Backend = new BackendImpact(
                 false,
-                oversized ? impact.Backend.DirectFilters : impact.Backend.Filters,
-                oversized ? impact.Backend.DirectAffectedSlices : impact.Backend.AffectedSlices),
+                impact.Backend.Filters,
+                impact.Backend.AffectedSlices),
             Frontends = impact.Frontends
                 .Select(frontend => frontend.Full || frontend.ExhaustiveFallback
                     ? CopyFrontend(frontend, full: false)
@@ -279,12 +293,24 @@ internal static class GateCommand
         if (impact is { Full: false } && impact.Filters.Count > 0)
         {
             var filter = ProofFilter(impact);
-            // Omitting an oversized filter widens to the complete backend suite. It is slower but fail-closed and
-            // avoids CreateProcess rejecting the command before a single proof can execute on Windows.
             if (filter.Length <= MaxInlineFilterLength)
             {
                 arguments.Add("--filter");
                 arguments.Add(filter);
+            }
+            else
+            {
+                // A long selection belongs in the runner's standard settings file, never an unfiltered run or
+                // several overlapping batches that execute the same shared proof repeatedly.
+                Directory.CreateDirectory(resultsDirectory);
+                var settingsPath = Path.Combine(resultsDirectory, "selected.runsettings");
+                var settings = new System.Xml.Linq.XDocument(
+                    new System.Xml.Linq.XElement("RunSettings",
+                        new System.Xml.Linq.XElement("RunConfiguration",
+                            new System.Xml.Linq.XElement("TestCaseFilter", filter))));
+                settings.Save(settingsPath);
+                arguments.Add("--settings");
+                arguments.Add(settingsPath);
             }
         }
         return [.. arguments];

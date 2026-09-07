@@ -64,13 +64,21 @@ internal static class FrontendGate
                     Console.WriteLine($"skies gate — frontend tests ({name}, "
                         + (impact.Full ? "full non-Assay partition" : $"{impact.Tests.Count} affected file(s)") + ")...");
                     var filters = impact.Full ? [] : impact.Tests.Order().ToArray();
-                    var arguments = new List<string> { "--" };
-                    arguments.AddRange(filters);
-                    arguments.Add($"--exclude={ReactAssaySuiteGlob}");
-                    tests = FrontendScriptContract.Run(
-                        client,
-                        FrontendScriptContract.ResolveUnitTestScript(client),
-                        [.. arguments]);
+                    var script = FrontendScriptContract.ResolveUnitTestScript(client);
+                    if (FrontendScriptContract.UsesNativeNodeTests(client, script))
+                    {
+                        var helper = Path.Combine(AppContext.BaseDirectory, "Tools", "node-test-affected.mjs");
+                        var paths = impact.Full ? "--full" : System.Text.Json.JsonSerializer.Serialize(filters);
+                        tests = Tooling.Run("node", [helper, script, paths], client);
+                    }
+                    else
+                    {
+                        var arguments = new List<string> { "--" };
+                        arguments.AddRange(filters);
+                        arguments.Add($"--exclude={ReactAssaySuiteGlob}");
+                        arguments.Add("--maxWorkers=2");
+                        tests = FrontendScriptContract.Run(client, script, [.. arguments]);
+                    }
                 }
             }
 
@@ -108,7 +116,7 @@ internal static class FrontendGate
                     {
                         Console.WriteLine($"skies gate — frontend E2E execution ({name}, "
                             + (impact.Full ? "full" : $"{flows.Count} affected flow(s)") + ")...");
-                        e2e = RunE2e(target, flows);
+                        e2e = RunE2e(target, flows, impact.Full);
                     }
                 }
             }
@@ -153,6 +161,7 @@ internal static class FrontendGate
         var arguments = new List<string> { "--no-install", "assay", "verify" };
         if (paths is not null)
             arguments.AddRange(paths);
+        arguments.AddRange(["--", "--maxWorkers=2"]);
         return Tooling.Run("npx", [.. arguments], client);
     }
 
@@ -205,7 +214,7 @@ internal static class FrontendGate
         return code;
     }
 
-    private static int RunE2e(FrontendPackage package, IReadOnlyList<FrontendFlow> flows)
+    private static int RunE2e(FrontendPackage package, IReadOnlyList<FrontendFlow> flows, bool full)
     {
         var client = package.Path;
         if (package.Platform == FrontendPlatform.Flutter)
@@ -237,8 +246,11 @@ internal static class FrontendGate
                 if (install != 0)
                     return install;
             }
-            code = Math.Max(code, Tooling.Run(
-                "npx", ["--no-install", "playwright", "test", .. web], client, gateEnvironment));
+            if (full)
+                code = Math.Max(code, Tooling.Run(
+                    "npx", ["--no-install", "playwright", "test", .. web], client, gateEnvironment));
+            else
+                code = Math.Max(code, RunAffectedWeb(client, flows.Where(flow => flow.Target == "web").ToList(), gateEnvironment));
         }
 
         var native = flows.Where(flow => flow.Target == "native").Select(flow => flow.Spec)
@@ -248,7 +260,23 @@ internal static class FrontendGate
         return code;
     }
 
-    private static int RunFlutterTests(string client, FrontendImpact impact)
+    private static int RunAffectedWeb(string client, IReadOnlyList<FrontendFlow> flows, IReadOnlyDictionary<string, string?> environment)
+    {
+        var selection = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllText(selection, System.Text.Json.JsonSerializer.Serialize(flows,
+                new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+            var script = Path.Combine(AppContext.BaseDirectory, "Tools", "playwright-affected.mjs");
+            return Tooling.Run("node", [script, selection], client, environment);
+        }
+        finally
+        {
+            File.Delete(selection);
+        }
+    }
+
+    internal static int RunFlutterTests(string client, FrontendImpact impact)
     {
         var testRoot = Path.Combine(client, "test");
         var tests = impact.Full && Directory.Exists(testRoot)
@@ -257,7 +285,12 @@ internal static class FrontendGate
                 .Select(path => Path.GetRelativePath(client, path)).Order(StringComparer.OrdinalIgnoreCase).ToArray()
             : impact.Full ? [] : impact.Tests.Order().ToArray();
         if (tests.Length == 0)
-            return 0;
+        {
+            if (!impact.Full || RequiresAssay(client))
+                return 0; // The Assay leg owns the package's remaining executable partition.
+            Console.Error.WriteLine($"skies gate — Flutter tests ({Path.GetFileName(client)}): no executable test suite.");
+            return 1;
+        }
         Console.WriteLine($"skies gate — Flutter tests ({Path.GetFileName(client)}, "
             + (impact.Full ? "full non-Assay partition" : $"{tests.Length} affected file(s)") + ")...");
         return Tooling.Run("flutter", ["test", .. tests], client);
