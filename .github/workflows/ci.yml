@@ -41,7 +41,7 @@ jobs:
     name: backend (skies gate)
     runs-on: ubuntu-latest
     env:
-      SKY_GATE_BASE: ${{ github.event.pull_request.base.sha || github.event.before || 'HEAD^' }}
+      SKY_CI_BASE: ${{ github.event.pull_request.base.sha || github.event.before || 'HEAD^' }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -51,7 +51,7 @@ jobs:
           dotnet-version: "10.0.x"
       - name: affected verification
         if: ${{ !inputs.full }}
-        run: dotnet run --project src/Skies.Framework.Cli/Skies.Framework.Cli.csproj -c Release -- gate --affected Skies.Framework.slnx -c Release
+        run: dotnet run --project src/Skies.Framework.Cli/Skies.Framework.Cli.csproj -c Release -- gate --affected --base "$SKY_CI_BASE" Skies.Framework.slnx -c Release
       - name: exhaustive release verification
         if: ${{ inputs.full }}
         run: dotnet run --project src/Skies.Framework.Cli/Skies.Framework.Cli.csproj -c Release -- gate --full Skies.Framework.slnx -c Release
