@@ -1,5 +1,5 @@
 import { execFile, spawn } from "node:child_process";
-import { relative, resolve } from "node:path";
+import { basename, relative, resolve } from "node:path";
 import type { ChildProcess } from "node:child_process";
 import type { CommandRequest, CommandResult, CommandRunner, GitClient } from "./types.js";
 
@@ -15,7 +15,11 @@ function append(current: string, chunk: Buffer | string): string {
 function terminate(child: ChildProcess, signal: NodeJS.Signals): void {
   if (child.pid === undefined) return;
   try {
-    if (process.platform === "win32") child.kill(signal);
+    if (process.platform === "win32") {
+      // Killing only cmd.exe or the parent Node process leaves test/browser descendants consuming resources
+      // and holding inherited pipes open. Windows needs explicit process-tree termination.
+      execFile("taskkill", ["/PID", String(child.pid), "/T", "/F"], { windowsHide: true }, () => {});
+    }
     else process.kill(-child.pid, signal);
   } catch {
     try { child.kill(signal); } catch { /* the process already ended */ }
@@ -32,8 +36,9 @@ export const defaultCommandRunner: CommandRunner = async (request) => new Promis
   const child = spawn(request.command[0], request.command.slice(1), {
     cwd: request.cwd,
     env: { ...process.env, ...request.env },
-    // Windows resolves npm/git only as .cmd scripts, which require a shell; argv is never user-controlled.
-    shell: process.platform === "win32",
+    // Only command shims need cmd.exe. Native executables must retain their argv boundaries on Windows too.
+    shell: process.platform === "win32"
+      && /^(?:npm|npx|pnpm|yarn|corepack)(?:\.cmd)?$|\.(?:cmd|bat)$/iu.test(basename(request.command[0])),
     windowsHide: true,
     detached: process.platform !== "win32",
     stdio: ["ignore", "pipe", "pipe"],

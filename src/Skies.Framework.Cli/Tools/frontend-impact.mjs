@@ -6,7 +6,7 @@ const boundary = (file) => /\.(?:viewModel|view|test|spec)\.[cm]?[jt]sx?$/i.test
 
 // TypeScript owns parsing and module resolution. The graph carries exported symbols through generated
 // barrels instead of treating a regenerated API file as a change to every hook imported from that file.
-export function analyzeGeneratedConsumers(ts, { root, files, changes, compilerOptions = {} }) {
+export function analyzeGeneratedConsumers(ts, { root, files, changes, compilerOptions = {}, projects = [] }) {
   root = path.resolve(root);
   const absolute = (file) => normalize(path.resolve(root, file));
   const current = new Map(Object.entries(files).map(([file, text]) => [absolute(file), text]));
@@ -25,8 +25,13 @@ export function analyzeGeneratedConsumers(ts, { root, files, changes, compilerOp
       if (path.dirname(directory) === directory) break;
     }
   }
-  const options = { allowJs: true, moduleResolution: ts.ModuleResolutionKind.Bundler,
-    baseUrl: root, paths: { '@/*': ['src/*'] }, ...compilerOptions };
+  const configurations = projects.map((project) => ({ ...project, root: absolute(project.root) }))
+    .sort((left, right) => right.root.length - left.root.length);
+  const optionsFor = (file) => {
+    const project = configurations.find((item) => file.startsWith(item.root + '/'));
+    return { allowJs: true, moduleResolution: ts.ModuleResolutionKind.Bundler,
+      baseUrl: project?.root ?? root, paths: { '@/*': ['src/*'] }, ...compilerOptions, ...project?.compilerOptions };
+  };
   const host = {
     fileExists: (file) => inventory.has(normalize(file)),
     readFile: (file) => current.get(normalize(file)) ?? previous.get(normalize(file)),
@@ -35,6 +40,7 @@ export function analyzeGeneratedConsumers(ts, { root, files, changes, compilerOp
     realpath: (file) => file,
   };
   const resolve = (specifier, from) => {
+    const options = optionsFor(from);
     const result = ts.resolveModuleName(specifier, from, options, host).resolvedModule;
     if (result && inventory.has(normalize(result.resolvedFileName))) return normalize(result.resolvedFileName);
     const local = specifier.startsWith('.') || Object.keys(options.paths ?? {}).some((alias) =>
@@ -56,7 +62,7 @@ export function analyzeGeneratedConsumers(ts, { root, files, changes, compilerOp
     const emitted = /\.d\.[cm]?ts$/.test(file) ? '' : ts.transpileModule(text, {
       fileName: file,
       compilerOptions: { target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.Preserve,
-        removeComments: true, ...compilerOptions, declaration: false, noEmit: false, emitDeclarationOnly: false,
+        removeComments: true, ...optionsFor(file), declaration: false, noEmit: false, emitDeclarationOnly: false,
         verbatimModuleSyntax: false, sourceMap: false, inlineSourceMap: false },
     }).outputText;
     const source = ts.createSourceFile(file, emitted, ts.ScriptTarget.Latest, true);

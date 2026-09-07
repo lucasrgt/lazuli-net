@@ -93,7 +93,20 @@ internal static class GateCommand
         {
             Console.WriteLine("skies gate — backend proofs (dotnet test)...");
             tests = Tooling.Dotnet("test", ProofArguments(forwarded, doctor, results, impact.Backend));
-            verdicts = GateScan.ParseTrxDirectory(results);
+            try
+            {
+                verdicts = GateScan.ParseTrxDirectory(results);
+            }
+            catch (InvalidDataException exception)
+            {
+                Console.Error.WriteLine($"skies gate: incomplete test evidence: {exception.Message}");
+                tests = Math.Max(tests, 2);
+            }
+            if (verdicts.Count == 0)
+            {
+                Console.Error.WriteLine("skies gate: the selected backend run produced no executable test evidence.");
+                tests = Math.Max(tests, 2);
+            }
         }
         else
         {

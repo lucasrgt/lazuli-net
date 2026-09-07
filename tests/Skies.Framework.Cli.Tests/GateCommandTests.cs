@@ -4,6 +4,36 @@ namespace Skies.Framework.Cli.Tests;
 
 public class GateCommandTests
 {
+    [Fact]
+    public async Task A_full_gate_cannot_pass_when_dotnet_test_produces_no_test_evidence()
+    {
+        var root = Directory.CreateTempSubdirectory("skies-empty-evidence-").FullName;
+        try
+        {
+            File.WriteAllText(Path.Combine(root, "Empty.csproj"),
+                "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>");
+            var start = new System.Diagnostics.ProcessStartInfo("dotnet")
+            {
+                WorkingDirectory = root, UseShellExecute = false,
+                RedirectStandardOutput = true, RedirectStandardError = true,
+            };
+            start.ArgumentList.Add(typeof(GateCommand).Assembly.Location);
+            start.ArgumentList.Add("gate");
+            start.ArgumentList.Add("--full");
+            using var process = System.Diagnostics.Process.Start(start)!;
+            var output = process.StandardOutput.ReadToEndAsync();
+            var error = process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync();
+            Assert.Equal(2, process.ExitCode);
+            Assert.Contains("no executable test evidence", await error);
+            Assert.DoesNotContain("gate: GREEN", await output);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     [Theory]
     [InlineData("--staged")]
     [InlineData("--affected")]

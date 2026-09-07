@@ -630,11 +630,15 @@
           },
           {
             "kind": "test",
-            "path": "frontend-sdk/tools/cli-generated-impact.test.ts"
+            "path": "frontend-sdk/tests/cli-generated-impact.test.ts"
           },
           {
             "kind": "test",
-            "path": "frontend-sdk/tools/cli-playwright-selection.test.ts"
+            "path": "frontend-sdk/tests/cli-playwright-selection.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "frontend-sdk/tests/cli-node-selection.test.ts"
           }
         ]
       },
@@ -1059,14 +1063,6 @@
       "expires": "2026-08-28"
     },
     {
-      "id": "bounded-gates-4110-proof-gates-foundations",
-      "capability": "proof.gates-foundations",
-      "side": "node",
-      "reason": "The .NET gate inferred C# dependencies from ambiguous nested type names and used file-wide browser selection. Its regression-tested fix uses qualified C# references, generated runtime export impact, and native Playwright case lists. The Node foundation selects explicit sourceScopes and dependency IDs and has neither this C# inference nor the .NET runner filter limit; its existing graph remains unchanged.",
-      "owner": "lucasrgt",
-      "expires": "2026-09-14"
-    },
-    {
       "id": "bounded-gates-4110-tooling-surface-sync",
       "capability": "tooling.surface-sync",
       "side": "node",
@@ -1075,10 +1071,18 @@
       "expires": "2026-09-14"
     },
     {
-      "id": "bounded-gates-4110-packaging-public-graphs",
-      "capability": "packaging.public-graphs",
-      "side": "node",
-      "reason": "Only the .NET CLI ships changed implementation and packaged helpers at 4.1.10; no Node package content or dependency graph changes.",
+      "id": "gate-audit-4110-tooling-generators",
+      "capability": "tooling.generators",
+      "side": "dotnet",
+      "reason": "The Node application template now consumes the corrected foundation package 0.1.1. The .NET generator has no dependency on that npm package; its runtime templates are unchanged.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-14"
+    },
+    {
+      "id": "gate-audit-4110-pilot-nontrivial",
+      "capability": "pilot.nontrivial",
+      "side": "dotnet",
+      "reason": "The Node pilot consumes foundation 0.1.1 to exercise the corrected Git and bounded-selection behavior. The .NET sample already consumes the corrected CLI gate from the framework checkout and needs no package manifest change.",
       "owner": "lucasrgt",
       "expires": "2026-09-14"
     }

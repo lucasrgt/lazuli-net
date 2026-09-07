@@ -10,6 +10,7 @@ const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 export default defineConfig({
   server: { fs: { allow: [r("..")] } }, // allow loading the example (a sibling of frontend/) under the repo root
   test: {
+    maxWorkers: 2,
     root: r(".."),
     environment: "jsdom",
     setupFiles: [r("./vitest.setup.ts")],
@@ -19,6 +20,7 @@ export default defineConfig({
     include: [
       "frontend-sdk/packages/**/*.test.{ts,tsx}",
       "frontend-sdk/tools/**/*.test.{ts,tsx}",
+      "frontend-sdk/tests/**/*.test.{ts,tsx}",
       "examples/sample-app/frontend/core/**/*.test.{ts,tsx}",
       "examples/sample-app/frontend/web/**/*.test.{ts,tsx}",
     ],

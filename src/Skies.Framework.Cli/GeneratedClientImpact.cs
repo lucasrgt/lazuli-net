@@ -11,7 +11,7 @@ internal static class GeneratedClientImpact
 
     internal static IReadOnlyList<string>? Select(
         string workspace, FrontendPackage package, IReadOnlyList<string> changes, GitComparison? comparison,
-        List<string> reasons)
+        List<string> reasons, IReadOnlyList<FrontendPackage>? packages = null)
     {
         var sources = changes.Where(path => IsGenerated(path)
             && (path.EndsWith(".ts", StringComparison.OrdinalIgnoreCase)
@@ -20,8 +20,8 @@ internal static class GeneratedClientImpact
         if (sources.Length == 0)
             return [];
         ArgumentNullException.ThrowIfNull(comparison);
-        if (package.Platform != FrontendPlatform.React || package.Role != FrontendPackageRole.Surface)
-            return Fallback(reasons, "generated client belongs to a shared or non-TypeScript package");
+        if (package.Platform != FrontendPlatform.React)
+            return Fallback(reasons, "generated client belongs to a non-TypeScript package");
 
         var script = Path.Combine(AppContext.BaseDirectory, "Tools", "frontend-impact-cli.mjs");
         var info = new ProcessStartInfo("node")
@@ -44,6 +44,8 @@ internal static class GeneratedClientImpact
             {
                 workspace,
                 packageRoot = package.Path,
+                packageRoots = (packages ?? [package]).Where(item => item.Platform == FrontendPlatform.React)
+                    .Select(item => item.Path).ToArray(),
                 changedPaths = sources,
                 before = comparison.Before,
                 after = comparison.After,

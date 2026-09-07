@@ -67,6 +67,7 @@ export function selectProofs(
     const proofMatches = config.proofs.filter((proof) => proof.sourceScopes.some((scope) => matchesScope(path, scope)));
     if (config.forceFullScopes.some((scope) => matchesScope(path, scope))) {
       if (fast) {
+        for (const proof of proofMatches) selected.add(proof.id);
         reasons.push(`'${path}' matches a force-full scope; exhaustive closure deferred by --fast; affected CI executes it`);
       } else {
         for (const proof of config.proofs) selected.add(proof.id);
@@ -154,7 +155,7 @@ export async function runGate(options: GateOptions, dependencies: GateDependenci
       selection = selectProofs(config, "staged", changed, true);
     } catch (error) {
       // A staged check must never execute the exhaustive fallback; it fails closed and bounded instead.
-      boundedFailure = `Git staged discovery failed; exhaustive fallback deferred by --fast: ${error instanceof Error ? error.message : String(error)}`;
+      boundedFailure = `Git staged discovery failed; no proof run started: ${error instanceof Error ? error.message : String(error)}`;
       selection = { selected: new Set<string>(), paths: [], reasons: [boundedFailure] };
     }
   } else if (options.mode === "affected" && options.changedPaths === undefined) {
@@ -165,17 +166,8 @@ export async function runGate(options: GateOptions, dependencies: GateDependenci
         const changed = await git.baseDiffPaths(config.root, baseRevision);
         selection = selectProofs(config, "affected", changed, fast);
       } catch (error) {
-        if (fast) {
-          // Pre-push verification stays bounded and fast; it never widens into the exhaustive inventory.
-          boundedFailure = `Git base discovery failed; exhaustive fallback deferred by --fast: ${error instanceof Error ? error.message : String(error)}`;
-          selection = { selected: new Set<string>(), paths: [], reasons: [boundedFailure] };
-        } else {
-          selection = selectProofs(config, "full");
-          selection = {
-            ...selection,
-            reasons: [`Git base discovery failed; fail-closed widening selects every proof: ${error instanceof Error ? error.message : String(error)}`],
-          };
-        }
+        boundedFailure = `Git base discovery failed; no proof run started: ${error instanceof Error ? error.message : String(error)}`;
+        selection = { selected: new Set<string>(), paths: [], reasons: [boundedFailure] };
       }
     } else {
       baseRevision = options.mergeBase ?? config.gitBase;
@@ -183,11 +175,8 @@ export async function runGate(options: GateOptions, dependencies: GateDependenci
         const changed = await git.changedPaths(config.root, baseRevision);
         selection = selectProofs(config, "affected", changed, fast);
       } catch (error) {
-        selection = selectProofs(config, "full");
-        selection = {
-          ...selection,
-          reasons: [`Git impact discovery failed; fail-closed widening selects every proof: ${error instanceof Error ? error.message : String(error)}`],
-        };
+        boundedFailure = `Git impact discovery failed; no proof run started: ${error instanceof Error ? error.message : String(error)}`;
+        selection = { selected: new Set<string>(), paths: [], reasons: [boundedFailure] };
       }
     }
   } else selection = selectProofs(config, options.mode, options.changedPaths, fast);

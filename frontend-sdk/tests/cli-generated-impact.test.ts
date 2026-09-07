@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import ts from 'typescript';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 // The helper ships inside the .NET tool; exercise it with the same project-owned TypeScript parser it loads there.
 import { analyzeGeneratedConsumers } from '../../src/Skies.Framework.Cli/Tools/frontend-impact.mjs';
 
@@ -9,6 +13,65 @@ function analyze(files: Record<string, string>, path: string, before: string | n
 }
 
 describe('the CLI generated-client impact graph', () => {
+  it('loads real workspace configs and imported helpers without scanning excluded prototypes', () => {
+    const root = mkdtempSync(path.join(tmpdir(), 'skies-generated-workspace-'));
+    const write = (file: string, text: string) => {
+      const target = path.join(root, file);
+      mkdirSync(path.dirname(target), { recursive: true });
+      writeFileSync(target, text);
+    };
+    try {
+      write('core/package.json', '{}');
+      write('core/tsconfig.json', '{"include":["src"],"compilerOptions":{"baseUrl":"."}}');
+      write('core/src/client.gen/api.ts', 'export const useLogin = () => 1;');
+      write('web/package.json', '{}');
+      write('web/tsconfig.json', JSON.stringify({ include: ['src'], exclude: ['src/prototypes'],
+        compilerOptions: { baseUrl: '.', paths: { '@core/*': ['../core/src/*'] } } }));
+      write('web/src/prototypes/broken.ts', "export { broken } from './missing';");
+      write('web/functions/session.ts', "export { useLogin } from '@core/client.gen/api';");
+      write('web/src/Login.viewModel.ts', "import { useLogin } from '../functions/session'; export const useScreen = () => useLogin();");
+      const git = (args: string[]) => {
+        const result = spawnSync('git', args, { cwd: root, encoding: 'utf8' });
+        expect(result.status, result.stderr).toBe(0);
+      };
+      git(['init', '-q']);
+      git(['config', 'user.name', 'Test']);
+      git(['config', 'user.email', 'test@example.invalid']);
+      git(['add', 'core/src/client.gen/api.ts']);
+      git(['commit', '-qm', 'baseline']);
+      write('core/src/client.gen/api.ts', 'export const useLogin = () => 2;');
+      const result = spawnSync(process.execPath,
+        [path.resolve(process.cwd(), '../src/Skies.Framework.Cli/Tools/frontend-impact-cli.mjs')], {
+          input: JSON.stringify({ workspace: root, packageRoot: path.join(root, 'core'),
+            packageRoots: [path.join(root, 'web'), path.join(root, 'core')],
+            changedPaths: ['core/src/client.gen/api.ts'], before: 'HEAD', after: null }),
+          encoding: 'utf8', timeout: 15_000,
+          env: { ...process.env, NODE_PATH: path.join(process.cwd(), 'node_modules') },
+        });
+      expect(result.status, result.stderr).toBe(0);
+      expect(JSON.parse(result.stdout)).toEqual({ reliable: true, files: ['../web/src/Login.viewModel.ts'] });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('follows a shared generated client into consumers using each package own aliases', () => {
+    const before = 'export const useLogin = () => 1; export const useCatalog = () => 2;';
+    const files = {
+      'core/src/client.gen/api.ts': before.replace('() => 1', '() => 3'),
+      'web/src/lib/session.ts': "export { useLogin } from '@core/client.gen/api';",
+      'web/src/features/Login.viewModel.ts': "import { useLogin } from '@/lib/session'; export const useScreen = () => useLogin();",
+      'admin/src/lib/session.ts': "export { useCatalog } from '@core/client.gen/api';",
+      'admin/src/features/Admin.viewModel.ts': "import { useCatalog } from '@/lib/session'; export const useScreen = () => useCatalog();",
+    };
+    const result = analyzeGeneratedConsumers(ts, { root: '/workspace', files,
+      changes: [{ path: 'core/src/client.gen/api.ts', before, after: files['core/src/client.gen/api.ts'] }],
+      projects: ['core', 'web', 'admin'].map((name) => ({ root: `/workspace/${name}`,
+        compilerOptions: { paths: { '@/*': ['src/*'], '@core/*': ['../core/src/*'] } } })),
+    });
+    expect(result.files).toEqual(['web/src/features/Login.viewModel.ts']);
+  });
+
   it('keeps runtime validators and literal dynamic imports in the affected closure', () => {
     const before = 'export const parseAmount = (value: unknown) => Number(value);';
     const files = {

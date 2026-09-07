@@ -132,19 +132,27 @@ internal static partial class GateImpact
         }
 
         var affectedFeatures = new HashSet<string>(StringComparer.Ordinal);
+        var runtimeChanges = new List<string>(changes);
         foreach (var impact in impacts)
         {
             var packageRelative = Normalize(Path.GetRelativePath(root, impact.Package.Path));
             var packageChanges = changes.Where(change => IsWithin(change, packageRelative)).ToList();
             if (packageChanges.Any(GeneratedClientImpact.IsGenerated))
             {
-                var consumers = GeneratedClientImpact.Select(root, impact.Package, packageChanges, comparison, reasons);
+                var consumers = GeneratedClientImpact.Select(root, impact.Package, packageChanges, comparison, reasons,
+                    impacts.Select(item => item.Package).ToList());
                 if (consumers is null)
                     impact.ExhaustiveFallback = true;
                 else
-                    packageChanges.AddRange(consumers.Select(file => packageRelative + "/" + file));
+                    runtimeChanges.AddRange(consumers.Select(file => Normalize(Path.GetRelativePath(root,
+                        Path.GetFullPath(Path.Combine(impact.Package.Path, file))))));
             }
-            foreach (var change in packageChanges.Distinct(StringComparer.OrdinalIgnoreCase))
+        }
+        foreach (var impact in impacts)
+        {
+            var packageRelative = Normalize(Path.GetRelativePath(root, impact.Package.Path));
+            foreach (var change in runtimeChanges.Where(change => IsWithin(change, packageRelative))
+                         .Distinct(StringComparer.OrdinalIgnoreCase))
                 SelectPackageChange(root, impact, packageRelative, change, affectedFeatures, reasons);
         }
 

@@ -221,9 +221,9 @@ internal static class GateScan
             {
                 doc = XDocument.Load(trx);
             }
-            catch (System.Xml.XmlException)
+            catch (System.Xml.XmlException exception)
             {
-                continue;   // a truncated result file cannot contribute verdicts; the test exit code still gates
+                throw new InvalidDataException($"malformed test result file {Path.GetFileName(trx)}", exception);
             }
 
             XNamespace ns = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010";

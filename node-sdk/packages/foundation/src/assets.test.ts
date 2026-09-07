@@ -66,7 +66,7 @@ describe("transactional foundation stack", () => {
     const root = await workspace();
     await expect(installFoundationAssets({ root, operation: "init", agentFiles: ["../AGENTS.md"] })).rejects.toThrow("parent");
     const outside = await workspace();
-    await symlink(outside, join(root, ".skies"), "dir");
+    await symlink(outside, join(root, ".skies"), process.platform === "win32" ? "junction" : "dir");
     await expect(installFoundationAssets({ root, operation: "init" })).rejects.toThrow("symbolic link");
   });
 

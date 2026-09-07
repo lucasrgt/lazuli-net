@@ -38,7 +38,7 @@ export function applicationPackageSource(name: string): string {
     },
     devDependencies: {
       "@skiesjs/doctor": "^0.1.1",
-      "@skiesjs/foundation": "0.1.0",
+      "@skiesjs/foundation": "0.1.1",
       "@skiesjs/testing": "0.1.0",
       "@types/express": "^5.0.0",
       "@types/node": "^24.0.0",
@@ -108,6 +108,7 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    maxWorkers: 2,
     include: ["src/**/*.{test,spec,proof,avp,journey}.ts"],
     reporters: [
       "default",
