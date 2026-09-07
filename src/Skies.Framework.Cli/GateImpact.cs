@@ -131,7 +131,8 @@ internal static partial class GateImpact
                 reasons.Add("frontend: shared workspace/gate dependency changed; selecting every frontend proof");
         }
 
-        var affectedFeatures = new HashSet<string>(StringComparer.Ordinal);
+        var packageFeatures = impacts.ToDictionary(impact => impact,
+            _ => new HashSet<string>(StringComparer.Ordinal));
         var runtimeChanges = new List<string>(changes);
         foreach (var impact in impacts)
         {
@@ -153,7 +154,7 @@ internal static partial class GateImpact
             var packageRelative = Normalize(Path.GetRelativePath(root, impact.Package.Path));
             foreach (var change in runtimeChanges.Where(change => IsWithin(change, packageRelative))
                          .Distinct(StringComparer.OrdinalIgnoreCase))
-                SelectPackageChange(root, impact, packageRelative, change, affectedFeatures, reasons);
+                SelectPackageChange(root, impact, packageRelative, change, packageFeatures[impact], reasons);
         }
 
         if (impacts.Any(impact => impact.Package.Role != FrontendPackageRole.Surface
@@ -170,9 +171,11 @@ internal static partial class GateImpact
         if (backend.Full)
             backendSubjects.Clear();
 
-        var changedFeatures = affectedFeatures.ToHashSet(StringComparer.Ordinal);
+        var sharedFeatures = impacts.Where(impact => impact.Package.Role != FrontendPackageRole.Surface)
+            .SelectMany(impact => packageFeatures[impact]).ToHashSet(StringComparer.Ordinal);
         foreach (var impact in impacts)
         {
+            var changedFeatures = packageFeatures[impact].Concat(sharedFeatures).ToHashSet(StringComparer.Ordinal);
             var flows = ReadFrontendFlows(impact.Package.Path);
             if (flows is null)
             {
@@ -187,12 +190,13 @@ internal static partial class GateImpact
             {
                 AddFlow(impact, flow);
                 foreach (var feature in flow.Features)
-                    affectedFeatures.Add(feature);
+                    packageFeatures[impact].Add(feature);
             }
         }
 
-        foreach (var feature in affectedFeatures)
-            SelectFeatureProofs(impacts, feature);
+        foreach (var impact in impacts)
+            foreach (var feature in packageFeatures[impact])
+                SelectFeatureProofs(impact, feature);
 
         foreach (var impact in impacts.Where(impact => impact.Selected))
         {

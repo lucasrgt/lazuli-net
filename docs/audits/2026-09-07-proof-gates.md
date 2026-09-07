@@ -9,7 +9,7 @@ real consumer cases. Findings below were corrected and protected by executable r
 | Ambiguous C# dependencies | One Pauta slice selected 412 slice subjects, 1,104 backend filter terms and 223 browser flows. Nested `Input`/`Output`, namespace segments, and property names joined unrelated code. | Resolve top-level qualified types, aliases, extension methods and real consumers. The reproduced edit selects 27 backend filters and no unrelated browser flow. |
 | Oversized test filter | A filter longer than 6,000 characters became an unfiltered backend run. | One standard runsettings file retains the full filter. A real runner smoke with over 10,000 characters executes exactly one matching test. |
 | Generated-client amplification | Regenerating a client or adding an erased error type widened the application; shared cores widened every surface. | Compare emitted exports and follow actual imports with each package's TypeScript configuration. A real Pauta print-options delta selects its print ViewModel; the inspected Hostpoint core delta selects its email verification ViewModel. |
-| Flow contagion and file-wide browser execution | A selected flow added shared features that selected further unrelated flows; one mapped case ran every case in its spec. | Freeze original feature roots and use deduplicated native Playwright test lists across all configured projects. Ambiguous leaf titles require their complete title path. Real runner tests prove an unrelated failing case stays unexecuted. |
+| Flow contagion and file-wide browser execution | A selected flow added shared features that selected further unrelated flows; one mapped case ran every case in its spec. | Keep surface feature names scoped to their own package and freeze original feature roots and use deduplicated native Playwright test lists across all configured projects. Ambiguous leaf titles require their complete title path. Real runner tests prove an unrelated failing case stays unexecuted. |
 | Git uncertainty caused exhaustive work | Missing ancestry widened .NET and Node gates; Node could do so even with fast mode. | Scoped discovery failure starts no proof execution and returns a nonzero verdict. Tests cover staged, explicit-base and default affected modes. |
 | Node fast mode lost direct proofs | A path matching both direct proof scopes and force-full scopes lost its direct proofs during deferral. | Preserve direct proof matches and their dependency closure while deferring exhaustive widening. |
 | Windows process handling | Native Node arguments passed through cmd.exe; timeout killed only the parent and could leave descendants working or holding pipes. | Native argv bypasses the shell; Windows timeout terminates the process tree. Native argument, timeout and finite descendant-process tests run on Windows. |
@@ -19,8 +19,8 @@ real consumer cases. Findings below were corrected and protected by executable r
 
 ## Validation
 
-- .NET CLI: 281 tests, compiler warnings promoted to errors.
-- Native helper integration and symbol selection: 19 tests, including real Node, Playwright, Git and
+- .NET CLI: 282 tests, compiler warnings promoted to errors.
+- Native helper integration and symbol selection: 21 tests, including real Node, Playwright, Git and
   multi-package TypeScript executions.
 - Node SDK: lint, build/typecheck, both sample doctors, and 346 unit tests passed on Windows.
 - Cross-runtime parity is checked with the repository manifest and its regression suite.
@@ -32,5 +32,5 @@ The generated import analysis remains conservative when source or configuration 
 runtime impact widens at the authoritative boundary; unavailable Git scope fails instead. Global compile,
 lint and structural proof inventories remain active for scoped runs.
 
-Release units carrying behavior changes are `skies-framework-cli` 4.1.11, `@skiesjs/foundation` 0.1.1 and
+Release units carrying behavior changes are `skies-framework-cli` 4.1.12, `@skiesjs/foundation` 0.1.1 and
 `@skiesjs/cli` 0.1.2. Pilot .NET packages align with the CLI's existing framework requirement, 4.1.4.

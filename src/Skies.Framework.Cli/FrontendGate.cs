@@ -68,7 +68,7 @@ internal static class FrontendGate
                     if (FrontendScriptContract.UsesNativeNodeTests(client, script))
                     {
                         var helper = Path.Combine(AppContext.BaseDirectory, "Tools", "node-test-affected.mjs");
-                        var paths = System.Text.Json.JsonSerializer.Serialize(impact.Full ? null : filters);
+                        var paths = impact.Full ? "--full" : System.Text.Json.JsonSerializer.Serialize(filters);
                         tests = Tooling.Run("node", [helper, script, paths], client);
                     }
                     else

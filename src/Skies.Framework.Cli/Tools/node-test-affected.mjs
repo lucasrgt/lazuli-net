@@ -31,11 +31,15 @@ try {
       }
     } else declaredPaths.push(arg);
   }
-  const selected = JSON.parse(encodedPaths);
-  const files = selected ?? declaredPaths;
+  const full = encodedPaths === '--full';
+  const selected = full ? [] : JSON.parse(encodedPaths);
+  if (!Array.isArray(selected) || (!full && selected.length === 0)
+      || selected.some((file) => typeof file !== 'string' || file.length === 0 || file.startsWith('-')))
+    throw new Error('Affected native tests require a nonempty file selection; use --full for the complete script');
+  const files = full ? declaredPaths : selected;
   scratch = mkdtempSync(path.join(tmpdir(), 'skies-node-evidence-'));
   const receipt = path.join(scratch, 'results.xml');
-  process.stdout.write(`skies gate — native Node tests: ${selected ? selected.length + ' selected file(s)' : 'full script'}, two workers\n`);
+  process.stdout.write(`skies gate — native Node tests: ${full ? 'full script' : selected.length + ' selected file(s)'}, two workers\n`);
   const result = spawnSync(process.execPath, [...options, '--test-concurrency=2',
     '--test-reporter=spec', '--test-reporter-destination=stdout',
     '--test-reporter=junit', `--test-reporter-destination=${receipt}`, ...files], { stdio: 'inherit' });

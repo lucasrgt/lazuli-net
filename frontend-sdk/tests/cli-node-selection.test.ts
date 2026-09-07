@@ -4,13 +4,27 @@ import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
+it.each(['null', '[]'])('rejects missing native scope %s before executing tests', (selection) => {
+  const root = mkdtempSync(path.join(tmpdir(), 'skies-native-node-scope-'));
+  try {
+    writeFileSync(path.join(root, 'package.json'), JSON.stringify({ scripts: { test: 'node --test' } }));
+    const helper = path.resolve(process.cwd(), '../src/Skies.Framework.Cli/Tools/node-test-affected.mjs');
+    const result = spawnSync(process.execPath, [helper, 'test', selection], { cwd: root, encoding: 'utf8', timeout: 10_000 });
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('nonempty file selection');
+    expect(result.stdout).not.toContain('native Node tests:');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 it.each(['empty', 'skipped'])('does not accept %s native test evidence', (mode) => {
   const root = mkdtempSync(path.join(tmpdir(), 'skies-native-node-evidence-'));
   try {
     writeFileSync(path.join(root, 'package.json'), JSON.stringify({ scripts: { test: 'node --test' } }));
     if (mode === 'skipped') writeFileSync(path.join(root, 'skip.test.mjs'), "import { test } from 'node:test'; test.skip('missing proof', () => {});");
     const helper = path.resolve(process.cwd(), '../src/Skies.Framework.Cli/Tools/node-test-affected.mjs');
-    const result = spawnSync(process.execPath, [helper, 'test', 'null'], { cwd: root, encoding: 'utf8', timeout: 10_000 });
+    const result = spawnSync(process.execPath, [helper, 'test', '--full'], { cwd: root, encoding: 'utf8', timeout: 10_000 });
     expect(result.status).toBe(1);
     expect(result.stderr).toContain(mode === 'empty' ? 'no executable test evidence' : 'skipped selected tests');
   } finally {
@@ -39,7 +53,7 @@ it('replaces a native Node script full file list with the affected files', () =>
     });
     expect(selected.status, selected.stdout + selected.stderr).toBe(0);
     expect(readFileSync(path.join(root, 'executed.txt'), 'utf8')).toBe('selected\n');
-    const full = spawnSync(process.execPath, [helper, 'test:unit', 'null'], {
+    const full = spawnSync(process.execPath, [helper, 'test:unit', '--full'], {
       cwd: root, encoding: 'utf8', timeout: 10_000,
     });
     expect(full.status).toBe(1);

@@ -276,42 +276,39 @@ internal static partial class GateImpact
         }
     }
 
-    private static void SelectFeatureProofs(IReadOnlyList<FrontendImpact> impacts, string feature)
+    private static void SelectFeatureProofs(FrontendImpact impact, string feature)
     {
-        foreach (var impact in impacts)
+        if (impact.Package.Platform == FrontendPlatform.Flutter)
         {
-            if (impact.Package.Platform == FrontendPlatform.Flutter)
+            var flutterSource = Path.Combine(impact.Package.Path, "lib", "features");
+            if (!Directory.Exists(flutterSource))
+                return;
+            foreach (var viewModel in Directory.EnumerateFiles(
+                         flutterSource,
+                         "*_view_model.dart",
+                         SearchOption.AllDirectories).Where(path =>
+                         TryFlutterViewModelName(Path.GetFileName(path), out var candidate)
+                         && candidate.Equals(feature, StringComparison.OrdinalIgnoreCase)))
             {
-                var flutterSource = Path.Combine(impact.Package.Path, "lib", "features");
-                if (!Directory.Exists(flutterSource))
-                    continue;
-                foreach (var viewModel in Directory.EnumerateFiles(
-                             flutterSource,
-                             "*_view_model.dart",
-                             SearchOption.AllDirectories).Where(path =>
-                             TryFlutterViewModelName(Path.GetFileName(path), out var candidate)
-                             && candidate.Equals(feature, StringComparison.OrdinalIgnoreCase)))
-                {
-                    SelectFlutterSiblingTests(
-                        impact,
-                        Normalize(Path.GetRelativePath(impact.Package.Path, viewModel)));
-                }
-                continue;
+                SelectFlutterSiblingTests(
+                    impact,
+                    Normalize(Path.GetRelativePath(impact.Package.Path, viewModel)));
             }
-            var source = Path.Combine(impact.Package.Path, "src");
-            if (!Directory.Exists(source))
-                continue;
-            foreach (var viewModel in Directory.EnumerateFiles(source, feature + ".viewModel.*", SearchOption.AllDirectories))
+            return;
+        }
+        var source = Path.Combine(impact.Package.Path, "src");
+        if (!Directory.Exists(source))
+            return;
+        foreach (var viewModel in Directory.EnumerateFiles(source, feature + ".viewModel.*", SearchOption.AllDirectories))
+        {
+            var directory = Path.GetDirectoryName(viewModel)!;
+            foreach (var test in Directory.EnumerateFiles(directory, "*.test.*", SearchOption.TopDirectoryOnly))
             {
-                var directory = Path.GetDirectoryName(viewModel)!;
-                foreach (var test in Directory.EnumerateFiles(directory, "*.test.*", SearchOption.TopDirectoryOnly))
-                {
-                    var relative = Normalize(Path.GetRelativePath(impact.Package.Path, test));
-                    if (Path.GetFileName(test).Contains(".assay.test.", StringComparison.OrdinalIgnoreCase))
-                        impact.Assays.Add(relative);
-                    else
-                        impact.Tests.Add(relative);
-                }
+                var relative = Normalize(Path.GetRelativePath(impact.Package.Path, test));
+                if (Path.GetFileName(test).Contains(".assay.test.", StringComparison.OrdinalIgnoreCase))
+                    impact.Assays.Add(relative);
+                else
+                    impact.Tests.Add(relative);
             }
         }
     }
