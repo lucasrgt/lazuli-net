@@ -23,6 +23,9 @@ internal sealed record BackendImpact(
 
     /// <summary>Whether this change requires any backend test process.</summary>
     public bool RunsTests => Full || Filters.Count > 0;
+
+    /// <summary>Production slices whose behavior can affect a browser flow; test-only consumers are not new roots.</summary>
+    public IReadOnlySet<string> RuntimeSlices { get; init; } = AffectedSlices;
 }
 
 /// <summary>The runtime proof subset for one frontend package.</summary>
@@ -65,7 +68,8 @@ internal sealed record FrontendFlow(
     string Target,
     string Spec,
     IReadOnlyList<string> Features,
-    IReadOnlyList<string> BackendSlices);
+    IReadOnlyList<string> BackendSlices,
+    string Case = "");
 
 /// <summary>The complete, explainable execution closure for one gate run.</summary>
 /// <param name="Backend">Backend runtime selection.</param>
@@ -81,7 +85,7 @@ internal sealed record GateImpactPlan(
 /// derived; ambiguous production or runtime-wide infrastructure changes widen instead of trusting a skip.
 /// Control-plane changes are validated by the doctor without impersonating application impact.
 /// </summary>
-internal static class GateImpact
+internal static partial class GateImpact
 {
     /// <summary>Build a fail-closed impact plan from the current workspace inventory.</summary>
     public static GateImpactPlan Build(
@@ -91,7 +95,8 @@ internal static class GateImpact
         IReadOnlyList<AvpProof> proofs,
         IReadOnlyList<JourneyProof> journeys,
         IReadOnlyList<CSharpTestSite> testClasses,
-        IReadOnlyList<FrontendPackage> packages)
+        IReadOnlyList<FrontendPackage> packages,
+        GitComparison? comparison = null)
     {
         var normalized = changes.Select(Normalize).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var reasons = new List<string>();
@@ -105,134 +110,8 @@ internal static class GateImpact
         var global = normalized.Any(IsRuntimeWideInfrastructure);
         var backend = SelectBackend(root, normalized, slices, proofs, journeys, testClasses, global, reasons);
         var frontend = packages.Select(package => new FrontendImpact(package)).ToList();
-        SelectFrontends(root, normalized, frontend, backend, global, reasons);
+        SelectFrontends(root, normalized, frontend, backend, global, reasons, comparison);
         return new GateImpactPlan(backend, frontend, reasons);
-    }
-
-    private static BackendImpact SelectBackend(
-        string root,
-        IReadOnlyList<string> changes,
-        IReadOnlyList<SliceSite> slices,
-        IReadOnlyList<AvpProof> proofs,
-        IReadOnlyList<JourneyProof> journeys,
-        IReadOnlyList<CSharpTestSite> testClasses,
-        bool global,
-        List<string> reasons)
-    {
-        if (global)
-        {
-            reasons.Add("backend: runtime-wide build infrastructure changed; selecting the full backend");
-            return FullBackend();
-        }
-
-        var backendRoots = SkiesManifest.BackendPaths(root)
-            .Select(path => Normalize(Path.GetRelativePath(root, path))).ToList();
-        var filters = new HashSet<string>(StringComparer.Ordinal);
-        var affected = new HashSet<string>(StringComparer.Ordinal);
-        var directFilters = new HashSet<string>(StringComparer.Ordinal);
-        var directAffected = new HashSet<string>(StringComparer.Ordinal);
-        var full = false;
-        CSharpImpactGraph? csharpGraph = null;
-
-        foreach (var change in changes)
-        {
-            if (IsDocumentation(change) || IsFrontendPath(change, root))
-                continue;
-
-            var backendPath = backendRoots.Any(path => IsWithin(change, path));
-            var backendContract = change.EndsWith(".spec.toml", StringComparison.OrdinalIgnoreCase)
-                || change.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
-                || change.EndsWith(".props", StringComparison.OrdinalIgnoreCase)
-                || change.EndsWith(".targets", StringComparison.OrdinalIgnoreCase)
-                || change.EndsWith(".sln", StringComparison.OrdinalIgnoreCase)
-                || change.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase);
-            if (backendContract)
-            {
-                if (change.EndsWith(".spec.toml", StringComparison.OrdinalIgnoreCase))
-                {
-                    var module = Path.GetFileName(change)[..^".spec.toml".Length];
-                    foreach (var slice in slices.Where(slice => slice.Module == module))
-                        SelectSlice(slice, directFilters, directAffected, proofs, journeys);
-                }
-                full = true;
-                reasons.Add($"backend: {change} changes the proof/build contract; selecting all tests");
-                continue;
-            }
-
-            if (!change.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            foreach (var slice in slices.Where(slice => Normalize(slice.File) == change))
-                SelectSlice(slice, directFilters, directAffected, proofs, journeys);
-            foreach (var proof in proofs.Where(proof => Normalize(proof.File) == change))
-            {
-                directFilters.Add(proof.ClassName);
-                foreach (var slice in slices.Where(slice =>
-                    slice.Module == proof.Module && slice.Name == proof.Subject))
-                {
-                    SelectSlice(slice, directFilters, directAffected, proofs, journeys);
-                }
-            }
-            foreach (var journey in journeys.Where(journey => Normalize(journey.File) == change))
-            {
-                directFilters.Add(journey.ClassName);
-                foreach (var slice in slices.Where(slice => slice.Name == journey.Subject))
-                    SelectSlice(slice, directFilters, directAffected, proofs, journeys);
-            }
-            foreach (var site in testClasses.Where(site => Normalize(site.File) == change))
-                directFilters.Add(site.ClassName);
-
-            csharpGraph ??= CSharpImpactGraph.Build(root);
-            var impactedFiles = csharpGraph.Expand(change);
-            var matched = false;
-            foreach (var slice in slices.Where(slice => impactedFiles.Contains(Normalize(slice.File))))
-            {
-                SelectSlice(slice, filters, affected, proofs, journeys);
-                matched = true;
-            }
-
-            foreach (var proof in proofs.Where(proof => impactedFiles.Contains(Normalize(proof.File))))
-            {
-                filters.Add(proof.ClassName);
-                foreach (var slice in slices.Where(slice => slice.Name == proof.Subject))
-                    SelectSlice(slice, filters, affected, proofs, journeys);
-                matched = true;
-            }
-
-            foreach (var journey in journeys.Where(journey => impactedFiles.Contains(Normalize(journey.File))))
-            {
-                filters.Add(journey.ClassName);
-                foreach (var slice in slices.Where(slice => slice.Name == journey.Subject))
-                    SelectSlice(slice, filters, affected, proofs, journeys);
-                matched = true;
-            }
-
-            foreach (var site in testClasses.Where(site => impactedFiles.Contains(Normalize(site.File))))
-            {
-                filters.Add(site.ClassName);
-                matched = true;
-            }
-
-            if (matched && impactedFiles.Count > 1)
-                reasons.Add($"backend: {change} reaches {impactedFiles.Count - 1} transitive C# consumer(s)");
-
-            if (!matched && backendPath)
-            {
-                full = true;
-                reasons.Add($"backend: {change} has no unambiguous slice binding; selecting all tests");
-            }
-            else if (!matched)
-            {
-                full = true;
-                reasons.Add($"backend: C# infrastructure {change} changed outside a declared backend; selecting all tests");
-            }
-        }
-
-        if (full)
-            return new BackendImpact(true, filters, affected, directFilters, directAffected);
-        if (filters.Count > 0)
-            reasons.Add($"backend: selected {affected.Count} slice(s) through {filters.Count} test filter term(s)");
-        return new BackendImpact(false, filters, affected, directFilters, directAffected);
     }
 
     private static void SelectFrontends(
@@ -241,7 +120,8 @@ internal static class GateImpact
         IReadOnlyList<FrontendImpact> impacts,
         BackendImpact backend,
         bool global,
-        List<string> reasons)
+        List<string> reasons,
+        GitComparison? comparison)
     {
         if (global || changes.Any(IsRootFrontendContract))
         {
@@ -251,20 +131,20 @@ internal static class GateImpact
                 reasons.Add("frontend: shared workspace/gate dependency changed; selecting every frontend proof");
         }
 
-        if (changes.Any(change => change.Contains("client.gen/", StringComparison.OrdinalIgnoreCase)
-                                  || change.Contains("/generated/", StringComparison.OrdinalIgnoreCase)))
-        {
-            foreach (var impact in impacts)
-                impact.ExhaustiveFallback = true;
-            if (impacts.Count > 0)
-                reasons.Add("frontend: generated client changed; selecting every consumer surface");
-        }
-
         var affectedFeatures = new HashSet<string>(StringComparer.Ordinal);
         foreach (var impact in impacts)
         {
             var packageRelative = Normalize(Path.GetRelativePath(root, impact.Package.Path));
-            foreach (var change in changes.Where(change => IsWithin(change, packageRelative)))
+            var packageChanges = changes.Where(change => IsWithin(change, packageRelative)).ToList();
+            if (packageChanges.Any(GeneratedClientImpact.IsGenerated))
+            {
+                var consumers = GeneratedClientImpact.Select(root, impact.Package, packageChanges, comparison, reasons);
+                if (consumers is null)
+                    impact.ExhaustiveFallback = true;
+                else
+                    packageChanges.AddRange(consumers.Select(file => packageRelative + "/" + file));
+            }
+            foreach (var change in packageChanges.Distinct(StringComparer.OrdinalIgnoreCase))
                 SelectPackageChange(root, impact, packageRelative, change, affectedFeatures, reasons);
         }
 
@@ -276,12 +156,13 @@ internal static class GateImpact
             reasons.Add("frontend: an unmapped shared core/library change can reach every surface; selecting all packages");
         }
 
-        var backendSubjects = backend.AffectedSlices
+        var backendSubjects = backend.RuntimeSlices
             .Select(key => key[(key.IndexOf('/') + 1)..])
             .ToHashSet(StringComparer.Ordinal);
         if (backend.Full)
             backendSubjects.Clear();
 
+        var changedFeatures = affectedFeatures.ToHashSet(StringComparer.Ordinal);
         foreach (var impact in impacts)
         {
             var flows = ReadFrontendFlows(impact.Package.Path);
@@ -293,7 +174,7 @@ internal static class GateImpact
 
             foreach (var flow in flows.Where(flow =>
                          backend.Full
-                         || flow.Features.Any(affectedFeatures.Contains)
+                         || flow.Features.Any(changedFeatures.Contains)
                          || flow.BackendSlices.Any(backendSubjects.Contains)))
             {
                 AddFlow(impact, flow);
@@ -315,301 +196,6 @@ internal static class GateImpact
         }
     }
 
-    private static void SelectPackageChange(
-        string root,
-        FrontendImpact impact,
-        string packageRelative,
-        string change,
-        HashSet<string> features,
-        List<string> reasons)
-    {
-        var local = change[packageRelative.Length..].TrimStart('/');
-        if (IsRenderedDesignInfrastructure(local))
-        {
-            impact.RenderedDesign = true;
-            reasons.Add($"frontend: {change} maps to the package rendered-design proof without widening runtime tests");
-            return;
-        }
-
-        if (local.StartsWith("src/storybook/", StringComparison.OrdinalIgnoreCase))
-        {
-            impact.RenderedDesign = true;
-            var source = Path.Combine(impact.Package.Path, local.Replace('/', Path.DirectorySeparatorChar));
-            if (impact.Package.Platform == FrontendPlatform.Flutter)
-                SelectFlutterSiblingTests(impact, local);
-            else
-                SelectSiblingTests(impact, source);
-            reasons.Add($"frontend: {change} maps to the package rendered-design proof without widening runtime tests");
-            return;
-        }
-
-        if (impact.Package.Platform == FrontendPlatform.Flutter)
-        {
-            SelectFlutterPackageChange(impact, local, change, features, reasons);
-            return;
-        }
-
-        if (local is "package.json" or "tsconfig.json" || local.EndsWith("config.ts", StringComparison.OrdinalIgnoreCase)
-            || local.EndsWith("config.js", StringComparison.OrdinalIgnoreCase) || local == "e2e/flows.json")
-        {
-            impact.ExhaustiveFallback = true;
-            return;
-        }
-
-        if (local.StartsWith("e2e/", StringComparison.OrdinalIgnoreCase))
-        {
-            var flow = ReadFrontendFlows(impact.Package.Path)?.Where(flow => SamePath(flow.Spec, local)).ToList() ?? [];
-            if (flow.Count == 0)
-                impact.ExhaustiveFallback = true;
-            else
-                flow.ForEach(item => AddFlow(impact, item));
-            return;
-        }
-
-        if (!local.StartsWith("src/", StringComparison.OrdinalIgnoreCase))
-            return;
-
-        var absolute = Path.Combine(impact.Package.Path, local.Replace('/', Path.DirectorySeparatorChar));
-        var file = Path.GetFileName(local);
-        var directTest = false;
-        if (file.Contains(".assay.test.", StringComparison.OrdinalIgnoreCase))
-        {
-            impact.Assays.Add(local);
-            directTest = true;
-        }
-        else if (file.Contains(".test.", StringComparison.OrdinalIgnoreCase)
-                 || file.Contains(".spec.", StringComparison.OrdinalIgnoreCase))
-        {
-            impact.Tests.Add(local);
-            directTest = true;
-        }
-
-        if (directTest)
-            return;
-
-        if (IsViewSource(file))
-        {
-            SelectViewTests(impact, absolute);
-            if (FrontendScriptContract.HasScript(impact.Package.Path, "design:rendered"))
-                impact.RenderedDesign = true;
-
-            if (impact.Tests.Count > 0 || impact.Assays.Count > 0)
-            {
-                reasons.Add($"frontend: {change} maps to its feature tests"
-                            + (impact.RenderedDesign ? " and rendered-design proof" : "")
-                            + " without widening every runtime proof");
-                return;
-            }
-        }
-
-        if (TryViewModelName(file, out var directFeature))
-        {
-            features.Add(directFeature);
-            return;
-        }
-
-        var directory = File.Exists(absolute) ? Path.GetDirectoryName(absolute)! : Path.GetDirectoryName(absolute)!;
-        var viewModels = Directory.Exists(directory)
-            ? Directory.EnumerateFiles(directory, "*.viewModel.*", SearchOption.TopDirectoryOnly)
-                .Select(Path.GetFileName).Where(name => TryViewModelName(name!, out _)).ToList()
-            : [];
-        if (viewModels.Count == 0)
-        {
-            impact.ExhaustiveFallback = true;
-            return;
-        }
-
-        foreach (var viewModel in viewModels)
-            if (TryViewModelName(viewModel!, out var feature))
-                features.Add(feature);
-    }
-
-    private static void SelectFlutterPackageChange(
-        FrontendImpact impact,
-        string local,
-        string change,
-        HashSet<string> features,
-        List<string> reasons)
-    {
-        if (local is "package.json" or "pubspec.yaml" or "analysis_options.yaml" or "e2e/flows.json"
-            || local.EndsWith("config.dart", StringComparison.OrdinalIgnoreCase))
-        {
-            impact.ExhaustiveFallback = true;
-            return;
-        }
-
-        if (local.StartsWith("integration_test/", StringComparison.OrdinalIgnoreCase))
-        {
-            var flows = ReadFrontendFlows(impact.Package.Path)?.Where(flow => SamePath(flow.Spec, local)).ToList() ?? [];
-            if (flows.Count == 0)
-                impact.ExhaustiveFallback = true;
-            else
-                flows.ForEach(flow => AddFlow(impact, flow));
-            return;
-        }
-
-        if (local.StartsWith("test/", StringComparison.OrdinalIgnoreCase))
-        {
-            if (local.EndsWith(".assay_test.dart", StringComparison.OrdinalIgnoreCase))
-                impact.Assays.Add(local);
-            else if (local.EndsWith("_test.dart", StringComparison.OrdinalIgnoreCase))
-                impact.Tests.Add(local);
-            return;
-        }
-
-        if (!local.StartsWith("lib/", StringComparison.OrdinalIgnoreCase))
-            return;
-
-        var file = Path.GetFileName(local);
-        if (TryFlutterViewModelName(file, out var feature))
-        {
-            features.Add(feature);
-            SelectFlutterSiblingTests(impact, local);
-            reasons.Add($"frontend: {change} maps to its Flutter feature tests without widening every runtime proof");
-            return;
-        }
-        if (file.EndsWith("_view.dart", StringComparison.OrdinalIgnoreCase))
-        {
-            var selectedBefore = impact.Tests.Count + impact.Assays.Count;
-            SelectFlutterSiblingTests(impact, local);
-            if (impact.Tests.Count + impact.Assays.Count == selectedBefore)
-            {
-                impact.ExhaustiveFallback = true;
-                reasons.Add($"frontend: {change} has no mirrored Flutter widget proof; selecting the full package");
-                return;
-            }
-            reasons.Add($"frontend: {change} maps to its Flutter widget proof without widening every runtime proof");
-            return;
-        }
-
-        var absolute = Path.Combine(impact.Package.Path, local.Replace('/', Path.DirectorySeparatorChar));
-        var directory = Path.GetDirectoryName(absolute)!;
-        var viewModels = Directory.Exists(directory)
-            ? Directory.EnumerateFiles(directory, "*_view_model.dart", SearchOption.TopDirectoryOnly).ToList()
-            : [];
-        if (viewModels.Count == 0)
-        {
-            impact.ExhaustiveFallback = true;
-            return;
-        }
-        foreach (var viewModel in viewModels)
-        {
-            if (TryFlutterViewModelName(Path.GetFileName(viewModel), out var adjacentFeature))
-                features.Add(adjacentFeature);
-            SelectFlutterSiblingTests(
-                impact,
-                Normalize(Path.GetRelativePath(impact.Package.Path, viewModel)));
-        }
-    }
-
-    private static void SelectFlutterSiblingTests(FrontendImpact impact, string sourceRelative)
-    {
-        var sourceDirectory = Path.GetDirectoryName(sourceRelative.Replace('/', Path.DirectorySeparatorChar)) ?? "lib";
-        var relativeDirectory = Path.GetRelativePath("lib", sourceDirectory);
-        var testDirectory = Path.Combine(impact.Package.Path, "test", relativeDirectory);
-        if (!Directory.Exists(testDirectory))
-            return;
-        foreach (var test in Directory.EnumerateFiles(testDirectory, "*_test.dart", SearchOption.TopDirectoryOnly))
-        {
-            var relative = Normalize(Path.GetRelativePath(impact.Package.Path, test));
-            if (test.EndsWith(".assay_test.dart", StringComparison.OrdinalIgnoreCase))
-                impact.Assays.Add(relative);
-            else
-                impact.Tests.Add(relative);
-        }
-    }
-
-    private static bool IsRenderedDesignInfrastructure(string local) =>
-        local.StartsWith(".storybook/", StringComparison.OrdinalIgnoreCase)
-        || local.StartsWith("design-e2e/", StringComparison.OrdinalIgnoreCase)
-        || local.Equals("playwright.design.config.ts", StringComparison.OrdinalIgnoreCase)
-        || local.Equals("playwright.design.config.js", StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsViewSource(string file) =>
-        file.Contains(".view.", StringComparison.OrdinalIgnoreCase);
-
-    private static void SelectViewTests(FrontendImpact impact, string absolute)
-    {
-        var source = Path.Combine(impact.Package.Path, "src");
-        var features = Path.Combine(source, "features");
-        var directory = Path.GetDirectoryName(absolute)!;
-
-        while (IsWithinDirectory(directory, source) && !SameDirectory(directory, features))
-        {
-            SelectSiblingTests(impact, Path.Combine(directory, Path.GetFileName(absolute)));
-            directory = Path.GetDirectoryName(directory)!;
-        }
-    }
-
-    private static bool IsWithinDirectory(string path, string parent)
-    {
-        var relative = Path.GetRelativePath(parent, path);
-        return relative != ".."
-               && !relative.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
-               && !Path.IsPathRooted(relative);
-    }
-
-    private static bool SameDirectory(string left, string right) =>
-        string.Equals(Path.GetFullPath(left).TrimEnd(Path.DirectorySeparatorChar),
-            Path.GetFullPath(right).TrimEnd(Path.DirectorySeparatorChar),
-            OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
-
-    private static void SelectSiblingTests(FrontendImpact impact, string absolute)
-    {
-        var directory = Path.GetDirectoryName(absolute)!;
-        if (!Directory.Exists(directory))
-            return;
-
-        foreach (var test in Directory.EnumerateFiles(directory, "*.test.*", SearchOption.TopDirectoryOnly))
-        {
-            var relative = Normalize(Path.GetRelativePath(impact.Package.Path, test));
-            if (Path.GetFileName(test).Contains(".assay.test.", StringComparison.OrdinalIgnoreCase))
-                impact.Assays.Add(relative);
-            else
-                impact.Tests.Add(relative);
-        }
-    }
-
-    private static void SelectFeatureProofs(IReadOnlyList<FrontendImpact> impacts, string feature)
-    {
-        foreach (var impact in impacts)
-        {
-            if (impact.Package.Platform == FrontendPlatform.Flutter)
-            {
-                var flutterSource = Path.Combine(impact.Package.Path, "lib", "features");
-                if (!Directory.Exists(flutterSource))
-                    continue;
-                foreach (var viewModel in Directory.EnumerateFiles(
-                             flutterSource,
-                             "*_view_model.dart",
-                             SearchOption.AllDirectories).Where(path =>
-                             TryFlutterViewModelName(Path.GetFileName(path), out var candidate)
-                             && candidate.Equals(feature, StringComparison.OrdinalIgnoreCase)))
-                {
-                    SelectFlutterSiblingTests(
-                        impact,
-                        Normalize(Path.GetRelativePath(impact.Package.Path, viewModel)));
-                }
-                continue;
-            }
-            var source = Path.Combine(impact.Package.Path, "src");
-            if (!Directory.Exists(source))
-                continue;
-            foreach (var viewModel in Directory.EnumerateFiles(source, feature + ".viewModel.*", SearchOption.AllDirectories))
-            {
-                var directory = Path.GetDirectoryName(viewModel)!;
-                foreach (var test in Directory.EnumerateFiles(directory, "*.test.*", SearchOption.TopDirectoryOnly))
-                {
-                    var relative = Normalize(Path.GetRelativePath(impact.Package.Path, test));
-                    if (Path.GetFileName(test).Contains(".assay.test.", StringComparison.OrdinalIgnoreCase))
-                        impact.Assays.Add(relative);
-                    else
-                        impact.Tests.Add(relative);
-                }
-            }
-        }
-    }
-
     /// <summary>Read the flow inventory used by both impact selection and canonical runner invocation.</summary>
     internal static IReadOnlyList<FrontendFlow>? ReadFrontendFlows(string package)
     {
@@ -626,7 +212,8 @@ internal static class GateImpact
                 Text(flow, "target"),
                 Normalize(Text(flow, "spec")),
                 Strings(flow, "features"),
-                Strings(flow, "backendSlices"))).ToList();
+                Strings(flow, "backendSlices"),
+                Text(flow, "case"))).ToList();
         }
         catch (JsonException)
         {

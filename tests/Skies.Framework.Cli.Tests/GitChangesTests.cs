@@ -19,6 +19,7 @@ public sealed class GitChangesTests
 
             Assert.True(changes.Reliable);
             Assert.Equal(["staged.cs"], changes.Files);
+            Assert.Equal(new GitComparison("HEAD", ":"), changes.Comparison);
         }
         finally
         {
@@ -39,6 +40,7 @@ public sealed class GitChangesTests
 
             Assert.True(changes.Reliable);
             Assert.Equal(["new.cs", "tracked.cs"], changes.Files);
+            Assert.Equal(new GitComparison("HEAD", null), changes.Comparison);
         }
         finally
         {
@@ -63,6 +65,7 @@ public sealed class GitChangesTests
 
             Assert.True(changes.Reliable);
             Assert.Equal(["committed.cs"], changes.Files);
+            Assert.Equal(new GitComparison(baseline, "HEAD"), changes.Comparison);
         }
         finally
         {

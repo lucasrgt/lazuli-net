@@ -67,6 +67,7 @@ internal static class FrontendGate
                     var arguments = new List<string> { "--" };
                     arguments.AddRange(filters);
                     arguments.Add($"--exclude={ReactAssaySuiteGlob}");
+                    arguments.Add("--maxWorkers=2");
                     tests = FrontendScriptContract.Run(
                         client,
                         FrontendScriptContract.ResolveUnitTestScript(client),
@@ -108,7 +109,7 @@ internal static class FrontendGate
                     {
                         Console.WriteLine($"skies gate — frontend E2E execution ({name}, "
                             + (impact.Full ? "full" : $"{flows.Count} affected flow(s)") + ")...");
-                        e2e = RunE2e(target, flows);
+                        e2e = RunE2e(target, flows, impact.Full);
                     }
                 }
             }
@@ -153,6 +154,7 @@ internal static class FrontendGate
         var arguments = new List<string> { "--no-install", "assay", "verify" };
         if (paths is not null)
             arguments.AddRange(paths);
+        arguments.AddRange(["--", "--maxWorkers=2"]);
         return Tooling.Run("npx", [.. arguments], client);
     }
 
@@ -205,7 +207,7 @@ internal static class FrontendGate
         return code;
     }
 
-    private static int RunE2e(FrontendPackage package, IReadOnlyList<FrontendFlow> flows)
+    private static int RunE2e(FrontendPackage package, IReadOnlyList<FrontendFlow> flows, bool full)
     {
         var client = package.Path;
         if (package.Platform == FrontendPlatform.Flutter)
@@ -237,8 +239,11 @@ internal static class FrontendGate
                 if (install != 0)
                     return install;
             }
-            code = Math.Max(code, Tooling.Run(
-                "npx", ["--no-install", "playwright", "test", .. web], client, gateEnvironment));
+            if (full)
+                code = Math.Max(code, Tooling.Run(
+                    "npx", ["--no-install", "playwright", "test", .. web], client, gateEnvironment));
+            else
+                code = Math.Max(code, RunAffectedWeb(client, flows.Where(flow => flow.Target == "web").ToList(), gateEnvironment));
         }
 
         var native = flows.Where(flow => flow.Target == "native").Select(flow => flow.Spec)
@@ -246,6 +251,22 @@ internal static class FrontendGate
         if (native.Count > 0)
             code = Math.Max(code, Tooling.Run("maestro", ["test", .. native], client, gateEnvironment));
         return code;
+    }
+
+    private static int RunAffectedWeb(string client, IReadOnlyList<FrontendFlow> flows, IReadOnlyDictionary<string, string?> environment)
+    {
+        var selection = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllText(selection, System.Text.Json.JsonSerializer.Serialize(flows,
+                new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+            var script = Path.Combine(AppContext.BaseDirectory, "Tools", "playwright-affected.mjs");
+            return Tooling.Run("node", [script, selection], client, environment);
+        }
+        finally
+        {
+            File.Delete(selection);
+        }
     }
 
     private static int RunFlutterTests(string client, FrontendImpact impact)

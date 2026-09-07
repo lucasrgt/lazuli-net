@@ -6,6 +6,27 @@ namespace Skies.Framework.Cli.Tests;
 public class GateReportTests
 {
     [Fact]
+    public void An_affected_console_report_summarizes_unaffected_inventory_and_keeps_findings_visible()
+    {
+        var matrix = GateMatrix.Build(
+            [new ManifestFile("Wallets.spec.toml", SpecManifest.Parse("module = \"Wallets\"\n[slices.Withdraw]\ncriteria = [\"valid\"]"), null)],
+            [new AvpProof("Wallets", "Withdraw", "valid", "W.cs", "WithdrawTests", "Valid")],
+            [new SliceSite("Wallets", "Withdraw", "W.cs")], [], new HashSet<string>());
+        var output = new StringWriter();
+
+        GateReport.WriteConsole(matrix, new GateLegs(0, 0, Scope: "staged-fast"), output);
+
+        Assert.Contains("1 criteria not affected", output.ToString());
+        Assert.DoesNotContain("WithdrawTests", output.ToString());
+        Assert.Contains("GREEN", output.ToString());
+        var failed = new StringWriter();
+        GateReport.WriteConsole(SampleMatrix(passing: false), new GateLegs(0, 1, Scope: "affected"), failed);
+        Assert.Contains("Withdraw", failed.ToString());
+        Assert.Contains("creep:", failed.ToString());
+        Assert.Contains("RED", failed.ToString());
+    }
+
+    [Fact]
     public void The_markdown_artifact_carries_the_verdict_the_rows_and_the_findings()
     {
         var matrix = SampleMatrix(passing: false);

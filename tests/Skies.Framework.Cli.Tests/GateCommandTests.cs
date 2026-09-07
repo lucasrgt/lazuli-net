@@ -4,6 +4,39 @@ namespace Skies.Framework.Cli.Tests;
 
 public class GateCommandTests
 {
+    [Theory]
+    [InlineData("--staged")]
+    [InlineData("--affected")]
+    public async Task An_unavailable_git_scope_fails_before_starting_builds_or_proofs(string mode)
+    {
+        var root = Directory.CreateTempSubdirectory("skies-missing-scope-").FullName;
+        try
+        {
+            var start = new System.Diagnostics.ProcessStartInfo("dotnet")
+            {
+                WorkingDirectory = root,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+            };
+            start.ArgumentList.Add(typeof(GateCommand).Assembly.Location);
+            start.ArgumentList.Add("gate");
+            start.ArgumentList.Add(mode);
+            using var process = System.Diagnostics.Process.Start(start)!;
+            var output = process.StandardOutput.ReadToEndAsync();
+            var error = process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync();
+
+            Assert.Equal(2, process.ExitCode);
+            Assert.Contains("no proof run started", await error);
+            Assert.DoesNotContain("backend conventions", await output);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     [Fact]
     public void The_release_gate_promotes_backend_warnings()
     {
@@ -194,7 +227,7 @@ public class GateCommandTests
     }
 
     [Fact]
-    public void Fast_feedback_preserves_direct_backend_proofs_when_the_transitive_closure_is_oversized()
+    public void Fast_feedback_preserves_the_affected_closure_even_when_its_filter_is_long()
     {
         var filters = Enumerable.Range(0, 200)
             .Select(index => $"App.Tests.Modules.Feature{index:D3}.A_very_descriptive_proof_class")
@@ -212,22 +245,35 @@ public class GateCommandTests
         var bounded = GateCommand.ApplyFastFeedback(impact, fast: true);
 
         Assert.True(bounded.Backend.RunsTests);
-        Assert.Equal(["DirectProof"], bounded.Backend.Filters);
-        Assert.Equal(["Feature/Change"], bounded.Backend.AffectedSlices);
-        Assert.Contains(bounded.Reasons, reason => reason.Contains("oversized transitive proof closure"));
+        Assert.Equal(filters, bounded.Backend.Filters);
+        Assert.Equal(impact.Backend.AffectedSlices, bounded.Backend.AffectedSlices);
+        Assert.DoesNotContain(bounded.Reasons, reason => reason.Contains("oversized transitive proof closure"));
     }
 
     [Fact]
-    public void An_oversized_filter_fails_closed_to_the_complete_backend_suite()
+    public void An_oversized_filter_is_preserved_in_one_runner_settings_file()
     {
         var filters = Enumerable.Range(0, 200)
             .Select(index => $"App.Tests.Modules.Feature{index:D3}.A_very_descriptive_proof_class")
             .ToHashSet();
         var impact = new BackendImpact(false, filters, new HashSet<string> { "Feature/Change" });
 
-        var arguments = GateCommand.ProofArguments(["App.slnx"], 0, "evidence", impact);
+        var directory = Directory.CreateTempSubdirectory("skies-filter-").FullName;
+        try
+        {
+            var arguments = GateCommand.ProofArguments(["App.slnx"], 0, directory, impact);
+            var settingsPath = arguments[Array.IndexOf(arguments, "--settings") + 1];
+            var settings = System.Xml.Linq.XDocument.Load(settingsPath);
+            var filter = settings.Root!.Element("RunConfiguration")!.Element("TestCaseFilter")!.Value;
 
-        Assert.DoesNotContain("--filter", arguments);
+            Assert.Equal(filters.Count, filter.Split('|').Length);
+            Assert.All(filters, term => Assert.Contains("FullyQualifiedName~" + term, filter));
+            Assert.DoesNotContain("--filter", arguments);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
     }
 
     [Theory]

@@ -75,7 +75,7 @@ internal static class DoctorCommand
 
         // Doctor legs are independent, read-only checks. A bounded fan-out avoids making a large monorepo pay their
         // sum serially while respecting the two-core hosted runner and keeping node/compiler memory predictable.
-        var degree = Math.Max(2, Math.Min(4, Environment.ProcessorCount));
+        var degree = Math.Max(1, Math.Min(2, Environment.ProcessorCount));
         using var slots = new SemaphoreSlim(degree, degree);
         var tasks = legs.Select(leg => Task.Run(() =>
         {

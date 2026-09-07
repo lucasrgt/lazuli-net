@@ -45,12 +45,17 @@ internal static class GateReport
         writer.WriteLine();
         writer.WriteLine($"gate matrix ({legs.Scope}) — {matrix.Rows.Count} declared criteria across "
                        + $"{matrix.Rows.Select(r => r.Module).Distinct().Count()} modules");
-        foreach (var module in matrix.Rows.GroupBy(r => r.Module))
+        var visible = legs.Scope == "full" ? matrix.Rows : matrix.Rows.Where(row => row.Verdict != MatrixVerdict.NotAffected);
+        var unaffected = matrix.Rows.Count(row => row.Verdict == MatrixVerdict.NotAffected);
+        if (unaffected > 0)
+            writer.WriteLine($"  {unaffected} criteria not affected; omitted from this execution report (not counted as passes)");
+        foreach (var module in visible.GroupBy(r => r.Module))
         {
             var proven = module.Count(r => r.Verdict == MatrixVerdict.Pass);
-            var omitted = module.Count(r => r.Verdict == MatrixVerdict.NotAffected);
-            writer.WriteLine($"  {module.Key} — {proven} executed/proven, {omitted} not affected, {module.Count()} declared");
-            foreach (var row in module)
+            var declared = matrix.Rows.Count(row => row.Module == module.Key);
+            var omitted = matrix.Rows.Count(row => row.Module == module.Key && row.Verdict == MatrixVerdict.NotAffected);
+            writer.WriteLine($"  {module.Key} — {proven} executed/proven, {omitted} not affected, {declared} declared");
+            foreach (var row in module.Where(row => legs.Scope == "full" || row.Verdict != MatrixVerdict.Pass))
                 writer.WriteLine($"    {row.Slice,-28} {row.CriterionId,-34} {Label(row.Verdict),-9} {FirstProof(row)}");
         }
 

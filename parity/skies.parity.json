@@ -583,7 +583,9 @@
           "src/Skies.Framework.Cli/RtwCommand.cs",
           "src/Skies.Framework.Cli/SkiesManifest.cs",
           "src/Skies.Framework.Cli/SuppressionGate.cs",
-          "src/Skies.Framework.Cli/WtwCommand.cs"
+          "src/Skies.Framework.Cli/WtwCommand.cs",
+          "src/Skies.Framework.Cli/GeneratedClientImpact.cs",
+          "src/Skies.Framework.Cli/Tools/*.mjs"
         ],
         "proofs": [
           {
@@ -621,6 +623,18 @@
           {
             "kind": "test",
             "path": "tests/Skies.Framework.Cli.Tests/SuppressionGateTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "tests/Skies.Framework.Cli.Tests/CSharpImpactGraphTests.cs"
+          },
+          {
+            "kind": "test",
+            "path": "frontend-sdk/tools/cli-generated-impact.test.ts"
+          },
+          {
+            "kind": "test",
+            "path": "frontend-sdk/tools/cli-playwright-selection.test.ts"
           }
         ]
       },
@@ -1043,6 +1057,30 @@
       "reason": "The .NET doctor and template messages name the moved @skiesjs packages; the Node CLI surface is unchanged in this rename.",
       "owner": "lucasrgt",
       "expires": "2026-08-28"
+    },
+    {
+      "id": "bounded-gates-4110-proof-gates-foundations",
+      "capability": "proof.gates-foundations",
+      "side": "node",
+      "reason": "The .NET gate inferred C# dependencies from ambiguous nested type names and used file-wide browser selection. Its regression-tested fix uses qualified C# references, generated runtime export impact, and native Playwright case lists. The Node foundation selects explicit sourceScopes and dependency IDs and has neither this C# inference nor the .NET runner filter limit; its existing graph remains unchanged.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-14"
+    },
+    {
+      "id": "bounded-gates-4110-tooling-surface-sync",
+      "capability": "tooling.surface-sync",
+      "side": "node",
+      "reason": "The .NET CLI frontend runner now launches its packaged Node helper directly on Windows for native Playwright case selection. The Node CLI already runs natively and has no cmd.exe adapter to correct.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-14"
+    },
+    {
+      "id": "bounded-gates-4110-packaging-public-graphs",
+      "capability": "packaging.public-graphs",
+      "side": "node",
+      "reason": "Only the .NET CLI ships changed implementation and packaged helpers at 4.1.10; no Node package content or dependency graph changes.",
+      "owner": "lucasrgt",
+      "expires": "2026-09-14"
     }
   ],
   "diagnostics": [

@@ -215,7 +215,7 @@ public sealed class GateImpactTests
                     "clients/web/src/client.gen/hostpoint.ts",
                     "clients/web/src/features/login/Login.assay.test.ts",
                 ],
-                [], [], [], [], [package]);
+                [], [], [], [], [package], new GitComparison("HEAD", null));
 
             var frontend = Assert.Single(plan.Frontends);
             Assert.True(frontend.ExhaustiveFallback);
@@ -225,6 +225,14 @@ public sealed class GateImpactTests
         {
             Directory.Delete(root, recursive: true);
         }
+    }
+
+    [Fact]
+    public void Generated_impact_requires_the_scoped_git_comparison()
+    {
+        var package = new FrontendPackage("clients/web", FrontendPackageRole.Surface);
+        Assert.Throws<ArgumentNullException>(() => GeneratedClientImpact.Select(
+            ".", package, ["clients/web/src/client.gen/api.ts"], null, []));
     }
 
     [Fact]

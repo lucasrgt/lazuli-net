@@ -40,8 +40,12 @@ jobs:
   dotnet:
     name: backend (skies gate)
     runs-on: ubuntu-latest
+    env:
+      SKY_GATE_BASE: ${{ github.event.pull_request.base.sha || github.event.before || 'HEAD^' }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "10.0.x"

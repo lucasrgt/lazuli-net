@@ -6,12 +6,15 @@ namespace Skies.Framework.Cli;
 /// <param name="Files">Workspace-relative paths with forward slashes.</param>
 /// <param name="Reliable">Whether Git supplied an unambiguous change set.</param>
 /// <param name="Message">The fallback reason when discovery was not reliable.</param>
-internal sealed record GitChangeSet(IReadOnlyList<string> Files, bool Reliable, string? Message);
+internal sealed record GitChangeSet(IReadOnlyList<string> Files, bool Reliable, string? Message, GitComparison? Comparison = null);
+
+/// <summary>Source trees used for symbol-level deltas; a null target is the working tree and ':' is the index.</summary>
+internal sealed record GitComparison(string Before, string? After);
 
 /// <summary>Reads the index or revision delta that roots the framework-owned impact calculation.</summary>
 internal static class GitChanges
 {
-    /// <summary>Discover changed paths for <paramref name="options"/>; uncertainty asks the caller for a full run.</summary>
+    /// <summary>Discover changed paths for <paramref name="options"/>; uncertainty makes scoped validation incomplete.</summary>
     public static GitChangeSet Read(string root, GateOptions options)
     {
         if (options.Mode == GateMode.Full)
@@ -22,7 +25,8 @@ internal static class GitChanges
             return new GitChangeSet([], false, "the workspace is not a Git checkout");
 
         if (options.Mode == GateMode.Staged)
-            return Diff(root, ["diff", "--cached", "--name-only", "--diff-filter=ACMRDTUXB", "-z", "--"]);
+            return Diff(root, ["diff", "--cached", "--name-only", "--diff-filter=ACMRDTUXB", "-z", "--"])
+                with { Comparison = new GitComparison("HEAD", ":") };
 
         var baseRevision = options.BaseRevision ?? Environment.GetEnvironmentVariable("SKY_GATE_BASE");
         var rangeIsExplicit = !string.IsNullOrWhiteSpace(baseRevision);
@@ -46,10 +50,14 @@ internal static class GitChanges
         if (!committed.Reliable)
             return new GitChangeSet([], false, $"base revision '{baseRevision}' is unavailable");
 
+        var ancestor = Capture(root, ["merge-base", baseRevision, "HEAD"]);
+        if (ancestor.ExitCode != 0)
+            return new GitChangeSet([], false, "Git could not resolve the comparison's merge base");
+
         // A caller-supplied base freezes the proof scope to the commits that can actually be pushed or reviewed.
         // The default interactive mode still adds local work so `skies gate` cannot overlook an uncommitted change.
         if (rangeIsExplicit)
-            return committed;
+            return committed with { Comparison = new GitComparison(ancestor.Output.Trim(), "HEAD") };
 
         var local = WorkingTree(root);
         if (!local.Reliable)
@@ -58,7 +66,8 @@ internal static class GitChanges
         return new GitChangeSet(
             committed.Files.Concat(local.Files).Distinct(StringComparer.OrdinalIgnoreCase).Order().ToList(),
             true,
-            null);
+            null,
+            new GitComparison(ancestor.Output.Trim(), null));
     }
 
     private static GitChangeSet Diff(string root, string[] arguments)
@@ -86,7 +95,8 @@ internal static class GitChanges
         return new GitChangeSet(
             tracked.Files.Concat(untracked.Files).Distinct(StringComparer.OrdinalIgnoreCase).Order().ToList(),
             true,
-            null);
+            null,
+            new GitComparison("HEAD", null));
     }
 
     private static (int ExitCode, string Output, string Error) Capture(string root, string[] arguments)
